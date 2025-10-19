@@ -40,6 +40,9 @@ format:
     <a href="https://github.com/mokhtartabari" target="_blank" class="social-button">
       <i class="fab fa-github"></i> GitHub
     </a>
+    <a href="https://scholar.google.com/citations?user=Eti_yWQAAAAJ&hl=en" target="_blank" class="social-button">
+      <i class="ai ai-google-scholar"></i> Google Scholar
+    </a>
     <a href="https://www.linkedin.com/in/mokhtar-tabari/" target="_blank" class="social-button">
       <i class="fab fa-linkedin"></i> LinkedIn
     </a>
