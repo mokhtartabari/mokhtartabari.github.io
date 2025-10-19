@@ -1,7 +1,29 @@
 ---
-title: "websiteQ"
+title: "Mokhtar Tabari"
 ---
 
-This is a Quarto website.
+# Biography
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
+Mokhtar Tabari is an Assistant Professor of Economics at University Canada West in Vancouver, Canada, and also serves as a Sessional Lecturer at the UBC Sauder School of Business. Prior to these roles, he completed a postdoctoral fellowship in the Strategy and Business Economics Division at UBC Sauder.
+
+Dr. Tabari holds a Ph.D. in Economics from the University of Calgary. His primary areas of focus include international economics, energy and environmental economics, and applied microeconomics, with a strong emphasis on leveraging data and empirical evidence to inform policy recommendations. He is also keenly investigating the transformative impact of Artificial Intelligence on the economy.
+
+Dr. Tabari has been teaching since 2020; with a wide teaching experience and mentoring students at both undergraduate and graduate levels. His teaching philosophy centers on helping students from diverse academic and cultural backgrounds develop a profound understanding and appreciation for economic theories and concepts, welcoming their unique perspectives and experiences. His commitment to teaching excellence was recognized with the regional **ACBSP Teaching Excellence Award** in 2023.
+
+## Education
+
+- **PhD in Economics**, University of Calgary, 2020
+- **MSc in Economics**, Institute for Management and Planning Studies, 2014
+- **BSc in Industrial Engineering**, Iran University of Science and Technology, 2011
+
+## Interests
+
+- International Trade
+- Energy and Environmental Economics
+- Applied Microeconomics
+
+## Organizations
+
+- **Assistant Professor**, University Canada West
+- **Sessional Lecturer**, UBC Sauder School of Business
+

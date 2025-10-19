@@ -1,0 +1,14 @@
+---
+title: "Contact"
+---
+
+# Contact
+
+## Get in Touch
+
+- **Email:** [mokhtar.tabari@ucanwest.ca](mailto:mokhtar.tabari@ucanwest.ca)
+- **Address:** 1461 Granville St., Vancouver, BC V6Z 2V3
+- **Phone:** 778-725-1358
+- **Skype:** mokhtar.tabari
+
+<!-- Add a contact form if needed -->
