@@ -18,8 +18,8 @@ format:
         <a href="https://bsky.app/profile/mokhtartabari.bsky.social" target="_blank" class="social-button">
           <i class="fas fa-globe"></i> BSKy
         </a>
-        <a href="skype:mokhtar.tabari?call" class="social-button">
-          <i class="fab fa-skype"></i> Skype
+        <a href="https://github.com/mokhtartabari" target="_blank" class="social-button">
+          <i class="fab fa-github"></i> GitHub
         </a>
         <a href="files/cv.pdf" target="_blank" class="social-button">
           <i class="ai ai-cv"></i> CV
