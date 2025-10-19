@@ -4,8 +4,6 @@ title: "About"
 
 # About Mokhtar Tabari
 
-![Mokhtar Tabari](img/profile.png){style="width: 200px; float: right; margin-left: 20px;"}
-
 Mokhtar Tabari is an Assistant Professor of Economics at University Canada West in Vancouver, Canada, and also serves as a Sessional Lecturer at the UBC Sauder School of Business. Prior to these roles, he completed a postdoctoral fellowship in the Strategy and Business Economics Division at UBC Sauder.
 
 Dr. Tabari holds a Ph.D. in Economics from the University of Calgary. His primary areas of focus include international economics, energy and environmental economics, and applied microeconomics, with a strong emphasis on leveraging data and empirical evidence to inform policy recommendations. He is also keenly investigating the transformative impact of Artificial Intelligence on the economy.
