@@ -1,11 +1,33 @@
 /* Import Academicons for academic icons */
 @import url('https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css');
 
+/* FORCE DARK TEXT IN LIGHT MODE - Override everything */
+html body,
+html body.quarto-light,
+html[data-bs-theme="light"] body,
+.quarto-container body,
+.main-content body {
+  color: #000000 !important;
+}
+
+/* Force all text elements to be black in light mode */
+html p, html li, html div, html span, html h1, html h2, html h3, html h4, html h5, html h6,
+html body p, html body li, html body div, html body span, html body h1, html body h2, html body h3, html body h4, html body h5, html body h6,
+.quarto-light p, .quarto-light li, .quarto-light div, .quarto-light span, .quarto-light h1, .quarto-light h2, .quarto-light h3, .quarto-light h4, .quarto-light h5, .quarto-light h6 {
+  color: #000000 !important;
+}
+
+/* Specific overrides for content */
+.content p, .content li, .content div, .content span,
+html .content p, html .content li, html .content div, html .content span {
+  color: #000000 !important;
+}
+
 /* Custom styles */
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.6;
-  color: #131518 !important; /* Dark text for light mode - force override Bootstrap */
+  color: #000000 !important; /* Dark text for light mode - force override Bootstrap */
 }
 
 a:hover {
@@ -19,7 +41,7 @@ p, li, div, span, h1, h2, h3, h4, h5, h6 {
 
 /* Specific content areas */
 .content p, .content li, .content div {
-  color: #131518 !important;
+  color: #000000 !important;
 }
 
 /* Hero Section Styles */
