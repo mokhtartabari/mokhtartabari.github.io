@@ -1,1 +1,1 @@
-Sitemap: https://www.mokhtartabari.ca/sitemap.xml
+Sitemap: https://mokhtartabari.github.io/sitemap.xml
