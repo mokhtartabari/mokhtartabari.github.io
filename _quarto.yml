@@ -33,11 +33,22 @@ format:
       - text: |
           <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
           <style>
-          /* FORCE BLACK TEXT - Inline styles to override everything */
-          body, p, li, div, span, h1, h2, h3, h4, h5, h6 {
-            color: #000000 !important;
+          /* FORCE BLACK TEXT in LIGHT MODE only */
+          @media (prefers-color-scheme: light) {
+            body, p, li, div, span, h1, h2, h3, h4, h5, h6 {
+              color: #000000 !important;
+            }
+            .position, .affiliation {
+              color: #000000 !important;
+            }
           }
-          .position, .affiliation {
-            color: #000000 !important;
+          /* Ensure DARK MODE has light text */
+          @media (prefers-color-scheme: dark) {
+            body, p, li, div, span, h1, h2, h3, h4, h5, h6 {
+              color: #e9ecef !important;
+            }
+            .position, .affiliation {
+              color: #e9ecef !important;
+            }
           }
           </style>
