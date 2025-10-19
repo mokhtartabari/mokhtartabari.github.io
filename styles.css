@@ -130,3 +130,32 @@ a:hover {
   gap: 1rem;
   flex-wrap: wrap;
 }
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  body {
+    color: #e9ecef;
+  }
+  
+  .position {
+    color: #adb5bd;
+  }
+  
+  .affiliation {
+    color: #e9ecef;
+  }
+  
+  .social-button {
+    background-color: #343a40;
+    border-color: #495057;
+    color: #e9ecef;
+  }
+  
+  .social-button:hover {
+    background-color: #495057;
+  }
+  
+  .footer-social-section {
+    border-top-color: #495057;
+  }
+}
