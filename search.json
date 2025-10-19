@@ -53,14 +53,7 @@
     "href": "index.html",
     "title": "Mokhtar Tabari",
     "section": "",
-    "text": "Welcome to my academic website\n\n\nAssistant Professor of Economics | University Canada West"
-  },
-  {
-    "objectID": "index.html#section-1",
-    "href": "index.html#section-1",
-    "title": "Mokhtar Tabari",
-    "section": "",
-    "text": "Assistant Professor of Economics | University Canada West"
+    "text": "title: “Mokhtar Tabari” format: html: page-layout: full —"
   },
   {
     "objectID": "index.html#education",
