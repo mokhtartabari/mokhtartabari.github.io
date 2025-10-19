@@ -1,5 +1,18 @@
 ---
 title: "Mokhtar Tabari"
+format:
+  html:
+    page-layout: full
+---
+
+# {style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 3em; font-weight: bold;"}
+
+Welcome to my academic website
+
+## {style="text-align: center; color: #666; font-size: 1.2em;"}
+
+Assistant Professor of Economics | University Canada West
+
 ---
 
 # Biography
@@ -16,14 +29,38 @@ Dr. Tabari has been teaching since 2020; with a wide teaching experience and men
 - **MSc in Economics**, Institute for Management and Planning Studies, 2014
 - **BSc in Industrial Engineering**, Iran University of Science and Technology, 2011
 
-## Interests
+## Research Interests
 
 - International Trade
 - Energy and Environmental Economics
 - Applied Microeconomics
 
-## Organizations
+## Recent Publications
 
-- **Assistant Professor**, University Canada West
-- **Sessional Lecturer**, UBC Sauder School of Business
+### Decomposing the Within-Firm Productivity Gains from Trade: Evidence From India
+**Status:** Accepted, Review of Economics and Statistics  
+**Abstract:** We develop a decomposition of firm-level revenue-based TFP growth into six margins...  
+[Read more](publications.qmd#published-papers)
 
+### The AI-TPS Framework: Using Generative AI for Active Learning in Principles of Economics
+**Status:** Working Paper  
+**Abstract:** In economics education, a persistent challenge is the high opportunity cost...  
+[Read more](publications.qmd#work-in-progress)
+
+## Recent Presentations
+
+- **Decomposing the Within-Firm Productivity Gains from Trade: Evidence From India**  
+  Canadian Economics Association Annual Conference, Toronto, Canada (2023)
+
+- **Decomposing the Within-Firm Productivity Gains from Trade: Evidence From India**  
+  Midwest International Economics Meetings, Minneapolis, USA (2022)
+
+[View all presentations](talks.qmd)
+
+## Contact
+
+- **Email:** [mokhtar.tabari@ucanwest.ca](mailto:mokhtar.tabari@ucanwest.ca)
+- **Address:** 1461 Granville St., Vancouver, BC V6Z 2V3
+- **Phone:** 778-725-1358
+
+[Get in touch](contact.qmd)
