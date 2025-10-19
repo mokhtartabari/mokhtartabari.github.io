@@ -8,38 +8,37 @@ format:
 ```{=html}
 <div class="hero-section">
 <div class="hero-container">
-<div class="hero-content">
-  <div class="profile-section">
-    <img src="img/profile.png" alt="Mokhtar Tabari" class="profile-image">
-  </div>
-  <div class="info-section">
-    <h1 class="name-title">Mokhtar Tabari</h1>
-    <p class="position">Assistant Professor of Economics</p>
-    <p class="affiliation">University Canada West, Vancouver, Canada</p>
-
-    <div class="social-links">
-      <a href="mailto:mokhtar.tabari@ucanwest.ca" class="social-button">
-        <i class="fas fa-envelope"></i> Email
-      </a>
-      <a href="https://twitter.com/MokhtarTabari" target="_blank" class="social-button">
-        <i class="fab fa-twitter"></i> Twitter
-      </a>
-      <a href="skype:mokhtar.tabari?call" class="social-button">
-        <i class="fab fa-skype"></i> Skype
-      </a>
-      <a href="files/cv.pdf" target="_blank" class="social-button">
-        <i class="ai ai-cv"></i> CV
-      </a>
+  <div class="top-section">
+    <div class="profile-section">
+      <img src="img/profile.png" alt="Mokhtar Tabari" class="profile-image">
+      <div class="social-links">
+        <a href="mailto:mokhtar.tabari@ucanwest.ca" class="social-button">
+          <i class="fas fa-envelope"></i> Email
+        </a>
+        <a href="https://bsky.app/profile/mokhtartabari.bsky.social" target="_blank" class="social-button">
+          <i class="fab fa-twitter"></i> BSKy
+        </a>
+        <a href="skype:mokhtar.tabari?call" class="social-button">
+          <i class="fab fa-skype"></i> Skype
+        </a>
+        <a href="files/cv.pdf" target="_blank" class="social-button">
+          <i class="ai ai-cv"></i> CV
+        </a>
+      </div>
     </div>
+    <div class="info-section">
+      <h1 class="name-title">Mokhtar Tabari</h1>
+      <p class="position">Assistant Professor</p>
+      <p class="affiliation">University Canada West</p>
 
-    <div class="nav-links">
-      <a href="about.qmd" class="nav-button primary">About</a>
-      <a href="publications.qmd" class="nav-button">Publications</a>
-      <a href="talks.qmd" class="nav-button">Talks</a>
-      <a href="contact.qmd" class="nav-button">Contact</a>
+      <div class="nav-links">
+        <a href="about.qmd" class="nav-button primary">About</a>
+        <a href="publications.qmd" class="nav-button">Publications</a>
+        <a href="talks.qmd" class="nav-button">Talks</a>
+        <a href="contact.qmd" class="nav-button">Contact</a>
+      </div>
     </div>
   </div>
-</div>
 </div>
 </div>
 ```
