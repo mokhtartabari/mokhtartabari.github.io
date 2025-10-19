@@ -1,0 +1,25 @@
+---
+title: "Welcome to My Blog"
+description: "Introducing my new blog section where I'll share insights on Canadian and US economies"
+author: "Mokhtar Tabari"
+date: "2025-10-18"
+categories: [announcement]
+---
+
+# Welcome to My Blog!
+
+I'm excited to launch this blog section on my website where I'll be sharing my thoughts and analysis on various topics that interest me, particularly:
+
+- **Canadian Economy**: Economic trends, policy analysis, and market insights
+- **US Economy**: Cross-border economic relationships and American market developments  
+- **Other Interests**: Topics in economics, data analysis, and current events
+
+## What to Expect
+
+I'll be posting regularly about:
+- Economic indicators and their implications
+- Policy discussions and their economic impacts
+- Data-driven analysis of market trends
+- Personal insights from my research and teaching experience
+
+Stay tuned for more posts coming soon!
