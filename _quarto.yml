@@ -13,10 +13,10 @@ website:
         text: About
       - href: publications.qmd
         text: Publications
-      - href: talks.qmd
-        text: Presentations
-      - href: posts/
-        text: Blog
+      # - href: talks.qmd
+      #   text: Presentations
+      # - href: posts/
+      #   text: Blog
       - href: contact.qmd
         text: Contact
 
