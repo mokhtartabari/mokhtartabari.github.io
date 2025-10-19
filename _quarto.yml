@@ -19,6 +19,15 @@ website:
         text: Blog
       - href: contact.qmd
         text: Contact
+    tools:
+      - icon: circle-half
+        menu:
+          - text: Light
+            theme: cosmo
+          - text: Dark
+            theme: darkly
+          - text: Auto
+            theme: auto
 
 format:
   html:
