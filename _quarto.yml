@@ -28,4 +28,4 @@ format:
     css: styles.css
     toc: true
     appearance: auto
-    html-theme-provider: default
+    html-theme-provider: bootswatch
