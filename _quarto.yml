@@ -29,3 +29,6 @@ format:
     toc: true
     appearance: auto
     html-theme-provider: bootswatch
+    include-in-header:
+      - text: |
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
