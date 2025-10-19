@@ -3,7 +3,7 @@ project:
 
 website:
   title: "Mokhtar Tabari"
-  site-url: "https://www.mokhtartabari.ca/"
+  site-url: "https://mokhtartabari.github.io/"
   google-analytics: "UA-149903273-1"
   navbar:
     left:
