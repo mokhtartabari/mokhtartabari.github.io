@@ -65,12 +65,12 @@ p, li, div, span {
 .position {
   margin: 0 0 1rem 0;
   font-size: 1.2em;
-  color: #495057 !important; /* Better contrast for light mode */
+  color: #495057; /* Better contrast for light mode */
 }
 
 .affiliation {
   margin: 0 0 1.5rem 0;
-  color: #212529 !important; /* Darker for better readability */
+  color: #212529; /* Darker for better readability */
 }
 
 /* Social Links */
