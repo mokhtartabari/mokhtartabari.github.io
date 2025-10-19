@@ -16,7 +16,7 @@ format:
           <i class="fas fa-envelope"></i> Email
         </a>
         <a href="https://bsky.app/profile/mokhtartabari.bsky.social" target="_blank" class="social-button">
-          <i class="fab fa-twitter"></i> BSKy
+          <i class="fas fa-globe"></i> BSKy
         </a>
         <a href="skype:mokhtar.tabari?call" class="social-button">
           <i class="fab fa-skype"></i> Skype
