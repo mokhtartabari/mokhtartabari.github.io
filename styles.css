@@ -116,7 +116,17 @@ a:hover {
   background-color: #5a67d8;
 }
 
-/* Navigation button hover effects */
-.nav-button.primary:hover {
-  background-color: #5a67d8 !important;
+/* Footer Social Section */
+.footer-social-section {
+  margin-top: 3rem;
+  padding: 2rem 0;
+  border-top: 1px solid #dee2e6;
+  text-align: center;
+}
+
+.footer-social-section .social-links {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
