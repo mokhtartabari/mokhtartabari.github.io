@@ -12,6 +12,18 @@ title: "Publications"
 **Date:** 2024-03-11  
 [Download PDF](https://drive.google.com/file/d/1s9i5DhbZkkMe1mIHhPj7kBmCwGMOMobH/view)
 
+### Enhancing Student Engagement: The Synergy of Peer Assessment and Flipped Classroom Design (Accepted, Journal of Economics and Finance Education)
+**Authors:** Mokhtar Tabari, Yan (Lizzie) Yan  
+**Abstract:** Grounded in student-centered teaching practices, we investigate the synergy of peer assessments and flipped classroom design in an economics course specifically developed for incoming MBA students. This innovative approach was implemented for two consecutive terms. Survey results show that students have a positive view of this integrated approach. It enhances their engagement and improves their knowledge and skills by providing constructive feedback. Additionally, this combination helps students improve their assessment skills.  
+**Date:** 2025-08-02  
+[Download PDF](https://drive.google.com/file/d/1DA9xLIwsfSihnNS0IZsAt39EVQzT2wvD/view)
+
+### Paying for performance: The role of policy in energy storage deployment (Energy Economics)
+**Authors:** Mokhtar Tabari, Blake Shaffer  
+**Abstract:** Energy storage has long been viewed as a solution to the growing challenge of intermittent electricity supply. However, energy storage deployment remains limited despite falling costs. One reason for this is current market rules inadequately compensate storage for all the value it can provide. A recent policy change in the United States seeks to rectify this situation by requiring grid operators to compensate providers of frequency regulation services based on speed and accuracy. This seemingly subtle change has a beneficial effect for fast-acting storage resources. Using a difference-in-differences method, exploiting the fact the Order covers a subset of U.S. electricity regions, we find a greater than 30% increase in the number of storage projects in the covered regions. This result highlights the importance of getting prices right and the material effect properly reflecting the value of storage can have on storage deployment.  
+**Date:** 2020-09-16  
+[Read online](https://www.sciencedirect.com/science/article/pii/S0140988320302899)
+
 ## Work in Progress
 
 ### The AI-TPS Framework: Using Generative AI for Active Learning in Principles of Economics
@@ -23,5 +35,10 @@ title: "Publications"
 **Authors:** Mokhtar Tabari, Seyed-Reza Hosseinifar, Gelareh Farhadian  
 **Abstract:** The study investigates the effectiveness of using live case studies in graduate business courses to improve students' power skills, critical thinking, and problem-solving. A randomized control trial design was used, and students were assigned to either a control or treatment group. Results show that students in the treatment group report higher levels of confidence in real-business problem-solving, communication, and leadership compared to those in the control group. The findings suggest that incorporating live case studies into business coursework can enhance student learning and prepare them for success in their professional careers.  
 **Date:** 2022-08-01
+
+### Patents, Prices and Productivity in the Global Economy
+**Authors:** Mokhtar Tabari, Alex Whalley, Greg Wright  
+**Abstract:** Products embodying intellectual property are exported globally, yet intellectual property regulations remain national. When firms face product adjustment costs, intellectual property regulatory decisions can have effects on prices and productivity in other markets and across all the firms' products. We study how Taiwanese firms respond to the loss of intellectual property protection in the Unites States. Using highly detailed firm-product-level data from 2000 to 2014 to estimate product level prices and productivity, we find three results. First, the loss of a patent invalidity case in the United States reduces product level export quantities, increases product level prices in export markets, but reduces product level productivity. Second, the loss of a patent invalidity case in the United States reduces product level domestic quantity, increases product level prices in domestic markets, and also reduces product level productivity. Third, the prices of other products in both domestic and export markets fall. Intellectual property embodied in marquee products can propagate intellectual property decisions across markets and products.  
+**Date:** 2019-10-01
 
 <!-- Add more publications here -->
