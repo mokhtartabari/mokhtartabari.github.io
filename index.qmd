@@ -5,9 +5,7 @@ format:
     page-layout: full
 ---
 
-::: {.content-visible when-profile="quarto"}
-:::
-
+```{=html}
 <div class="hero-section">
 <div class="hero-container">
 <div class="hero-content">
@@ -44,3 +42,4 @@ format:
 </div>
 </div>
 </div>
+```
