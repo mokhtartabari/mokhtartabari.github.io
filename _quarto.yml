@@ -27,4 +27,4 @@ format:
       dark: darkly
     css: styles.css
     toc: true
-    html-theme-provider: bootswatch
+    appearance: auto
