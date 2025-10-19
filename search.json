@@ -53,7 +53,7 @@
     "href": "index.html",
     "title": "Mokhtar Tabari",
     "section": "",
-    "text": "&lt;img src=\"img/profile.png\" alt=\"Mokhtar Tabari\" class=\"profile-image\"&gt;\n\n\n&lt;h1 class=\"name-title\"&gt;Mokhtar Tabari&lt;/h1&gt;\n&lt;p class=\"position\"&gt;Assistant Professor of Economics&lt;/p&gt;\n&lt;p class=\"affiliation\"&gt;University Canada West, Vancouver, Canada&lt;/p&gt;\n\n&lt;div class=\"social-links\"&gt;\n  &lt;a href=\"mailto:mokhtar.tabari@ucanwest.ca\" class=\"social-button\"&gt;\n    &lt;i class=\"fas fa-envelope\"&gt;&lt;/i&gt; Email\n  &lt;/a&gt;\n  &lt;a href=\"https://twitter.com/MokhtarTabari\" target=\"_blank\" class=\"social-button\"&gt;\n    &lt;i class=\"fab fa-twitter\"&gt;&lt;/i&gt; Twitter\n  &lt;/a&gt;\n  &lt;a href=\"skype:mokhtar.tabari?call\" class=\"social-button\"&gt;\n    &lt;i class=\"fab fa-skype\"&gt;&lt;/i&gt; Skype\n  &lt;/a&gt;\n  &lt;a href=\"files/cv.pdf\" target=\"_blank\" class=\"social-button\"&gt;\n    &lt;i class=\"ai ai-cv\"&gt;&lt;/i&gt; CV\n  &lt;/a&gt;\n&lt;/div&gt;\n\n&lt;div class=\"nav-links\"&gt;\n  &lt;a href=\"about.qmd\" class=\"nav-button primary\"&gt;About&lt;/a&gt;\n  &lt;a href=\"publications.qmd\" class=\"nav-button\"&gt;Publications&lt;/a&gt;\n  &lt;a href=\"talks.qmd\" class=\"nav-button\"&gt;Talks&lt;/a&gt;\n  &lt;a href=\"contact.qmd\" class=\"nav-button\"&gt;Contact&lt;/a&gt;\n&lt;/div&gt;"
+    "text": "Mokhtar Tabari\n    Assistant Professor of Economics\n    University Canada West, Vancouver, Canada\n\n    \n      \n         Email\n      \n      \n         Twitter\n      \n      \n         Skype\n      \n      \n         CV\n      \n    \n\n    \n      About\n      Publications\n      Talks\n      Contact"
   },
   {
     "objectID": "contact.html",
