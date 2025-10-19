@@ -53,42 +53,7 @@
     "href": "index.html",
     "title": "Mokhtar Tabari",
     "section": "",
-    "text": "title: “Mokhtar Tabari” format: html: page-layout: full —"
-  },
-  {
-    "objectID": "index.html#education",
-    "href": "index.html#education",
-    "title": "Mokhtar Tabari",
-    "section": "Education",
-    "text": "Education\n\nPhD in Economics, University of Calgary, 2020\nMSc in Economics, Institute for Management and Planning Studies, 2014\nBSc in Industrial Engineering, Iran University of Science and Technology, 2011"
-  },
-  {
-    "objectID": "index.html#research-interests",
-    "href": "index.html#research-interests",
-    "title": "Mokhtar Tabari",
-    "section": "Research Interests",
-    "text": "Research Interests\n\nInternational Trade\nEnergy and Environmental Economics\nApplied Microeconomics"
-  },
-  {
-    "objectID": "index.html#recent-publications",
-    "href": "index.html#recent-publications",
-    "title": "Mokhtar Tabari",
-    "section": "Recent Publications",
-    "text": "Recent Publications\n\nDecomposing the Within-Firm Productivity Gains from Trade: Evidence From India\nStatus: Accepted, Review of Economics and Statistics\nAbstract: We develop a decomposition of firm-level revenue-based TFP growth into six margins…\nRead more\n\n\nThe AI-TPS Framework: Using Generative AI for Active Learning in Principles of Economics\nStatus: Working Paper\nAbstract: In economics education, a persistent challenge is the high opportunity cost…\nRead more"
-  },
-  {
-    "objectID": "index.html#recent-presentations",
-    "href": "index.html#recent-presentations",
-    "title": "Mokhtar Tabari",
-    "section": "Recent Presentations",
-    "text": "Recent Presentations\n\nDecomposing the Within-Firm Productivity Gains from Trade: Evidence From India\nCanadian Economics Association Annual Conference, Toronto, Canada (2023)\nDecomposing the Within-Firm Productivity Gains from Trade: Evidence From India\nMidwest International Economics Meetings, Minneapolis, USA (2022)\n\nView all presentations"
-  },
-  {
-    "objectID": "index.html#contact",
-    "href": "index.html#contact",
-    "title": "Mokhtar Tabari",
-    "section": "Contact",
-    "text": "Contact\n\nEmail: mokhtar.tabari@ucanwest.ca\nAddress: 1461 Granville St., Vancouver, BC V6Z 2V3\nPhone: 778-725-1358\n\nGet in touch"
+    "text": "&lt;!-- Profile Picture --&gt;\n&lt;div style=\"flex-shrink: 0;\"&gt;\n  &lt;img src=\"img/profile.png\" alt=\"Mokhtar Tabari\" style=\"width: 200px; height: 200px; border-radius: 50%; object-fit: cover; border: 4px solid #667eea;\"&gt;\n&lt;/div&gt;\n\n&lt;!-- Main Content --&gt;\n&lt;div style=\"flex: 1;\"&gt;\n  &lt;h1 style=\"margin: 0 0 0.5rem 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 2.5em; font-weight: bold;\"&gt;\n    Mokhtar Tabari\n  &lt;/h1&gt;\n  &lt;p style=\"margin: 0 0 1rem 0; font-size: 1.2em; color: #666;\"&gt;\n    Assistant Professor of Economics\n  &lt;/p&gt;\n  &lt;p style=\"margin: 0 0 1.5rem 0; color: #333;\"&gt;\n    University Canada West, Vancouver, Canada\n  &lt;/p&gt;\n\n  &lt;!-- Social Links --&gt;\n  &lt;div style=\"display: flex; gap: 1rem; margin-bottom: 2rem;\"&gt;\n    &lt;a href=\"mailto:mokhtar.tabari@ucanwest.ca\" style=\"display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; text-decoration: none; color: #495057; font-size: 0.9em;\"&gt;\n      &lt;i class=\"fas fa-envelope\"&gt;&lt;/i&gt; Email\n    &lt;/a&gt;\n    &lt;a href=\"https://twitter.com/MokhtarTabari\" target=\"_blank\" style=\"display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; text-decoration: none; color: #495057; font-size: 0.9em;\"&gt;\n      &lt;i class=\"fab fa-twitter\"&gt;&lt;/i&gt; Twitter\n    &lt;/a&gt;\n    &lt;a href=\"skype:mokhtar.tabari?call\" style=\"display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; text-decoration: none; color: #495057; font-size: 0.9em;\"&gt;\n      &lt;i class=\"fab fa-skype\"&gt;&lt;/i&gt; Skype\n    &lt;/a&gt;\n    &lt;a href=\"files/cv.pdf\" target=\"_blank\" style=\"display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; text-decoration: none; color: #495057; font-size: 0.9em;\"&gt;\n      &lt;i class=\"ai ai-cv\"&gt;&lt;/i&gt; CV\n    &lt;/a&gt;\n  &lt;/div&gt;\n\n  &lt;!-- Navigation Links --&gt;\n  &lt;div style=\"display: flex; gap: 1rem;\"&gt;\n    &lt;a href=\"about.qmd\" style=\"display: inline-block; padding: 0.75rem 1.5rem; background-color: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; transition: background-color 0.3s;\"&gt;\n      About\n    &lt;/a&gt;\n    &lt;a href=\"publications.qmd\" style=\"display: inline-block; padding: 0.75rem 1.5rem; background-color: #6c757d; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; transition: background-color 0.3s;\"&gt;\n      Publications\n    &lt;/a&gt;\n    &lt;a href=\"talks.qmd\" style=\"display: inline-block; padding: 0.75rem 1.5rem; background-color: #6c757d; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; transition: background-color 0.3s;\"&gt;\n      Talks\n    &lt;/a&gt;\n    &lt;a href=\"contact.qmd\" style=\"display: inline-block; padding: 0.75rem 1.5rem; background-color: #6c757d; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; transition: background-color 0.3s;\"&gt;\n      Contact\n    &lt;/a&gt;\n  &lt;/div&gt;\n&lt;/div&gt;"
   },
   {
     "objectID": "contact.html",
