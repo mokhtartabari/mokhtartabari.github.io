@@ -1,0 +1,30 @@
+name: Deploy Quarto site
+
+on:
+  push:
+    branches: source
+  pull_request:
+    branches: source
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Render Quarto site
+        run: quarto render
+
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/source'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: _site
+          cname: www.mokhtartabari.ca
