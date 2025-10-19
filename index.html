@@ -159,57 +159,40 @@ ga('send', {
 </header>
 
 
-<div style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
-<div style="display: flex; align-items: center; gap: 3rem; margin-bottom: 2rem;">
-<pre><code>&lt;!-- Profile Picture --&gt;
-&lt;div style="flex-shrink: 0;"&gt;
-  &lt;img src="img/profile.png" alt="Mokhtar Tabari" style="width: 200px; height: 200px; border-radius: 50%; object-fit: cover; border: 4px solid #667eea;"&gt;
+<div class="hero-section">
+<div class="hero-container">
+<div class="hero-content">
+<div class="profile-section">
+<pre><code>&lt;img src="img/profile.png" alt="Mokhtar Tabari" class="profile-image"&gt;</code></pre>
+</div>
+<div class="info-section">
+<pre><code>&lt;h1 class="name-title"&gt;Mokhtar Tabari&lt;/h1&gt;
+&lt;p class="position"&gt;Assistant Professor of Economics&lt;/p&gt;
+&lt;p class="affiliation"&gt;University Canada West, Vancouver, Canada&lt;/p&gt;
+
+&lt;div class="social-links"&gt;
+  &lt;a href="mailto:mokhtar.tabari@ucanwest.ca" class="social-button"&gt;
+    &lt;i class="fas fa-envelope"&gt;&lt;/i&gt; Email
+  &lt;/a&gt;
+  &lt;a href="https://twitter.com/MokhtarTabari" target="_blank" class="social-button"&gt;
+    &lt;i class="fab fa-twitter"&gt;&lt;/i&gt; Twitter
+  &lt;/a&gt;
+  &lt;a href="skype:mokhtar.tabari?call" class="social-button"&gt;
+    &lt;i class="fab fa-skype"&gt;&lt;/i&gt; Skype
+  &lt;/a&gt;
+  &lt;a href="files/cv.pdf" target="_blank" class="social-button"&gt;
+    &lt;i class="ai ai-cv"&gt;&lt;/i&gt; CV
+  &lt;/a&gt;
 &lt;/div&gt;
 
-&lt;!-- Main Content --&gt;
-&lt;div style="flex: 1;"&gt;
-  &lt;h1 style="margin: 0 0 0.5rem 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 2.5em; font-weight: bold;"&gt;
-    Mokhtar Tabari
-  &lt;/h1&gt;
-  &lt;p style="margin: 0 0 1rem 0; font-size: 1.2em; color: #666;"&gt;
-    Assistant Professor of Economics
-  &lt;/p&gt;
-  &lt;p style="margin: 0 0 1.5rem 0; color: #333;"&gt;
-    University Canada West, Vancouver, Canada
-  &lt;/p&gt;
-
-  &lt;!-- Social Links --&gt;
-  &lt;div style="display: flex; gap: 1rem; margin-bottom: 2rem;"&gt;
-    &lt;a href="mailto:mokhtar.tabari@ucanwest.ca" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; text-decoration: none; color: #495057; font-size: 0.9em;"&gt;
-      &lt;i class="fas fa-envelope"&gt;&lt;/i&gt; Email
-    &lt;/a&gt;
-    &lt;a href="https://twitter.com/MokhtarTabari" target="_blank" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; text-decoration: none; color: #495057; font-size: 0.9em;"&gt;
-      &lt;i class="fab fa-twitter"&gt;&lt;/i&gt; Twitter
-    &lt;/a&gt;
-    &lt;a href="skype:mokhtar.tabari?call" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; text-decoration: none; color: #495057; font-size: 0.9em;"&gt;
-      &lt;i class="fab fa-skype"&gt;&lt;/i&gt; Skype
-    &lt;/a&gt;
-    &lt;a href="files/cv.pdf" target="_blank" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; text-decoration: none; color: #495057; font-size: 0.9em;"&gt;
-      &lt;i class="ai ai-cv"&gt;&lt;/i&gt; CV
-    &lt;/a&gt;
-  &lt;/div&gt;
-
-  &lt;!-- Navigation Links --&gt;
-  &lt;div style="display: flex; gap: 1rem;"&gt;
-    &lt;a href="about.qmd" style="display: inline-block; padding: 0.75rem 1.5rem; background-color: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; transition: background-color 0.3s;"&gt;
-      About
-    &lt;/a&gt;
-    &lt;a href="publications.qmd" style="display: inline-block; padding: 0.75rem 1.5rem; background-color: #6c757d; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; transition: background-color 0.3s;"&gt;
-      Publications
-    &lt;/a&gt;
-    &lt;a href="talks.qmd" style="display: inline-block; padding: 0.75rem 1.5rem; background-color: #6c757d; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; transition: background-color 0.3s;"&gt;
-      Talks
-    &lt;/a&gt;
-    &lt;a href="contact.qmd" style="display: inline-block; padding: 0.75rem 1.5rem; background-color: #6c757d; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; transition: background-color 0.3s;"&gt;
-      Contact
-    &lt;/a&gt;
-  &lt;/div&gt;
+&lt;div class="nav-links"&gt;
+  &lt;a href="about.qmd" class="nav-button primary"&gt;About&lt;/a&gt;
+  &lt;a href="publications.qmd" class="nav-button"&gt;Publications&lt;/a&gt;
+  &lt;a href="talks.qmd" class="nav-button"&gt;Talks&lt;/a&gt;
+  &lt;a href="contact.qmd" class="nav-button"&gt;Contact&lt;/a&gt;
 &lt;/div&gt;</code></pre>
+</div>
+</div>
 </div>
 </div>
 
