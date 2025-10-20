@@ -287,6 +287,16 @@ a:hover {
       color: #7c3aed; // Lighter purple for dark mode
     }
   }
+  
+  // Dark mode - ensure visibility
+  [data-bs-theme="dark"] &,
+  .dark & {
+    color: $gray-100;
+    
+    &:hover {
+      color: #7c3aed; // Lighter purple for dark mode
+    }
+  }
 }
 
 .publication-authors {
@@ -312,11 +322,6 @@ a:hover {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  
-  &:before {
-    content: "📄";
-    font-size: 1em;
-  }
   
   // Dark mode
   [data-bs-theme="dark"] &,
