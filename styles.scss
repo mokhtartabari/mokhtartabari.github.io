@@ -273,6 +273,15 @@ a:hover {
   &:hover {
     color: #667eea;
   }
+  
+  // Dark mode - ensure visibility
+  [data-bs-theme="dark"] & {
+    color: $gray-100;
+    
+    &:hover {
+      color: #7c3aed; // Lighter purple for dark mode
+    }
+  }
 }
 
 .publication-authors {
@@ -281,6 +290,11 @@ a:hover {
   font-weight: 600;
   margin-bottom: 1rem;
   font-style: italic;
+  
+  // Dark mode - ensure visibility
+  [data-bs-theme="dark"] & {
+    color: #a78bfa; // Lighter purple for dark mode
+  }
 }
 
 .publication-abstract {
