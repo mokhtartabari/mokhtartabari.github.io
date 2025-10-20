@@ -303,6 +303,28 @@ a:hover {
   }
 }
 
+.publication-journal {
+  font-size: 1em;
+  color: #28a745;
+  font-weight: 600;
+  margin: 0.5rem 0;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &:before {
+    content: "📄";
+    font-size: 1em;
+  }
+  
+  // Dark mode
+  [data-bs-theme="dark"] &,
+  .dark & {
+    color: #34d399; // Lighter green for dark mode
+  }
+}
+
 .publication-abstract {
   color: $gray-700;
   line-height: 1.6;
