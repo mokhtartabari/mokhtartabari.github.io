@@ -117,7 +117,8 @@ a:hover {
   }
 
   // Quarto dark mode targeting
-  [data-bs-theme="dark"] & {
+  [data-bs-theme="dark"] &,
+  .dark & {
     background-color: $gray-800;
     border-color: $gray-600;
     color: $gray-300;
@@ -155,7 +156,8 @@ a:hover {
   }
 
   // Dark mode adjustments
-  [data-bs-theme="dark"] & {
+  [data-bs-theme="dark"] &,
+  .dark & {
     &.primary {
       background-color: #7c3aed; // Slightly lighter purple for dark mode
     }
@@ -173,7 +175,8 @@ a:hover {
   border-top: 1px solid $gray-300;
   text-align: center;
 
-  [data-bs-theme="dark"] & {
+  [data-bs-theme="dark"] &,
+  .dark & {
     border-top-color: $gray-600;
   }
 }
@@ -253,7 +256,8 @@ a:hover {
   }
   
   // Dark mode styles
-  [data-bs-theme="dark"] & {
+  [data-bs-theme="dark"] &,
+  .dark & {
     background: $gray-800;
     border-color: $gray-600;
     
@@ -275,7 +279,8 @@ a:hover {
   }
   
   // Dark mode - ensure visibility
-  [data-bs-theme="dark"] & {
+  [data-bs-theme="dark"] &,
+  .dark & {
     color: $gray-100;
     
     &:hover {
@@ -292,7 +297,8 @@ a:hover {
   font-style: italic;
   
   // Dark mode - ensure visibility
-  [data-bs-theme="dark"] & {
+  [data-bs-theme="dark"] &,
+  .dark & {
     color: #a78bfa; // Lighter purple for dark mode
   }
 }
@@ -304,7 +310,8 @@ a:hover {
   font-size: 1em;
   
   // Dark mode
-  [data-bs-theme="dark"] & {
+  [data-bs-theme="dark"] &,
+  .dark & {
     color: $gray-300;
   }
 }
