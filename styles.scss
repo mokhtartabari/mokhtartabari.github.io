@@ -210,11 +210,6 @@ a:hover {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  
-  &:before {
-    content: "📄";
-    font-size: 1.2em;
-  }
 }
 
 .publications-section h2.work-in-progress {
@@ -276,16 +271,6 @@ a:hover {
   
   &:hover {
     color: #667eea;
-  }
-  
-  // Dark mode - ensure visibility
-  [data-bs-theme="dark"] &,
-  .dark & {
-    color: $gray-100;
-    
-    &:hover {
-      color: #7c3aed; // Lighter purple for dark mode
-    }
   }
   
   // Dark mode - ensure visibility
