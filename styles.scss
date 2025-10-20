@@ -18,13 +18,16 @@ a:hover {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
+  text-align: center; /* Center all text content */
 }
 
 .hero-container {
   display: flex;
-  align-items: center;
+  flex-direction: column; /* Stack items vertically */
+  align-items: center; /* Center items horizontally */
   gap: 3rem;
   margin-bottom: 2rem;
+  text-align: center; /* Center text within container */
 }
 
 .profile-section {
@@ -41,6 +44,7 @@ a:hover {
 
 .info-section {
   flex: 1;
+  text-align: center; /* Center the text content */
 }
 
 .name-title {
@@ -52,17 +56,20 @@ a:hover {
   -webkit-text-fill-color: transparent;
   font-size: 2.5em;
   font-weight: bold;
+  text-align: center; /* Center the title */
 }
 
 .position {
   margin: 0 0 1rem 0;
   font-size: 1.2em;
   color: $gray-600; /* Will be dark in light mode, light in dark mode */
+  text-align: center; /* Center position text */
 }
 
 .affiliation {
   margin: 0 0 1.5rem 0;
   color: $body-color; /* Uses theme's main text color */
+  text-align: center; /* Center affiliation text */
 }
 
 /* Social Links */
@@ -71,6 +78,7 @@ a:hover {
   gap: 1rem;
   margin-bottom: 2rem;
   flex-wrap: wrap;
+  justify-content: center; /* Center the social buttons */
 }
 
 .social-button {
@@ -107,6 +115,7 @@ a:hover {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
+  justify-content: center; /* Center the navigation buttons */
 }
 
 .nav-button {
