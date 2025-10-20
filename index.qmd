@@ -20,7 +20,6 @@ format:
       <div class="nav-links">
         <a href="about.qmd" class="nav-button primary">About</a>
         <a href="publications.qmd" class="nav-button">Publications</a>
-        <a href="talks.qmd" class="nav-button">Talks</a>
         <a href="contact.qmd" class="nav-button">Contact</a>
       </div>
     </div>
