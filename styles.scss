@@ -1,0 +1,407 @@
+/*-- scss:rules --*/
+
+/* Import Academicons for academic icons */
+@import url('https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css');
+
+/* Custom styles that work with Quarto themes */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+}
+
+a:hover {
+  opacity: 0.8;
+}
+
+/* Hero Section Styles */
+.hero-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center; /* Center all text content */
+}
+
+.hero-container {
+  display: flex;
+  flex-direction: column; /* Stack items vertically */
+  align-items: center; /* Center items horizontally */
+  gap: 3rem;
+  margin-bottom: 2rem;
+  text-align: center; /* Center text within container */
+}
+
+.profile-section {
+  flex-shrink: 0;
+}
+
+.profile-image {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #667eea;
+  transition: all 0.3s ease; /* Smooth transition for all effects */
+  
+  &:hover {
+    transform: scale(1.05); /* Slight zoom effect */
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3); /* Subtle glow effect */
+    border-color: #764ba2; /* Change border color on hover */
+  }
+}
+
+.info-section {
+  flex: 1;
+  text-align: center; /* Center the text content */
+}
+
+.name-title {
+  margin: 0 0 0.5rem 0;
+  color: #667eea;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 2.5em;
+  font-weight: bold;
+  text-align: center; /* Center the title */
+  transition: all 0.3s ease; /* Smooth transition */
+  cursor: pointer; /* Indicate it's interactive */
+  
+  &:hover {
+    transform: translateY(-2px) scale(1.02); /* Lift and slight zoom */
+    text-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); /* Subtle glow effect */
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%); /* Reverse gradient */
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+.position {
+  margin: 0 0 1rem 0;
+  font-size: 1.2em;
+  color: $gray-600; /* Will be dark in light mode, light in dark mode */
+  text-align: center; /* Center position text */
+}
+
+.affiliation {
+  margin: 0 0 1.5rem 0;
+  color: $body-color; /* Uses theme's main text color */
+  text-align: center; /* Center affiliation text */
+}
+
+/* Social Links */
+.social-links {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  justify-content: center; /* Center the social buttons */
+}
+
+.social-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: $gray-100;
+  border: 1px solid $gray-300;
+  border-radius: 6px;
+  text-decoration: none;
+  color: $gray-700;
+  font-size: 0.9em;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: $gray-200;
+  }
+
+  // Quarto dark mode targeting
+  [data-bs-theme="dark"] &,
+  .dark & {
+    background-color: $gray-800;
+    border-color: $gray-600;
+    color: $gray-300;
+
+    &:hover {
+      background-color: $gray-700;
+    }
+  }
+}
+
+/* Navigation Links */
+.nav-links {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center; /* Center the navigation buttons */
+}
+
+.nav-button {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background-color: $gray-600;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: bold;
+  transition: background-color 0.3s;
+
+  &.primary {
+    background-color: #667eea;
+  }
+
+  &:hover {
+    background-color: #5a67d8;
+  }
+
+  // Dark mode adjustments
+  [data-bs-theme="dark"] &,
+  .dark & {
+    &.primary {
+      background-color: #7c3aed; // Slightly lighter purple for dark mode
+    }
+
+    &:hover {
+      background-color: #6d28d9;
+    }
+  }
+}
+
+/* Footer Social Section */
+.footer-social-section {
+  margin-top: 3rem;
+  padding: 2rem 0;
+  border-top: 1px solid $gray-300;
+  text-align: center;
+
+  [data-bs-theme="dark"] &,
+  .dark & {
+    border-top-color: $gray-600;
+  }
+}
+
+.footer-social-section .social-links {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Publications Page Styles */
+.publications-section {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.publications-section h1 {
+  text-align: center;
+  color: #667eea;
+  margin-bottom: 3rem;
+  font-size: 2.5em;
+  font-weight: bold;
+}
+
+.publications-section h2 {
+  color: #667eea;
+  margin: 3rem 0 2rem 0;
+  font-size: 1.8em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.publications-section h2.work-in-progress {
+  &:before {
+    content: "🚧";
+  }
+}
+
+.publication-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid $gray-200;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+    border-color: #667eea;
+  }
+  
+  &:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.3s ease;
+  }
+  
+  &:hover:before {
+    width: 6px;
+  }
+  
+  // Dark mode styles
+  [data-bs-theme="dark"] &,
+  .dark & {
+    background: $gray-800;
+    border-color: $gray-600;
+    
+    &:hover {
+      border-color: #7c3aed;
+    }
+  }
+}
+
+.publication-title {
+  font-size: 1.4em;
+  font-weight: bold;
+  color: $body-color;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+  
+  &:hover {
+    color: #667eea;
+  }
+  
+  // Dark mode - ensure visibility
+  [data-bs-theme="dark"] &,
+  .dark & {
+    color: $gray-100;
+    
+    &:hover {
+      color: #7c3aed; // Lighter purple for dark mode
+    }
+  }
+}
+
+.publication-authors {
+  font-size: 1.1em;
+  color: #667eea;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  font-style: italic;
+  
+  // Dark mode - ensure visibility
+  [data-bs-theme="dark"] &,
+  .dark & {
+    color: #a78bfa; // Lighter purple for dark mode
+  }
+}
+
+.publication-journal {
+  font-size: 1em;
+  color: #28a745;
+  font-weight: 600;
+  margin: 0.5rem 0;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  // Dark mode
+  [data-bs-theme="dark"] &,
+  .dark & {
+    color: #34d399; // Lighter green for dark mode
+  }
+}
+
+.publication-abstract {
+  color: $gray-700;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  font-size: 1em;
+  
+  // Dark mode
+  [data-bs-theme="dark"] &,
+  .dark & {
+    color: $gray-300;
+  }
+}
+
+.publication-links {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.publication-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white !important;
+  text-decoration: none !important;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95em;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    border-color: #667eea;
+  }
+  
+  &:active {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  }
+  
+  &.secondary {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    box-shadow: 0 2px 8px rgba(107, 114, 128, 0.2);
+    
+    &:hover {
+      background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
+      border-color: #6b7280;
+      box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
+    }
+  }
+  
+  i {
+    font-size: 1em;
+    transition: transform 0.3s ease;
+  }
+  
+  &:hover i {
+    transform: scale(1.1);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .publications-section {
+    padding: 1rem;
+  }
+  
+  .publication-card {
+    padding: 1.5rem;
+  }
+  
+  .publication-title {
+    font-size: 1.2em;
+  }
+  
+  .publication-links {
+    flex-direction: column;
+  }
+  
+  .publication-link {
+    justify-content: center;
+  }
+}
+
