@@ -1,24 +1,25 @@
 export const site = {
   name: "Mokhtar Tabari",
-  title: "Mokhtar Tabari — Assistant Professor of Economics",
+  title: "Mokhtar Tabari — Economist",
   description:
-    "Assistant Professor of Economics at University Canada West and Sessional Lecturer at UBC Sauder. Award-winning teacher and researcher working on international trade, energy and environmental economics, the economics of AI, and applied microeconomics.",
+    "Economist working on international trade, energy and environmental economics, applied microeconomics, and the economics of AI. Based in Vancouver, Canada.",
   url: "https://mokhtartabari.github.io",
-  position: "Assistant Professor of Economics",
+  position: "Instructor of Economics",
   institutions: [
     {
-      name: "University Canada West",
-      role: "Assistant Professor",
-      url: "https://www.ucanwest.ca/",
+      name: "Capilano University",
+      role: "Instructor",
+      url: "https://www.capilanou.ca/",
     },
     {
       name: "UBC Sauder School of Business",
-      role: "Sessional Lecturer",
+      role: "Sessional Instructor",
       url: "https://www.sauder.ubc.ca/",
     },
   ],
   location: "Vancouver, Canada",
-  email: "mokhtar.tabari@ucanwest.ca",
+  email: "mokhtartabari@capilanou.ca",
+  emailPersonal: "mokhtar.tab@gmail.com",
   cv: "/files/cv.pdf",
   socials: {
     scholar:

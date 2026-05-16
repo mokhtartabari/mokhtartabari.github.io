@@ -53,9 +53,40 @@ export const innovations = [
 
 export const appointments: TeachingAppointment[] = [
   {
+    institution: "Capilano University",
+    role: "Instructor",
+    period: "2022 – Present",
+    url: "https://www.capilanou.ca/",
+    courses: [
+      {
+        code: "ECON 100",
+        title: "Introduction to Economics",
+        level: "principles",
+      },
+      {
+        code: "ECON 111",
+        title: "Principles of Microeconomic Theory",
+        level: "principles",
+      },
+    ],
+  },
+  {
+    institution: "UBC Sauder School of Business",
+    role: "Sessional Instructor",
+    period: "2020, 2023 – Present",
+    url: "https://www.sauder.ubc.ca/",
+    courses: [
+      {
+        code: "COMM 394",
+        title: "Environment, Society, and Government",
+        level: "upper-undergrad",
+      },
+    ],
+  },
+  {
     institution: "University Canada West",
     role: "Assistant Professor",
-    period: "2020 – Present",
+    period: "2020 – 2026",
     url: "https://www.ucanwest.ca/",
     courses: [
       { code: "MBAF 504", title: "Business Economics", level: "graduate" },
@@ -80,37 +111,6 @@ export const appointments: TeachingAppointment[] = [
         code: "BUSI 100",
         title: "Introduction to Business",
         level: "general",
-      },
-    ],
-  },
-  {
-    institution: "Capilano University",
-    role: "Sessional Instructor",
-    period: "2022 – Present",
-    url: "https://www.capilanou.ca/",
-    courses: [
-      {
-        code: "ECON 100",
-        title: "Introduction to Economics",
-        level: "principles",
-      },
-      {
-        code: "ECON 111",
-        title: "Principles of Microeconomic Theory",
-        level: "principles",
-      },
-    ],
-  },
-  {
-    institution: "UBC Sauder School of Business",
-    role: "Sessional Lecturer",
-    period: "2020, 2023 – 2024",
-    url: "https://www.sauder.ubc.ca/",
-    courses: [
-      {
-        code: "COMM 394",
-        title: "Environment, Society, and Government",
-        level: "upper-undergrad",
       },
     ],
   },

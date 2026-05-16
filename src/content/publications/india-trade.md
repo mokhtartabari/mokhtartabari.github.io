@@ -3,7 +3,7 @@ title: "Decomposing the Within-Firm Productivity Gains from Trade: Evidence From
 authors:
   - "Mokhtar Tabari"
   - "Scott Orr"
-year: 2024
+year: 2025
 venue: "Review of Economics and Statistics"
 venueShort: "REStat"
 status: "accepted"
