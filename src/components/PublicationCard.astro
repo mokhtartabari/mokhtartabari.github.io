@@ -1,0 +1,137 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+type Props = {
+  publication: CollectionEntry<"publications">;
+  highlightAuthor?: string;
+};
+
+const { publication, highlightAuthor = "Mokhtar Tabari" } = Astro.props;
+const { data } = publication;
+
+const statusLabel: Record<typeof data.status, string> = {
+  published: "Published",
+  accepted: "Accepted",
+  "revise-and-resubmit": "R&R",
+  "working-paper": "Working Paper",
+};
+
+const statusColor: Record<typeof data.status, string> = {
+  published:
+    "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 ring-emerald-500/20",
+  accepted:
+    "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 ring-emerald-500/20",
+  "revise-and-resubmit":
+    "bg-amber-500/10 text-amber-700 dark:text-amber-300 ring-amber-500/20",
+  "working-paper":
+    "bg-accent-500/10 text-accent-700 dark:text-accent-300 ring-accent-500/20",
+};
+
+const iconPaths: Record<string, string> = {
+  pdf: `<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><path d="M14 2v6h6" /><path d="M9 15h6M9 11h2" />`,
+  doi: `<path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />`,
+  code: `<polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" />`,
+  data: `<ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M3 5v6c0 1.66 4 3 9 3s9-1.34 9-3V5M3 11v6c0 1.66 4 3 9 3s9-1.34 9-3v-6" />`,
+  slides: `<rect x="2" y="3" width="20" height="14" rx="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" />`,
+  media: `<path d="M4 5h16v14H4z" /><path d="M8 9l5 3-5 3V9z" fill="currentColor" />`,
+  preprint: `<path d="M9 12h6M9 16h6M9 8h6M5 4h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1z" />`,
+  external: `<path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />`,
+};
+
+const renderAuthor = (a: string) =>
+  a.toLowerCase() === highlightAuthor.toLowerCase();
+---
+
+<article
+  class="reveal group relative rounded-2xl border border-default bg-elevated p-6 sm:p-7 transition-all hover:border-accent-400 dark:hover:border-accent-500 hover:shadow-[0_12px_40px_-12px_rgba(99,102,241,0.25)]"
+>
+  <span
+    class="absolute top-0 left-6 sm:left-7 right-6 sm:right-7 h-px bg-gradient-to-r from-transparent via-accent-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
+  ></span>
+
+  <div class="flex flex-wrap items-center gap-2 mb-3">
+    <span
+      class:list={[
+        "inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full ring-1 ring-inset",
+        statusColor[data.status],
+      ]}
+    >
+      {statusLabel[data.status]}
+    </span>
+    <span class="text-xs text-muted">{data.year}</span>
+    {
+      data.tags.slice(0, 3).map((tag) => (
+        <span class="text-xs text-muted px-2 py-0.5 rounded-full border border-default">
+          {tag}
+        </span>
+      ))
+    }
+  </div>
+
+  <h3
+    class="font-serif text-xl sm:text-[1.4rem] font-semibold leading-snug text-fg group-hover:text-accent-700 dark:group-hover:text-accent-300 transition-colors"
+  >
+    {data.title}
+  </h3>
+
+  <p class="mt-2 text-sm text-muted">
+    {
+      data.authors.map((author, i) => (
+        <>
+          <span
+            class:list={[
+              renderAuthor(author)
+                ? "font-semibold text-fg"
+                : "",
+            ]}
+          >
+            {author}
+          </span>
+          {i < data.authors.length - 1 && ", "}
+        </>
+      ))
+    }
+  </p>
+
+  {
+    data.venue && (
+      <p class="mt-1 text-sm italic text-accent-700 dark:text-accent-300">
+        {data.venue}
+      </p>
+    )
+  }
+
+  <p class="mt-4 text-[15px] leading-relaxed text-muted line-clamp-5">
+    {data.abstract}
+  </p>
+
+  {
+    data.links.length > 0 && (
+      <div class="mt-5 flex flex-wrap gap-2">
+        {data.links.map((link) => (
+          <a
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg border border-default text-fg hover:bg-accent-50 dark:hover:bg-accent-900/30 hover:border-accent-400 dark:hover:border-accent-500 transition-all"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              set:html={iconPaths[link.icon] ?? iconPaths.external}
+            />
+            {link.label}
+          </a>
+        ))}
+      </div>
+    )
+  }
+</article>

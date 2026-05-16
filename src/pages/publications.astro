@@ -1,0 +1,93 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import PublicationCard from "~/components/PublicationCard.astro";
+
+const all = await getCollection("publications");
+
+const groups = {
+  "Published & Accepted": all
+    .filter(
+      (p) => p.data.status === "published" || p.data.status === "accepted",
+    )
+    .sort((a, b) => a.data.order - b.data.order),
+  "Working Papers & R&R": all
+    .filter(
+      (p) =>
+        p.data.status === "working-paper" ||
+        p.data.status === "revise-and-resubmit",
+    )
+    .sort((a, b) => a.data.order - b.data.order),
+};
+
+const totalCount = all.length;
+---
+
+<BaseLayout
+  title="Publications"
+  description="Research papers, working papers, and academic publications by Mokhtar Tabari."
+>
+  <section class="container-wide pt-16 pb-12">
+    <header class="reveal max-w-3xl">
+      <p
+        class="text-xs font-medium tracking-widest uppercase text-accent-700 dark:text-accent-300 mb-3"
+      >
+        Research · {totalCount} papers
+      </p>
+      <h1
+        class="font-serif text-4xl sm:text-5xl font-semibold leading-[1.1] tracking-tight"
+      >
+        Publications & working papers
+      </h1>
+      <p class="mt-4 text-lg text-muted">
+        Selected research in international trade, energy economics, productivity,
+        and economics education.
+      </p>
+    </header>
+  </section>
+
+  {
+    Object.entries(groups).map(([heading, items]) =>
+      items.length === 0 ? null : (
+        <section class="container-wide py-10">
+          <h2 class="reveal font-serif text-2xl font-semibold mb-6 flex items-center gap-3">
+            <span class="w-8 h-px bg-accent-500" />
+            {heading}
+          </h2>
+          <div class="grid lg:grid-cols-2 gap-6">
+            {items.map((pub) => (
+              <PublicationCard publication={pub} />
+            ))}
+          </div>
+        </section>
+      ),
+    )
+  }
+
+  <section class="container-wide py-16">
+    <div
+      class="reveal rounded-2xl border border-default bg-elevated p-8 text-center"
+    >
+      <p class="text-muted">
+        Looking for the most up-to-date list? See my
+        <a
+          href="https://scholar.google.com/citations?user=Eti_yWQAAAAJ&hl=en"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-accent-600 dark:text-accent-400 hover:underline font-medium"
+        >
+          Google Scholar profile
+        </a>
+        or
+        <a
+          href="/files/cv.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-accent-600 dark:text-accent-400 hover:underline font-medium"
+        >
+          download my CV
+        </a>.
+      </p>
+    </div>
+  </section>
+</BaseLayout>

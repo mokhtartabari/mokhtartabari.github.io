@@ -1,0 +1,72 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+
+const posts = (await getCollection("posts"))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<BaseLayout
+  title="Blog"
+  description="Thoughts on economics, policy, and research by Mokhtar Tabari."
+>
+  <section class="container-wide pt-16 pb-12">
+    <header class="reveal max-w-3xl">
+      <p
+        class="text-xs font-medium tracking-widest uppercase text-accent-700 dark:text-accent-300 mb-3"
+      >
+        Writing
+      </p>
+      <h1
+        class="font-serif text-4xl sm:text-5xl font-semibold leading-[1.1] tracking-tight"
+      >
+        Blog
+      </h1>
+      <p class="mt-4 text-lg text-muted">
+        Notes on the Canadian and US economies, policy, AI, and research.
+      </p>
+    </header>
+  </section>
+
+  <section class="container-wide pb-24">
+    {
+      posts.length === 0 ? (
+        <p class="reveal text-muted">No posts yet — come back soon.</p>
+      ) : (
+        <ul class="space-y-4" role="list">
+          {posts.map((post) => (
+            <li class="reveal">
+              <a
+                href={`/posts/${post.id}/`}
+                class="group block rounded-2xl border border-default bg-elevated p-6 hover:border-accent-400 dark:hover:border-accent-500 transition-all hover:-translate-y-0.5"
+              >
+                <div class="flex flex-wrap items-baseline justify-between gap-3 mb-2">
+                  <time
+                    datetime={post.data.date.toISOString()}
+                    class="text-xs uppercase tracking-wider text-muted"
+                  >
+                    {post.data.date.toLocaleDateString("en-CA", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </time>
+                  {post.data.category && (
+                    <span class="text-xs font-medium tracking-wider uppercase text-accent-700 dark:text-accent-300">
+                      {post.data.category}
+                    </span>
+                  )}
+                </div>
+                <h2 class="font-serif text-2xl font-semibold leading-snug group-hover:text-accent-700 dark:group-hover:text-accent-300 transition-colors">
+                  {post.data.title}
+                </h2>
+                <p class="mt-2 text-muted">{post.data.description}</p>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </section>
+</BaseLayout>

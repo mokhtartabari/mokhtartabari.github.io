@@ -1,0 +1,83 @@
+---
+import { site } from "~/data/site";
+
+type Props = {
+  size?: "sm" | "md";
+  showLabels?: boolean;
+};
+
+const { size = "md", showLabels = false } = Astro.props;
+
+const links = [
+  {
+    label: "Email",
+    href: `mailto:${site.email}`,
+    svg: `<path d="M3 7l9 6 9-6M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />`,
+  },
+  {
+    label: "Google Scholar",
+    href: site.socials.scholar,
+    svg: `<path d="M12 14l9-5-9-5-9 5 9 5z" /><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />`,
+  },
+  {
+    label: "LinkedIn",
+    href: site.socials.linkedin,
+    svg: `<rect x="3" y="3" width="18" height="18" rx="2" /><path d="M8 11v5M8 8v.01M12 11v5M16 11v5M16 11a2 2 0 10-4 0" />`,
+  },
+  {
+    label: "GitHub",
+    href: site.socials.github,
+    svg: `<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22" />`,
+  },
+  {
+    label: "Bluesky",
+    href: site.socials.bluesky,
+    svg: `<path d="M6 4c2.5 0 5 1.5 6 4 1-2.5 3.5-4 6-4s4 1.5 4 4-1 5-4 6c2 .5 4 1.5 4 4s-1.5 4-4 4-5-2-6-5c-1 3-3.5 5-6 5s-4-1.5-4-4 2-3.5 4-4c-3-1-4-3.5-4-6s1.5-4 4-4z" />`,
+  },
+  {
+    label: "CV",
+    href: site.cv,
+    svg: `<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><path d="M14 2v6h6M9 13h6M9 17h6M9 9h2" />`,
+  },
+];
+
+const sizeClasses =
+  size === "sm"
+    ? "w-9 h-9 p-2"
+    : "w-10 h-10 p-2.5";
+---
+
+<ul class="flex flex-wrap gap-2 items-center" role="list">
+  {
+    links.map((link) => (
+      <li>
+        <a
+          href={link.href}
+          target={link.href.startsWith("mailto:") ? undefined : "_blank"}
+          rel={link.href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
+          aria-label={link.label}
+          title={link.label}
+          class:list={[
+            "inline-flex items-center gap-2 rounded-lg border border-default bg-elevated text-muted hover:text-accent-600 dark:hover:text-accent-400 hover:border-accent-400 dark:hover:border-accent-500 transition-all hover:-translate-y-0.5 hover:shadow-sm",
+            showLabels ? "px-3 py-2 text-sm" : sizeClasses,
+          ]}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            set:html={link.svg}
+          />
+          {showLabels && <span>{link.label}</span>}
+        </a>
+      </li>
+    ))
+  }
+</ul>

@@ -1,0 +1,282 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Fraunces", "Source Serif Pro", Georgia, "Times New Roman",
+    serif;
+
+  --color-ink-50: #f7f7f8;
+  --color-ink-100: #eeeef1;
+  --color-ink-200: #d8d9df;
+  --color-ink-300: #b3b5bf;
+  --color-ink-400: #8b8e9c;
+  --color-ink-500: #6b6e7d;
+  --color-ink-600: #4f5263;
+  --color-ink-700: #3b3e4d;
+  --color-ink-800: #25272f;
+  --color-ink-900: #15161c;
+  --color-ink-950: #0c0d12;
+
+  --color-accent-50: #eef2ff;
+  --color-accent-100: #e0e7ff;
+  --color-accent-200: #c7d2fe;
+  --color-accent-300: #a5b4fc;
+  --color-accent-400: #818cf8;
+  --color-accent-500: #6366f1;
+  --color-accent-600: #4f46e5;
+  --color-accent-700: #4338ca;
+  --color-accent-800: #3730a3;
+  --color-accent-900: #312e81;
+
+  --color-gold-400: #d4a548;
+  --color-gold-500: #b8862b;
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("https://rsms.me/inter/font-files/InterVariable.woff2?v=4.0")
+    format("woff2");
+}
+
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/fraunces/v37/6NUh8FyLNQOQZAnv9bYEvDiIdE9Ea92uemAk_WBq8U_9v0c2WjPLNVMjuxihRRyZHA.woff2")
+    format("woff2");
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+    --bg: var(--color-ink-50);
+    --bg-elevated: #ffffff;
+    --fg: var(--color-ink-900);
+    --fg-muted: var(--color-ink-600);
+    --border: var(--color-ink-200);
+  }
+
+  .dark {
+    color-scheme: dark;
+    --bg: var(--color-ink-950);
+    --bg-elevated: var(--color-ink-900);
+    --fg: var(--color-ink-50);
+    --fg-muted: var(--color-ink-300);
+    --border: var(--color-ink-800);
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01", "ss03";
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-serif);
+    font-feature-settings: "ss01";
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-200);
+    color: var(--color-ink-900);
+  }
+
+  .dark ::selection {
+    background-color: var(--color-accent-700);
+    color: white;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--color-accent-500);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer utilities {
+  .container-prose {
+    max-width: 72ch;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+
+  .container-wide {
+    max-width: 80rem;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+
+  .bg-surface {
+    background-color: var(--bg);
+  }
+
+  .bg-elevated {
+    background-color: var(--bg-elevated);
+  }
+
+  .text-fg {
+    color: var(--fg);
+  }
+
+  .text-muted {
+    color: var(--fg-muted);
+  }
+
+  .border-default {
+    border-color: var(--border);
+  }
+
+  .grid-noise {
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      rgba(99, 102, 241, 0.08) 1px,
+      transparent 0
+    );
+    background-size: 24px 24px;
+  }
+
+  .dark .grid-noise {
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      rgba(165, 180, 252, 0.06) 1px,
+      transparent 0
+    );
+  }
+}
+
+/* Reveal-on-scroll animation */
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Prose styling for blog posts */
+.prose-academic {
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  color: var(--fg);
+}
+
+.prose-academic h1,
+.prose-academic h2,
+.prose-academic h3 {
+  font-family: var(--font-serif);
+  letter-spacing: -0.02em;
+  color: var(--fg);
+}
+
+.prose-academic h1 {
+  font-size: 2.25rem;
+  font-weight: 600;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.prose-academic h2 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-top: 2.25rem;
+  margin-bottom: 0.85rem;
+}
+
+.prose-academic h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose-academic p {
+  margin-block: 1.1rem;
+}
+
+.prose-academic ul,
+.prose-academic ol {
+  margin-block: 1.1rem;
+  padding-left: 1.5rem;
+}
+
+.prose-academic ul {
+  list-style: disc;
+}
+
+.prose-academic ol {
+  list-style: decimal;
+}
+
+.prose-academic li {
+  margin-block: 0.4rem;
+}
+
+.prose-academic a {
+  color: var(--color-accent-600);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.dark .prose-academic a {
+  color: var(--color-accent-400);
+}
+
+.prose-academic strong {
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.prose-academic blockquote {
+  border-left: 3px solid var(--color-accent-500);
+  padding-left: 1rem;
+  font-style: italic;
+  color: var(--fg-muted);
+  margin-block: 1.25rem;
+}
+
+.prose-academic code {
+  background-color: var(--color-ink-100);
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.dark .prose-academic code {
+  background-color: var(--color-ink-800);
+}
