@@ -1,0 +1,270 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import {
+  philosophy,
+  interests,
+  innovations,
+  appointments,
+  teachingAssistantships,
+  levelLabels,
+  levelColors,
+} from "~/data/teaching";
+
+const publications = await getCollection("publications");
+const pubBySlug = Object.fromEntries(publications.map((p) => [p.id, p]));
+
+const totalCourses = appointments.reduce(
+  (sum, app) => sum + app.courses.length,
+  0,
+);
+---
+
+<BaseLayout
+  title="Teaching"
+  description="Teaching philosophy, course history, and pedagogical research by Dr. Mokhtar Tabari — recipient of the ACBSP Teaching Excellence Award."
+>
+  <section class="container-wide pt-16 pb-12">
+    <header class="reveal max-w-3xl">
+      <p
+        class="text-xs font-medium tracking-widest uppercase text-accent-700 dark:text-accent-300 mb-3"
+      >
+        Teaching
+      </p>
+      <h1
+        class="font-serif text-4xl sm:text-5xl font-semibold leading-[1.1] tracking-tight"
+      >
+        Teaching, in theory and in practice
+      </h1>
+      <p class="mt-5 text-lg text-muted leading-relaxed">
+        Five years as an Assistant Professor, sessional appointments at four
+        additional institutions, and a peer-reviewed agenda in economics
+        pedagogy. {totalCourses}+ distinct course preparations across the principles, intermediate,
+        graduate, and quantitative-methods sequences.
+      </p>
+    </header>
+  </section>
+
+  <!-- Award strip -->
+  <section class="container-wide pb-12">
+    <div
+      class="reveal flex flex-wrap items-center gap-5 rounded-2xl border border-default bg-elevated p-6"
+    >
+      <span
+        class="flex items-center justify-center w-12 h-12 rounded-xl bg-gold-400/15 text-gold-500 flex-shrink-0"
+        aria-hidden="true"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <path
+            d="M12 2l2.4 7.2h7.6l-6.2 4.5 2.4 7.3L12 16.6l-6.2 4.4 2.4-7.3L2 9.2h7.6L12 2z"
+          ></path>
+        </svg>
+      </span>
+      <div class="min-w-0">
+        <p class="text-xs font-medium uppercase tracking-wider text-muted">
+          Recognition
+        </p>
+        <p class="font-serif text-lg font-semibold text-fg">
+          ACBSP Teaching Excellence Award · 2023
+        </p>
+        <p class="text-sm text-muted">
+          Regional award for sustained excellence in business and economics
+          instruction.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Philosophy -->
+  <section class="container-wide py-12">
+    <div class="grid lg:grid-cols-12 gap-10">
+      <div class="lg:col-span-4">
+        <h2 class="reveal font-serif text-3xl font-semibold">
+          Teaching philosophy
+        </h2>
+        <p class="reveal mt-3 text-sm text-muted">
+          Three commitments that shape every course I design.
+        </p>
+      </div>
+      <div
+        class="lg:col-span-8 space-y-5 text-[17px] leading-relaxed text-fg"
+      >
+        {philosophy.map((p) => <p class="reveal">{p}</p>)}
+      </div>
+    </div>
+  </section>
+
+  <!-- Areas of teaching interest -->
+  <section class="container-wide py-12">
+    <div class="reveal mb-8">
+      <h2 class="font-serif text-3xl font-semibold">
+        Areas I am prepared to teach
+      </h2>
+      <p class="mt-2 text-muted">
+        Courses spanning the principles, intermediate, applied-methods, and
+        graduate sequences.
+      </p>
+    </div>
+    <ul class="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-3" role="list">
+      {
+        interests.map((interest) => (
+          <li class="flex items-start gap-3 rounded-xl border border-default bg-elevated p-4">
+            <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-accent-500 flex-shrink-0" />
+            <span class="text-sm font-medium">{interest}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <!-- Pedagogical innovations -->
+  <section class="container-wide py-12">
+    <div class="reveal mb-8 max-w-3xl">
+      <h2 class="font-serif text-3xl font-semibold">
+        Pedagogical research & innovation
+      </h2>
+      <p class="mt-2 text-muted">
+        Teaching approaches I have built, tested in the classroom, and written
+        up in peer-reviewed venues.
+      </p>
+    </div>
+    <div class="grid lg:grid-cols-3 gap-5">
+      {
+        innovations.map((item, i) => {
+          const paper = pubBySlug[item.paperSlug];
+          return (
+            <article class="reveal group relative flex flex-col rounded-2xl border border-default bg-elevated p-6 hover:border-accent-400 dark:hover:border-accent-500 transition-all hover:-translate-y-1">
+              <span class="font-serif text-4xl text-accent-500/40 group-hover:text-accent-500 transition-colors leading-none">
+                0{i + 1}
+              </span>
+              <h3 class="mt-3 font-serif text-lg font-semibold leading-snug">
+                {item.title}
+              </h3>
+              <p class="mt-2 text-sm text-muted leading-relaxed flex-1">
+                {item.summary}
+              </p>
+              {paper && (
+                <a
+                  href="/publications/"
+                  class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-accent-600 dark:text-accent-400 hover:underline"
+                >
+                  Related paper →
+                </a>
+              )}
+            </article>
+          );
+        })
+      }
+    </div>
+  </section>
+
+  <!-- Course history -->
+  <section class="container-wide py-12">
+    <div class="reveal mb-8 max-w-3xl">
+      <h2 class="font-serif text-3xl font-semibold">
+        Courses taught
+      </h2>
+      <p class="mt-2 text-muted">
+        Independent appointments as instructor of record across five
+        post-secondary institutions in Canada.
+      </p>
+    </div>
+
+    <div class="space-y-8">
+      {
+        appointments.map((app) => (
+          <article class="reveal rounded-2xl border border-default bg-elevated overflow-hidden">
+            <header class="px-6 py-5 border-b border-default flex flex-wrap items-baseline justify-between gap-3">
+              <div>
+                <h3 class="font-serif text-xl font-semibold">
+                  {app.url ? (
+                    <a
+                      href={app.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="hover:text-accent-600 dark:hover:text-accent-400 transition-colors"
+                    >
+                      {app.institution}
+                    </a>
+                  ) : (
+                    app.institution
+                  )}
+                </h3>
+                <p class="text-sm text-muted mt-0.5">{app.role}</p>
+              </div>
+              <span class="text-sm text-muted whitespace-nowrap">
+                {app.period}
+              </span>
+            </header>
+            <ul class="divide-y divide-default" role="list">
+              {app.courses.map((course) => (
+                <li class="px-6 py-3 flex flex-wrap items-center gap-3 hover:bg-accent-50/40 dark:hover:bg-accent-900/15 transition-colors">
+                  {course.code && (
+                    <span class="font-mono text-xs text-muted w-20 flex-shrink-0">
+                      {course.code}
+                    </span>
+                  )}
+                  <span class="font-medium flex-1 min-w-[200px]">
+                    {course.title}
+                  </span>
+                  <span
+                    class:list={[
+                      "text-xs font-medium px-2 py-0.5 rounded-full ring-1 ring-inset",
+                      levelColors[course.level],
+                    ]}
+                  >
+                    {levelLabels[course.level]}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Teaching assistantships -->
+  <section class="container-wide py-12">
+    <div class="reveal rounded-2xl border border-default bg-elevated p-6 sm:p-8">
+      <div class="flex flex-wrap items-baseline justify-between gap-3 mb-3">
+        <h2 class="font-serif text-xl font-semibold">
+          Teaching assistantships
+        </h2>
+        <span class="text-sm text-muted">
+          {teachingAssistantships.institution} · {teachingAssistantships.period}
+        </span>
+      </div>
+      <p class="text-muted leading-relaxed">
+        {teachingAssistantships.summary}
+      </p>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="container-wide py-16">
+    <div
+      class="reveal rounded-2xl border border-default bg-elevated p-8 text-center"
+    >
+      <h2 class="font-serif text-2xl font-semibold mb-3">
+        Teaching materials, references, and syllabi
+      </h2>
+      <p class="text-muted mb-6">
+        Sample syllabi, course evaluations, and references are available on
+        request.
+      </p>
+      <a
+        href="/contact/"
+        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent-600 hover:bg-accent-700 text-white font-medium text-sm transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-accent-500/25"
+      >
+        Get in touch
+      </a>
+    </div>
+  </section>
+</BaseLayout>

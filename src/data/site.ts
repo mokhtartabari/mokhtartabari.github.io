@@ -2,7 +2,7 @@ export const site = {
   name: "Mokhtar Tabari",
   title: "Mokhtar Tabari — Assistant Professor of Economics",
   description:
-    "Assistant Professor of Economics at University Canada West and Sessional Lecturer at UBC Sauder. Research on international trade, energy and environmental economics, and applied microeconomics.",
+    "Assistant Professor of Economics at University Canada West and Sessional Lecturer at UBC Sauder. Award-winning teacher and researcher working on international trade, energy and environmental economics, the economics of AI, and applied microeconomics.",
   url: "https://mokhtartabari.github.io",
   position: "Assistant Professor of Economics",
   institutions: [

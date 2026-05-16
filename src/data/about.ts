@@ -95,29 +95,3 @@ export const otherExperience = [
   },
 ];
 
-export const courses = [
-  { course: "Business Economics", institution: "University Canada West" },
-  {
-    course: "Principles of Microeconomics",
-    institution: "University Canada West",
-  },
-  {
-    course: "Principles of Macroeconomics",
-    institution: "University Canada West",
-  },
-  { course: "Government and Business", institution: "UBC Sauder" },
-  { course: "Introduction to Economics", institution: "Capilano University" },
-  {
-    course: "Statistics for Business and Economics",
-    institution: "Thompson Rivers University",
-  },
-  {
-    course: "Quantitative Reasoning and Analysis",
-    institution: "University Canada West",
-  },
-  { course: "Introduction to Business", institution: "University Canada West" },
-  {
-    course: "The Global Trading System",
-    institution: "University of Calgary",
-  },
-];

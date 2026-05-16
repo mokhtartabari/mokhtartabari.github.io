@@ -6,8 +6,8 @@ import {
   experience,
   awards,
   otherExperience,
-  courses,
 } from "~/data/about";
+import { appointments, interests as teachingInterests } from "~/data/teaching";
 import { site } from "~/data/site";
 ---
 
@@ -165,41 +165,48 @@ import { site } from "~/data/site";
     </ul>
   </section>
 
-  <!-- Teaching -->
+  <!-- Teaching summary -->
   <section class="container-wide py-12 pb-24">
-    <h2 class="reveal font-serif text-3xl font-semibold mb-8">
-      Teaching experience
-    </h2>
-    <div class="reveal overflow-hidden rounded-2xl border border-default bg-elevated">
-      <table class="w-full text-sm">
-        <thead class="bg-[color-mix(in_srgb,var(--bg)_50%,transparent)]">
-          <tr>
-            <th
-              class="text-left px-5 py-3 font-medium text-muted uppercase tracking-wider text-xs"
-              >Course</th
-            >
-            <th
-              class="text-left px-5 py-3 font-medium text-muted uppercase tracking-wider text-xs"
-              >Institution</th
-            >
-          </tr>
-        </thead>
-        <tbody>
-          {
-            courses.map((c, i) => (
-              <tr
-                class:list={[
-                  "transition-colors hover:bg-accent-50/50 dark:hover:bg-accent-900/20",
-                  i !== courses.length - 1 && "border-b border-default",
-                ]}
-              >
-                <td class="px-5 py-3 font-medium">{c.course}</td>
-                <td class="px-5 py-3 text-muted">{c.institution}</td>
-              </tr>
-            ))
-          }
-        </tbody>
-      </table>
+    <div class="reveal flex flex-wrap items-baseline justify-between gap-3 mb-8">
+      <h2 class="font-serif text-3xl font-semibold">Teaching</h2>
+      <a
+        href="/teaching/"
+        class="text-sm font-medium text-accent-600 dark:text-accent-400 hover:underline"
+      >
+        Full teaching record →
+      </a>
+    </div>
+
+    <div class="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+      {
+        appointments.map((app) => (
+          <article class="rounded-xl border border-default bg-elevated p-5 hover:border-accent-400 dark:hover:border-accent-500 transition-colors">
+            <h3 class="font-serif font-semibold text-base leading-snug">
+              {app.institution}
+            </h3>
+            <p class="text-sm text-muted mt-1">{app.role}</p>
+            <p class="text-xs text-muted mt-1">{app.period}</p>
+            <p class="text-xs text-muted mt-3 pt-3 border-t border-default">
+              {app.courses.length} course{app.courses.length > 1 ? "s" : ""}
+            </p>
+          </article>
+        ))
+      }
+    </div>
+
+    <div class="reveal">
+      <p class="text-sm text-muted mb-3 uppercase tracking-wider font-medium">
+        Areas of teaching
+      </p>
+      <ul class="flex flex-wrap gap-2" role="list">
+        {
+          teachingInterests.map((t) => (
+            <li class="text-sm px-3 py-1.5 rounded-full border border-default bg-elevated text-fg">
+              {t}
+            </li>
+          ))
+        }
+      </ul>
     </div>
   </section>
 </BaseLayout>

@@ -53,20 +53,21 @@ const recentPosts = (await getCollection("posts"))
         </h1>
 
         <p class="reveal text-lg sm:text-xl text-muted max-w-2xl leading-relaxed">
-          Economist researching <span class="text-fg font-medium"
+          Economist and educator working on <span class="text-fg font-medium"
             >international trade</span
           >, <span class="text-fg font-medium">energy & environmental policy</span
           >, and the economics of <span class="text-fg font-medium"
             >artificial intelligence</span
-          >. Based in {site.location}.
+          >. Award-winning teacher with six years of classroom experience across
+          undergraduate and graduate economics.
         </p>
 
         <div class="reveal flex flex-wrap gap-3 pt-2">
           <a
-            href="/about/"
+            href="/teaching/"
             class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent-600 hover:bg-accent-700 text-white font-medium text-sm transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-accent-500/25"
           >
-            About me
+            Teaching
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="14"
@@ -193,6 +194,80 @@ const recentPosts = (await getCollection("posts"))
       </section>
     )
   }
+
+  <!-- Teaching highlight -->
+  <section class="container-wide py-16 lg:py-20">
+    <div class="reveal grid lg:grid-cols-12 gap-8 items-center rounded-3xl border border-default bg-elevated p-8 sm:p-12 relative overflow-hidden">
+      <div
+        class="absolute -top-20 -left-20 w-72 h-72 bg-gold-400/10 rounded-full blur-3xl"
+        aria-hidden="true"
+      >
+      </div>
+
+      <div class="lg:col-span-7 relative">
+        <p
+          class="text-xs font-medium tracking-widest uppercase text-accent-700 dark:text-accent-300 mb-3"
+        >
+          Teaching
+        </p>
+        <h2 class="font-serif text-3xl sm:text-4xl font-semibold leading-tight">
+          Six years in the classroom across five institutions
+        </h2>
+        <p class="mt-4 text-muted leading-relaxed">
+          From freshman principles to graduate MBA core to upper-division
+          electives in trade and policy. Recipient of the <strong class="text-fg"
+            >ACBSP Teaching Excellence Award</strong
+          > and an active researcher in economics pedagogy, including generative
+          AI for active learning.
+        </p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a
+            href="/teaching/"
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent-600 hover:bg-accent-700 text-white font-medium text-sm transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-accent-500/25"
+          >
+            Teaching record
+          </a>
+        </div>
+      </div>
+
+      <ul
+        class="lg:col-span-5 relative grid grid-cols-2 gap-4"
+        role="list"
+        aria-label="Teaching highlights"
+      >
+        <li class="rounded-xl border border-default bg-[var(--bg)] p-4 text-center">
+          <p class="font-serif text-3xl font-semibold text-accent-600 dark:text-accent-400">
+            5
+          </p>
+          <p class="text-xs uppercase tracking-wider text-muted mt-1">
+            Institutions
+          </p>
+        </li>
+        <li class="rounded-xl border border-default bg-[var(--bg)] p-4 text-center">
+          <p class="font-serif text-3xl font-semibold text-accent-600 dark:text-accent-400">
+            14+
+          </p>
+          <p class="text-xs uppercase tracking-wider text-muted mt-1">
+            Distinct courses
+          </p>
+        </li>
+        <li class="rounded-xl border border-default bg-[var(--bg)] p-4 text-center">
+          <p class="font-serif text-3xl font-semibold text-accent-600 dark:text-accent-400">
+            Grad → 1st-yr
+          </p>
+          <p class="text-xs uppercase tracking-wider text-muted mt-1">
+            Levels taught
+          </p>
+        </li>
+        <li class="rounded-xl border border-default bg-[var(--bg)] p-4 text-center">
+          <p class="font-serif text-3xl font-semibold text-gold-500">★ 2023</p>
+          <p class="text-xs uppercase tracking-wider text-muted mt-1">
+            ACBSP Award
+          </p>
+        </li>
+      </ul>
+    </div>
+  </section>
 
   <!-- Latest writing -->
   {
