@@ -19,15 +19,9 @@ export const philosophy = [
 ];
 
 export const interests = [
-  "Principles of Microeconomics & Macroeconomics",
-  "Intermediate Microeconomics & Macroeconomics",
-  "International Trade & Open-Economy Macroeconomics",
-  "Development Economics",
-  "Energy & Environmental Economics",
-  "Econometrics & Applied Quantitative Methods",
-  "Statistics for Business and Economics",
-  "Business Economics (MBA Core)",
-  "Economics of AI, Tech & Platform Markets",
+  "Undergraduate economics — principles, intermediate, and field courses",
+  "Applied econometrics, statistics, and quantitative methods",
+  "Graduate international trade",
 ];
 
 export const innovations = [
