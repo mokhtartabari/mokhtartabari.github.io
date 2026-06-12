@@ -23,78 +23,138 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Sync inflation charts
+        env:
+          GH_PAT: ${{ secrets.WEBSITE_DISPATCH_TOKEN }}
         run: |
           mkdir -p public/charts/inflation
 
-          # Download manifest
-          curl -fsSL \
-            "https://raw.githubusercontent.com/mokhtartabari/inflation-data-viz/main/charts-manifest.json" \
+          # Download manifest — auth required for private repo
+          echo "Fetching inflation manifest..."
+          HTTP_STATUS=$(curl -fsSL \
+            -H "Authorization: token $GH_PAT" \
+            -H "Accept: application/vnd.github.v3.raw" \
+            -w "%{http_code}" \
             -o src/data/charts-manifest-inflation.json \
-            || echo '{"topic":"inflation","updated":null,"charts":[]}' \
+            "https://raw.githubusercontent.com/mokhtartabari/inflation-data-viz/main/charts-manifest.json" \
+            2>&1 || echo "000")
+
+          if [ "$HTTP_STATUS" != "200" ] && [ -z "$(cat src/data/charts-manifest-inflation.json 2>/dev/null | python3 -c 'import sys,json; json.load(sys.stdin); print("ok")' 2>/dev/null)" ]; then
+            echo "⚠️  Could not fetch inflation manifest (HTTP $HTTP_STATUS) — writing empty stub"
+            echo '{"topic":"inflation","updated":null,"charts":[]}' \
               > src/data/charts-manifest-inflation.json
+          else
+            echo "✓ Inflation manifest fetched (HTTP $HTTP_STATUS)"
+            cat src/data/charts-manifest-inflation.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(f'  {len(d[\"charts\"])} charts, updated: {d[\"updated\"]}')"
+          fi
 
-          # Download each PNG listed in the manifest
+          # Download each PNG listed in the manifest (with auth for private repo URLs)
           python3 - <<'PYEOF'
-          import json, urllib.request, os, sys
+import json, os, sys
+import urllib.request
 
-          try:
-              manifest = json.load(open("src/data/charts-manifest-inflation.json"))
-          except Exception as e:
-              print(f"Could not read inflation manifest: {e}")
-              sys.exit(0)
+TOKEN = os.environ.get("GH_PAT", "")
 
-          ok, fail = 0, 0
-          for c in manifest.get("charts", []):
-              url  = c.get("url", "")
-              dest = f"public/charts/inflation/{c['filename']}"
-              if not url:
-                  continue
-              try:
-                  urllib.request.urlretrieve(url, dest)
-                  ok += 1
-              except Exception as ex:
-                  print(f"  ✗ {c['filename']}: {ex}")
-                  fail += 1
+try:
+    manifest = json.load(open("src/data/charts-manifest-inflation.json"))
+except Exception as e:
+    print(f"Could not read inflation manifest: {e}")
+    sys.exit(0)
 
-          print(f"Inflation: {ok} downloaded, {fail} failed")
-          PYEOF
+charts = manifest.get("charts", [])
+if not charts:
+    print("No charts in inflation manifest — nothing to download")
+    sys.exit(0)
+
+ok, fail = 0, 0
+for c in charts:
+    url  = c.get("url", "")
+    dest = f"public/charts/inflation/{c['filename']}"
+    if not url:
+        print(f"  ⚠ {c['filename']}: no url field, skipping")
+        continue
+    try:
+        req = urllib.request.Request(url)
+        if TOKEN and "githubusercontent.com" in url:
+            req.add_header("Authorization", f"token {TOKEN}")
+        with urllib.request.urlopen(req) as resp, open(dest, "wb") as f:
+            f.write(resp.read())
+        print(f"  ✓ {c['filename']}")
+        ok += 1
+    except Exception as ex:
+        print(f"  ✗ {c['filename']}: {ex}")
+        fail += 1
+
+print(f"Inflation: {ok} downloaded, {fail} failed")
+if fail > 0:
+    sys.exit(1)
+PYEOF
 
       - name: Sync GDP charts
+        env:
+          GH_PAT: ${{ secrets.WEBSITE_DISPATCH_TOKEN }}
         run: |
           mkdir -p public/charts/gdp
 
-          # Download manifest
-          curl -fsSL \
-            "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/charts-manifest.json" \
+          # Download manifest — auth required for private repo
+          echo "Fetching GDP manifest..."
+          HTTP_STATUS=$(curl -fsSL \
+            -H "Authorization: token $GH_PAT" \
+            -H "Accept: application/vnd.github.v3.raw" \
+            -w "%{http_code}" \
             -o src/data/charts-manifest-gdp.json \
-            || echo '{"topic":"gdp","updated":null,"charts":[]}' \
+            "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/charts-manifest.json" \
+            2>&1 || echo "000")
+
+          if [ "$HTTP_STATUS" != "200" ] && [ -z "$(cat src/data/charts-manifest-gdp.json 2>/dev/null | python3 -c 'import sys,json; json.load(sys.stdin); print("ok")' 2>/dev/null)" ]; then
+            echo "⚠️  Could not fetch GDP manifest (HTTP $HTTP_STATUS) — writing empty stub"
+            echo '{"topic":"gdp","updated":null,"charts":[]}' \
               > src/data/charts-manifest-gdp.json
+          else
+            echo "✓ GDP manifest fetched (HTTP $HTTP_STATUS)"
+            cat src/data/charts-manifest-gdp.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(f'  {len(d[\"charts\"])} charts, updated: {d[\"updated\"]}')"
+          fi
 
-          # Download each PNG listed in the manifest
+          # Download each PNG listed in the manifest (with auth for private repo URLs)
           python3 - <<'PYEOF'
-          import json, urllib.request, os, sys
+import json, os, sys
+import urllib.request
 
-          try:
-              manifest = json.load(open("src/data/charts-manifest-gdp.json"))
-          except Exception as e:
-              print(f"Could not read GDP manifest: {e}")
-              sys.exit(0)
+TOKEN = os.environ.get("GH_PAT", "")
 
-          ok, fail = 0, 0
-          for c in manifest.get("charts", []):
-              url  = c.get("url", "")
-              dest = f"public/charts/gdp/{c['filename']}"
-              if not url:
-                  continue
-              try:
-                  urllib.request.urlretrieve(url, dest)
-                  ok += 1
-              except Exception as ex:
-                  print(f"  ✗ {c['filename']}: {ex}")
-                  fail += 1
+try:
+    manifest = json.load(open("src/data/charts-manifest-gdp.json"))
+except Exception as e:
+    print(f"Could not read GDP manifest: {e}")
+    sys.exit(0)
 
-          print(f"GDP: {ok} downloaded, {fail} failed")
-          PYEOF
+charts = manifest.get("charts", [])
+if not charts:
+    print("No charts in GDP manifest — nothing to download")
+    sys.exit(0)
+
+ok, fail = 0, 0
+for c in charts:
+    url  = c.get("url", "")
+    dest = f"public/charts/gdp/{c['filename']}"
+    if not url:
+        print(f"  ⚠ {c['filename']}: no url field, skipping")
+        continue
+    try:
+        req = urllib.request.Request(url)
+        if TOKEN and "githubusercontent.com" in url:
+            req.add_header("Authorization", f"token {TOKEN}")
+        with urllib.request.urlopen(req) as resp, open(dest, "wb") as f:
+            f.write(resp.read())
+        print(f"  ✓ {c['filename']}")
+        ok += 1
+    except Exception as ex:
+        print(f"  ✗ {c['filename']}: {ex}")
+        fail += 1
+
+print(f"GDP: {ok} downloaded, {fail} failed")
+if fail > 0:
+    sys.exit(1)
+PYEOF
 
       - name: Commit changes
         run: |
