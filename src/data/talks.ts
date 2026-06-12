@@ -17,7 +17,7 @@ export const talks: Talk[] = [
   },
   {
     title:
-      "Decomposing the Within-Firm Productivity Gains from Trade: Evidence From India",
+      "Enhancing Student Engagement: The Synergy of Peer Assessment and Flipped Classroom Design",
     venue: "BC Economics Articulation Meeting",
     location: "British Columbia, Canada",
     date: "2024",
