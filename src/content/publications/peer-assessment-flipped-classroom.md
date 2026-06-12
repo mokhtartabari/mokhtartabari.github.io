@@ -6,7 +6,7 @@ authors:
 year: 2024
 venue: "Journal of Economics and Finance Education"
 venueShort: "JEFE"
-status: "accepted"
+status: "published"
 featured: false
 order: 2
 tags: ["Economics Education", "Pedagogy"]

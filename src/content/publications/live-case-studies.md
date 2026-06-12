@@ -4,8 +4,9 @@ authors:
   - "Mokhtar Tabari"
   - "Seyed-Reza Hosseinifar"
   - "Gelareh Farhadian"
-year: 2025
-status: "working-paper"
+year: 2023
+venue: "IDGI Journal of Higher Education"
+status: "published"
 featured: false
 order: 5
 tags: ["Economics Education", "Experimental Design"]

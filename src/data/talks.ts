@@ -9,6 +9,22 @@ export type Talk = {
 export const talks: Talk[] = [
   {
     title:
+      "AI-Integrated Course Design: Virtual Interviews and Podcasts in Economics",
+    venue: "Capilano University Teaching & Learning Symposium",
+    location: "North Vancouver, Canada",
+    date: "2024",
+    year: 2024,
+  },
+  {
+    title:
+      "Decomposing the Within-Firm Productivity Gains from Trade: Evidence From India",
+    venue: "BC Economics Articulation Meeting",
+    location: "British Columbia, Canada",
+    date: "2024",
+    year: 2024,
+  },
+  {
+    title:
       "Decomposing the Within-Firm Productivity Gains from Trade: Evidence From India",
     venue: "Canadian Economics Association Annual Conference",
     location: "Toronto, Canada",
