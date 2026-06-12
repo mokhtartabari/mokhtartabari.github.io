@@ -1,5 +1,61 @@
 {
   "topic": "inflation",
-  "updated": null,
-  "charts": []
+  "updated": "2026-06-12",
+  "charts": [
+    {
+      "slug": "canada_inflation_map",
+      "filename": "canada_inflation_map.png",
+      "title": "Canada Inflation Map"
+    },
+    {
+      "slug": "canada_inflation_map_full",
+      "filename": "canada_inflation_map_full.png",
+      "title": "Canada Inflation Map Full"
+    },
+    {
+      "slug": "canada_inflation_trend",
+      "filename": "canada_inflation_trend.png",
+      "title": "Canada Inflation Trend"
+    },
+    {
+      "slug": "cpi_trend",
+      "filename": "cpi_trend.png",
+      "title": "Cpi Trend"
+    },
+    {
+      "slug": "provincial_inflation_facets",
+      "filename": "provincial_inflation_facets.png",
+      "title": "Provincial Inflation Facets"
+    },
+    {
+      "slug": "provincial_inflation_heatmap",
+      "filename": "provincial_inflation_heatmap.png",
+      "title": "Provincial Inflation Heatmap"
+    },
+    {
+      "slug": "provincial_inflation_ridges",
+      "filename": "provincial_inflation_ridges.png",
+      "title": "Provincial Inflation Ridges"
+    },
+    {
+      "slug": "sector_inflation_comparison",
+      "filename": "sector_inflation_comparison.png",
+      "title": "Sector Inflation Comparison"
+    },
+    {
+      "slug": "sector_inflation_contribution_time",
+      "filename": "sector_inflation_contribution_time.png",
+      "title": "Sector Inflation Contribution Time"
+    },
+    {
+      "slug": "sector_inflation_heatmap",
+      "filename": "sector_inflation_heatmap.png",
+      "title": "Sector Inflation Heatmap"
+    },
+    {
+      "slug": "top_3_contributors_deep_dive",
+      "filename": "top_3_contributors_deep_dive.png",
+      "title": "Top 3 Contributors Deep Dive"
+    }
+  ]
 }
