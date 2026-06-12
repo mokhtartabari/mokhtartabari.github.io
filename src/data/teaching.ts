@@ -141,6 +141,15 @@ export const appointments: TeachingAppointment[] = [
   },
 ];
 
+export const serviceRoles = [
+  {
+    title: "Course Lead, MBAF 504: Business Economics",
+    org: "University Canada West",
+    period: "2022 – 2025",
+    note: "Over 25 sections",
+  },
+];
+
 export const teachingAssistantships = {
   institution: "University of Calgary",
   period: "2014 – 2020",
