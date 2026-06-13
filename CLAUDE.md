@@ -78,3 +78,21 @@ Optional fields: `venue`, `venueShort`. Each link in `links` needs `label`, `hre
 ## Deployment
 
 Pushing to `main` triggers the GitHub Actions workflow (`.github/workflows/deploy.yml`), which runs `npm ci && npm run build` and deploys `./dist` to GitHub Pages. No manual deployment step is needed.
+
+## Future Features
+
+### Consulting / Services Layer Integration (Planned)
+To leverage the website's data products for contract work and consulting, the following architecture is planned for a future update:
+
+1. **Portfolio Integration (The "Show, Don't Tell" Strategy)**
+   - Create a reusable `<ConsultingCTA />` component.
+   - Insert this subtle CTA at the bottom of data visualization pages (`src/pages/data/[topic].astro`) and complex dashboards to convert readers into clients.
+
+2. **Dedicated Landing Page (`/consulting` or `/services`)**
+   - Create `src/pages/consulting.astro` using `<BaseLayout>`.
+   - Structure: Hero emphasizing academic rigor + production data engineering; Grid of core offerings (Empirical Studies, Custom Dashboards, Data Pipelines); Clear contact CTA.
+   - Store offering data in `src/data/services.ts`.
+
+3. **Navigation & Homepage Updates**
+   - Add a `Consulting` link to the main navigation in `src/components/Header.astro`.
+   - Update the homepage hero in `src/pages/index.astro` with a sentence introducing consulting capabilities and a link to the new services page.
