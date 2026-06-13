@@ -178,22 +178,39 @@
   }
 }
 
-/* Reveal-on-scroll animation */
+/* Reveal-on-scroll animation.
+   Implemented as a one-shot keyframe so the *resting* state has no transform.
+   A persistent transform (even translateY(0)) promotes the element to its own
+   composited layer, and browsers then rasterize its contents — images and SVG
+   text — and scale that bitmap. On Windows / HiDPI with fractional display
+   scaling that looks noticeably fuzzy. Animating via keyframes lets the element
+   settle back to `transform: none`, so charts render at native resolution. */
 .reveal {
   opacity: 0;
-  transform: translateY(12px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
 .reveal.is-visible {
   opacity: 1;
-  transform: translateY(0);
+  animation: reveal-in 0.6s ease;
+}
+
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .reveal {
     opacity: 1;
-    transform: none;
+  }
+  .reveal.is-visible {
+    animation: none;
   }
 }
 
