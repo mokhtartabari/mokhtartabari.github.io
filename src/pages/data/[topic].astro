@@ -185,7 +185,7 @@ function slugToTitle(slug: string) {
                   aria-label={`Open chart: ${title}`}
                   style={`animation-delay:${(i % 6) * 60}ms`}
                 >
-                  <div class="overflow-hidden bg-[color-mix(in_srgb,var(--bg)_40%,transparent)]">
+                  <div class="overflow-hidden" style="background-color: var(--chart-bg)">
                     <img
                       src={`${topic.chartsDir}${chart.filename}`}
                       alt={title}
@@ -269,7 +269,8 @@ function slugToTitle(slug: string) {
           id="lb-img"
           src=""
           alt=""
-          class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl"
+          class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl p-3"
+          style="background-color: var(--chart-bg)"
         />
 
         <button

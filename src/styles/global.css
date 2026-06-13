@@ -61,6 +61,10 @@
     --fg: var(--color-ink-900);
     --fg-muted: var(--color-ink-600);
     --border: var(--color-ink-200);
+    /* Surface behind chart images. Charts are exported transparent with dark
+       ink, so this MUST stay light in both themes. Single knob to re-theme all
+       charts site-wide (was baked into each PNG as #E6F0FF). */
+    --chart-bg: #e6f0ff;
   }
 
   .dark {
@@ -70,6 +74,9 @@
     --fg: var(--color-ink-50);
     --fg-muted: var(--color-ink-300);
     --border: var(--color-ink-800);
+    /* Kept light on purpose: the chart ink is dark, so charts sit on a light
+       "paper" panel even in dark mode. */
+    --chart-bg: #e6f0ff;
   }
 
   html {
