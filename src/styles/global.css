@@ -63,8 +63,9 @@
     --border: var(--color-ink-200);
     /* Surface behind chart images. Charts are exported transparent with dark
        ink, so this MUST stay light in both themes. Single knob to re-theme all
-       charts site-wide (was baked into each PNG as #E6F0FF). */
-    --chart-bg: #e6f0ff;
+       charts site-wide. White = matches the elevated card so charts blend in
+       (no distinct coloured block). */
+    --chart-bg: var(--bg-elevated);
   }
 
   .dark {
@@ -74,9 +75,10 @@
     --fg: var(--color-ink-50);
     --fg-muted: var(--color-ink-300);
     --border: var(--color-ink-800);
-    /* Kept light on purpose: the chart ink is dark, so charts sit on a light
-       "paper" panel even in dark mode. */
-    --chart-bg: #e6f0ff;
+    /* Dark mode: charts have dark ink, so they must sit on a light "paper"
+       panel (can't follow --bg-elevated, which is dark). White keeps them
+       readable and consistent with light mode. */
+    --chart-bg: #ffffff;
   }
 
   html {
