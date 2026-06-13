@@ -48,18 +48,25 @@ async function syncTopic(topic, repo) {
     return;
   }
 
-  // Download charts (PNGs live at the data-viz repo root, so path = filename)
+  // Download every available format for each chart (PNG always; SVG/PDF when
+  // present). All formats live at the data-viz repo root sharing the same base
+  // name, so path = `<base>.<ext>`.
   for (const chart of manifestData.charts || []) {
     if (!chart.filename) continue;
-    const dest = path.join(chartsDir, chart.filename);
-    try {
-      const res = await fetch(apiUrl(repo, chart.filename), { headers });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const arrayBuffer = await res.arrayBuffer();
-      fs.writeFileSync(dest, Buffer.from(arrayBuffer));
-      console.log(`  ✓ ${chart.filename}`);
-    } catch (err) {
-      console.error(`  ✗ Failed to download ${chart.filename}: ${err.message}`);
+    const base = chart.filename.replace(/\.png$/i, '');
+    const formats = chart.formats?.length ? chart.formats : ['png'];
+    for (const ext of formats) {
+      const fname = `${base}.${ext}`;
+      const dest = path.join(chartsDir, fname);
+      try {
+        const res = await fetch(apiUrl(repo, fname), { headers });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const arrayBuffer = await res.arrayBuffer();
+        fs.writeFileSync(dest, Buffer.from(arrayBuffer));
+        console.log(`  ✓ ${fname}`);
+      } catch (err) {
+        console.error(`  ✗ Failed to download ${fname}: ${err.message}`);
+      }
     }
   }
 }

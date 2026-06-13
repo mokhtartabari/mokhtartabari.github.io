@@ -5,6 +5,8 @@ export interface ChartEntry {
   description?: string;
   category?: string;
   span?: string; // "full" → chart spans the full grid width
+  /** Formats available for this chart, e.g. ["png","svg","pdf"]. PNG always present. */
+  formats?: string[];
 }
 
 export interface VizManifest {
