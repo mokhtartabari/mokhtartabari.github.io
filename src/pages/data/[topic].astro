@@ -20,7 +20,22 @@ const charts = manifest.charts;
 
 const rawCategories = [...new Set(charts.map((c) => c.category).filter(Boolean))];
 const hasCategories = rawCategories.length > 1;
-const categories = hasCategories ? ["All", ...rawCategories] : [];
+
+// Preferred reading order for category sections/filter (unknown categories appended).
+const CATEGORY_ORDER = ["Overview", "Per Capita", "Provincial", "Sectors", "Industries", "Cyclical"];
+const catRank = (c: string) => {
+  const i = CATEGORY_ORDER.indexOf(c);
+  return i === -1 ? CATEGORY_ORDER.length : i;
+};
+const orderedCats = [...rawCategories].sort(
+  (a, b) => catRank(a) - catRank(b) || rawCategories.indexOf(a) - rawCategories.indexOf(b),
+);
+const categories = hasCategories ? ["All", ...orderedCats] : [];
+
+// Charts grouped by category (in CATEGORY_ORDER), preserving publish.yml order within each.
+const groups = hasCategories
+  ? orderedCats.map((cat) => ({ cat, items: charts.filter((c) => (c.category ?? "") === cat) }))
+  : [{ cat: null as string | null, items: charts }];
 
 function fmtDate(iso: string | null) {
   if (!iso) return null;
@@ -146,49 +161,60 @@ function slugToTitle(slug: string) {
           id="chart-grid"
           class="grid sm:grid-cols-2 gap-6"
         >
-          {charts.map((chart, i) => {
-            const title = chart.title ?? slugToTitle(chart.slug);
-            const caption = chart.description || title;
-            return (
-            <figure
-              class="reveal chart-card group relative rounded-2xl border border-default bg-elevated overflow-hidden cursor-zoom-in hover:border-accent-200 dark:hover:border-accent-800 hover:shadow-xl transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500"
-              data-index={i}
-              data-category={chart.category ?? ""}
-              data-title={title}
-              data-caption={caption}
-              role="button"
-              tabindex="0"
-              aria-label={`Open chart: ${title}`}
-              style={`animation-delay:${(i % 6) * 60}ms`}
-            >
-              <div class="overflow-hidden bg-[color-mix(in_srgb,var(--bg)_40%,transparent)]">
-                <img
-                  src={`${topic.chartsDir}${chart.filename}`}
-                  alt={title}
-                  class="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.02]"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-              <figcaption class="px-4 py-3 flex items-start justify-between gap-3">
-                <span class="text-sm leading-snug text-muted">
-                  {caption}
-                </span>
-                {chart.category && (
-                  <span class="flex-shrink-0 text-[11px] font-medium px-2 py-0.5 rounded-full bg-accent-50 dark:bg-accent-900/30 text-accent-700 dark:text-accent-300">
-                    {chart.category}
-                  </span>
-                )}
-              </figcaption>
-              {/* Expand hint */}
-              <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                <div class="bg-black/50 text-white rounded-lg p-1.5 backdrop-blur-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                </div>
-              </div>
-            </figure>
-            );
-          })}
+          {groups.map((group) => (
+            <>
+              {group.cat && (
+                <h2
+                  class="category-heading sm:col-span-2 font-serif text-lg font-semibold tracking-tight mt-4 first:mt-0 pb-1.5 border-b border-default"
+                  data-category={group.cat}
+                >
+                  {group.cat}
+                </h2>
+              )}
+              {group.items.map((chart, i) => {
+                const title = chart.title ?? slugToTitle(chart.slug);
+                const caption = chart.description || title;
+                return (
+                <figure
+                  class="reveal chart-card group relative rounded-2xl border border-default bg-elevated overflow-hidden cursor-zoom-in hover:border-accent-200 dark:hover:border-accent-800 hover:shadow-xl transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500"
+                  data-category={chart.category ?? ""}
+                  data-title={title}
+                  data-caption={caption}
+                  role="button"
+                  tabindex="0"
+                  aria-label={`Open chart: ${title}`}
+                  style={`animation-delay:${(i % 6) * 60}ms`}
+                >
+                  <div class="overflow-hidden bg-[color-mix(in_srgb,var(--bg)_40%,transparent)]">
+                    <img
+                      src={`${topic.chartsDir}${chart.filename}`}
+                      alt={title}
+                      class="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.02]"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                  <figcaption class="px-4 py-3 flex items-start justify-between gap-3">
+                    <span class="text-sm leading-snug text-muted">
+                      {caption}
+                    </span>
+                    {chart.category && (
+                      <span class="flex-shrink-0 text-[11px] font-medium px-2 py-0.5 rounded-full bg-accent-50 dark:bg-accent-900/30 text-accent-700 dark:text-accent-300">
+                        {chart.category}
+                      </span>
+                    )}
+                  </figcaption>
+                  {/* Expand hint */}
+                  <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div class="bg-black/50 text-white rounded-lg p-1.5 backdrop-blur-sm">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                    </div>
+                  </div>
+                </figure>
+                );
+              })}
+            </>
+          ))}
         </div>
       )
     }
@@ -279,7 +305,8 @@ function slugToTitle(slug: string) {
     background-color: var(--color-accent-500);
     border-color: var(--color-accent-500);
   }
-  .chart-card[data-hidden] {
+  .chart-card[data-hidden],
+  .category-heading[data-hidden] {
     display: none;
   }
 </style>
@@ -289,6 +316,7 @@ function slugToTitle(slug: string) {
   const filterSetup = () => {
     const btns = document.querySelectorAll<HTMLButtonElement>(".category-btn");
     const cards = document.querySelectorAll<HTMLElement>(".chart-card");
+    const headings = document.querySelectorAll<HTMLElement>(".category-heading");
     if (!btns.length) return;
 
     btns.forEach((btn) => {
@@ -303,6 +331,11 @@ function slugToTitle(slug: string) {
           } else {
             card.setAttribute("data-hidden", "");
           }
+        });
+        // Section headings only make sense in the "All" view.
+        headings.forEach((h) => {
+          if (cat === "All") h.removeAttribute("data-hidden");
+          else h.setAttribute("data-hidden", "");
         });
       });
     });
