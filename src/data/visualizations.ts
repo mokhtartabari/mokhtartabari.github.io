@@ -46,4 +46,15 @@ export const vizTopics: VizTopic[] = [
     repoLabel: "gdp-data-viz",
     chartsDir: "/charts/gdp/",
   },
+  {
+    slug: "trade",
+    title: "Trade & Exports",
+    description:
+      "Canadian merchandise exports — U.S. vs the rest of the world, levels and growth.",
+    longDescription:
+      "Canada's merchandise trade through the lens of its export markets — monthly export levels and growth for the United States versus the rest of the world, on a balance-of-payments basis. Based on Statistics Canada international trade data and refreshed automatically.",
+    repo: "https://github.com/mokhtartabari/trade-data-viz",
+    repoLabel: "trade-data-viz",
+    chartsDir: "/charts/trade/",
+  },
 ];

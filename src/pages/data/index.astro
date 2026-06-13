@@ -3,10 +3,12 @@ import BaseLayout from "~/layouts/BaseLayout.astro";
 import { vizTopics, type VizManifest } from "~/data/visualizations";
 import inflationManifest from "~/data/charts-manifest-inflation.json";
 import gdpManifest from "~/data/charts-manifest-gdp.json";
+import tradeManifest from "~/data/charts-manifest-trade.json";
 
 const manifests: Record<string, VizManifest> = {
   inflation: inflationManifest as unknown as VizManifest,
   gdp: gdpManifest as unknown as VizManifest,
+  trade: tradeManifest as unknown as VizManifest,
 };
 
 const totalCharts = Object.values(manifests).reduce(
