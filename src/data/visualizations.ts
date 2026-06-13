@@ -41,7 +41,7 @@ export const vizTopics: VizTopic[] = [
     description:
       "Real GDP, provincial output, sector contributions, and growth decompositions.",
     longDescription:
-      "A comprehensive look at Canadian GDP — aggregate real output growth, provincial breakdowns, industry-level contributions, economic diffusion indexes, and structural shifts across sectors. Based on Statistics Canada national accounts data and automatically refreshed.",
+      "A comprehensive look at Canadian GDP — aggregate real output growth, provincial breakdowns, industry-level contributions, and structural shifts across sectors. Based on Statistics Canada national accounts data and automatically refreshed.",
     repo: "https://github.com/mokhtartabari/gdp-data-viz",
     repoLabel: "gdp-data-viz",
     chartsDir: "/charts/gdp/",
