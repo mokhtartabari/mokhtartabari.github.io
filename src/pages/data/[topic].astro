@@ -47,7 +47,7 @@ function slugToTitle(slug: string) {
   <div class="container-wide pt-8 pb-0">
     <nav class="flex items-center gap-2 text-sm text-muted" aria-label="Breadcrumb">
       <a href="/data/" class="hover:text-accent-600 dark:hover:text-accent-400 transition-colors">
-        Data
+        Charts
       </a>
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="opacity-40">
         <path d="M9 18l6-6-6-6"/>
@@ -146,25 +146,33 @@ function slugToTitle(slug: string) {
           id="chart-grid"
           class="grid sm:grid-cols-2 gap-6"
         >
-          {charts.map((chart, i) => (
+          {charts.map((chart, i) => {
+            const title = chart.title ?? slugToTitle(chart.slug);
+            const caption = chart.description || title;
+            return (
             <figure
-              class="reveal chart-card group relative rounded-2xl border border-default bg-elevated overflow-hidden cursor-zoom-in hover:border-accent-200 dark:hover:border-accent-800 hover:shadow-xl transition-all duration-300"
+              class="reveal chart-card group relative rounded-2xl border border-default bg-elevated overflow-hidden cursor-zoom-in hover:border-accent-200 dark:hover:border-accent-800 hover:shadow-xl transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500"
               data-index={i}
               data-category={chart.category ?? ""}
+              data-title={title}
+              data-caption={caption}
+              role="button"
+              tabindex="0"
+              aria-label={`Open chart: ${title}`}
               style={`animation-delay:${(i % 6) * 60}ms`}
             >
               <div class="overflow-hidden bg-[color-mix(in_srgb,var(--bg)_40%,transparent)]">
                 <img
                   src={`${topic.chartsDir}${chart.filename}`}
-                  alt={chart.title ?? slugToTitle(chart.slug)}
+                  alt={title}
                   class="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.02]"
                   loading="lazy"
                   decoding="async"
                 />
               </div>
-              <figcaption class="px-4 py-3 flex items-center justify-between gap-3">
-                <span class="text-sm font-medium leading-snug">
-                  {chart.title ?? slugToTitle(chart.slug)}
+              <figcaption class="px-4 py-3 flex items-start justify-between gap-3">
+                <span class="text-sm leading-snug text-muted">
+                  {caption}
                 </span>
                 {chart.category && (
                   <span class="flex-shrink-0 text-[11px] font-medium px-2 py-0.5 rounded-full bg-accent-50 dark:bg-accent-900/30 text-accent-700 dark:text-accent-300">
@@ -179,7 +187,8 @@ function slugToTitle(slug: string) {
                 </div>
               </div>
             </figure>
-          ))}
+            );
+          })}
         </div>
       )
     }
@@ -328,7 +337,7 @@ function slugToTitle(slug: string) {
       current = ((idx % pool.length) + pool.length) % pool.length;
       const card = pool[current];
       const img = card.querySelector("img")!;
-      const caption = card.querySelector("figcaption span")?.textContent ?? "";
+      const caption = card.dataset.caption ?? "";
       lbImg.src = img.src;
       lbImg.alt = img.alt;
       lbCaption.textContent = caption;
@@ -347,11 +356,18 @@ function slugToTitle(slug: string) {
       document.body.style.overflow = "";
     };
 
-    cards.forEach((card, i) => {
-      card.addEventListener("click", () => {
+    cards.forEach((card) => {
+      const openCard = () => {
         const pool = visibleCards();
         const poolIdx = pool.indexOf(card);
         open(poolIdx >= 0 ? poolIdx : 0);
+      };
+      card.addEventListener("click", openCard);
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openCard();
+        }
       });
     });
 
