@@ -1,15 +1,7 @@
 {
   "topic": "gdp",
-  "updated": "2026-06-12",
+  "updated": "2026-06-13",
   "charts": [
-    {
-      "slug": "gdp_growth_card",
-      "filename": "gdp_growth_card.png",
-      "title": "GDP at a Glance",
-      "description": "Latest real GDP growth with historical context",
-      "category": "Overview",
-      "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/gdp_growth_card.png"
-    },
     {
       "slug": "rgdp_plot",
       "filename": "rgdp_plot.png",
@@ -17,38 +9,6 @@
       "description": "Chained Canadian real GDP, monthly, seasonally adjusted",
       "category": "Overview",
       "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/rgdp_plot.png"
-    },
-    {
-      "slug": "rgdp_yoy_growth",
-      "filename": "rgdp_yoy_growth.png",
-      "title": "Real GDP Growth Rate",
-      "description": "Year-over-year real GDP growth",
-      "category": "Overview",
-      "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/rgdp_yoy_growth.png"
-    },
-    {
-      "slug": "rgdp_quarterly_annual_comparison",
-      "filename": "rgdp_quarterly_annual_comparison.png",
-      "title": "Quarterly vs. Annual GDP Growth",
-      "description": "Comparing short-run momentum with full-year growth",
-      "category": "Overview",
-      "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/rgdp_quarterly_annual_comparison.png"
-    },
-    {
-      "slug": "rgdp_per_capita_quarterly_levels",
-      "filename": "rgdp_per_capita_quarterly_levels.png",
-      "title": "Real GDP Per Capita",
-      "description": "Output per Canadian, quarterly, chained dollars",
-      "category": "Per Capita",
-      "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/rgdp_per_capita_quarterly_levels.png"
-    },
-    {
-      "slug": "rgdp_per_capita_quarterly_annual_comparison",
-      "filename": "rgdp_per_capita_quarterly_annual_comparison.png",
-      "title": "Per Capita GDP — Quarterly vs. Annual",
-      "description": "Per-person output growth at quarterly and annual frequencies",
-      "category": "Per Capita",
-      "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/rgdp_per_capita_quarterly_annual_comparison.png"
     },
     {
       "slug": "canada_rgdp_map",
@@ -59,20 +19,36 @@
       "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/canada_rgdp_map.png"
     },
     {
-      "slug": "canada_rgdp_per_capita_map",
-      "filename": "canada_rgdp_per_capita_map.png",
-      "title": "Real GDP Per Capita by Province",
-      "description": "Per-person real output mapped across provinces",
-      "category": "Provincial",
-      "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/canada_rgdp_per_capita_map.png"
+      "slug": "economic_engine_stacked",
+      "filename": "economic_engine_stacked.png",
+      "title": "Economic Engine — Waterfall",
+      "description": "Waterfall breakdown of industry contributions to monthly GDP change",
+      "category": "Sectors",
+      "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/economic_engine_stacked.png"
     },
     {
-      "slug": "canada_rgdp_per_capita_growth_map",
-      "filename": "canada_rgdp_per_capita_growth_map.png",
-      "title": "Per Capita GDP Growth by Province",
-      "description": "Recent per-capita growth rates across Canadian provinces",
+      "slug": "granular_gdp_growth_vs_diffusion",
+      "filename": "granular_gdp_growth_vs_diffusion.png",
+      "title": "GDP Growth vs. Diffusion Index",
+      "description": "Breadth of growth across granular industries alongside headline GDP",
+      "category": "Cyclical",
+      "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/granular_gdp_growth_vs_diffusion.png"
+    },
+    {
+      "slug": "rgdp_growth_heatmap",
+      "filename": "rgdp_growth_heatmap.png",
+      "title": "Provincial GDP Growth Heatmap",
+      "description": "Month-by-month real GDP growth across provinces, colour-coded",
       "category": "Provincial",
-      "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/canada_rgdp_per_capita_growth_map.png"
+      "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/rgdp_growth_heatmap.png"
+    },
+    {
+      "slug": "rgdp_per_capita_quarterly_levels",
+      "filename": "rgdp_per_capita_quarterly_levels.png",
+      "title": "Real GDP Per Capita",
+      "description": "Output per Canadian, quarterly, chained dollars",
+      "category": "Per Capita",
+      "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/rgdp_per_capita_quarterly_levels.png"
     },
     {
       "slug": "provincial_rgdp_growth",
@@ -83,28 +59,28 @@
       "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/provincial_rgdp_growth.png"
     },
     {
-      "slug": "provincial_rgdp_facets",
-      "filename": "provincial_rgdp_facets.png",
-      "title": "Provincial GDP Trends",
-      "description": "Small-multiples real GDP trend for each province",
+      "slug": "canada_rgdp_growth_map",
+      "filename": "canada_rgdp_growth_map.png",
+      "title": "Real GDP Growth by Province (Map)",
+      "description": "Recent real GDP growth rates mapped across Canadian provinces",
       "category": "Provincial",
-      "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/provincial_rgdp_facets.png"
+      "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/canada_rgdp_growth_map.png"
     },
     {
-      "slug": "economic_engine_summary",
-      "filename": "economic_engine_summary.png",
-      "title": "Economic Engine Summary",
-      "description": "Which industries are driving Canadian growth",
+      "slug": "sector_rgdp_growth_comparison_highlighted",
+      "filename": "sector_rgdp_growth_comparison_highlighted.png",
+      "title": "Sector GDP Growth — Annual Comparison",
+      "description": "Industry-level real GDP growth rates with top performers highlighted",
       "category": "Sectors",
-      "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/economic_engine_summary.png"
+      "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/sector_rgdp_growth_comparison_highlighted.png"
     },
     {
-      "slug": "sector_rgdp_contribution_time",
-      "filename": "sector_rgdp_contribution_time.png",
-      "title": "Sector Contributions Over Time",
-      "description": "Stacked contributions of major industries to real GDP growth",
+      "slug": "sector_rgdp_growth_comparison_monthly_highlighted",
+      "filename": "sector_rgdp_growth_comparison_monthly_highlighted.png",
+      "title": "Sector GDP Growth — Monthly Comparison",
+      "description": "Month-over-month industry growth rates with top performers highlighted",
       "category": "Sectors",
-      "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/sector_rgdp_contribution_time.png"
+      "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/sector_rgdp_growth_comparison_monthly_highlighted.png"
     },
     {
       "slug": "sector_rgdp_growth",
@@ -123,6 +99,22 @@
       "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/sector_gdp_growth_heatmap.png"
     },
     {
+      "slug": "gdp_growth_vs_diffusion",
+      "filename": "gdp_growth_vs_diffusion.png",
+      "title": "GDP Growth vs. Diffusion (Standard)",
+      "description": "Standard economic diffusion index plotted against real GDP growth",
+      "category": "Cyclical",
+      "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/gdp_growth_vs_diffusion.png"
+    },
+    {
+      "slug": "treemap_tile_plot",
+      "filename": "treemap_tile_plot.png",
+      "title": "GDP Treemap — Tile View",
+      "description": "Tile-style treemap of industry shares in Canadian real GDP",
+      "category": "Sectors",
+      "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/treemap_tile_plot.png"
+    },
+    {
       "slug": "industry_gdp_treemap",
       "filename": "industry_gdp_treemap.png",
       "title": "Industry GDP Treemap",
@@ -131,20 +123,20 @@
       "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/industry_gdp_treemap.png"
     },
     {
-      "slug": "economic_diffusion_index",
-      "filename": "economic_diffusion_index.png",
-      "title": "Economic Diffusion Index",
-      "description": "Share of industries expanding — a breadth-of-growth indicator",
-      "category": "Cyclical",
-      "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/economic_diffusion_index.png"
+      "slug": "industry_gdp_bar_chart",
+      "filename": "industry_gdp_bar_chart.png",
+      "title": "Industry GDP Bar Chart",
+      "description": "Ranked bar chart of real GDP by industry",
+      "category": "Sectors",
+      "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/industry_gdp_bar_chart.png"
     },
     {
-      "slug": "k_shaped_recovery_plot",
-      "filename": "k_shaped_recovery_plot.png",
-      "title": "K-Shaped Recovery",
-      "description": "Divergence in recovery trajectories across sectors post-2020",
-      "category": "Cyclical",
-      "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/k_shaped_recovery_plot.png"
+      "slug": "industry_mom_growth_bars",
+      "filename": "industry_mom_growth_bars.png",
+      "title": "Industry Month-over-Month Growth",
+      "description": "Latest monthly GDP change ranked by industry",
+      "category": "Sectors",
+      "url": "https://raw.githubusercontent.com/mokhtartabari/gdp-data-viz/main/industry_mom_growth_bars.png"
     }
   ]
 }
