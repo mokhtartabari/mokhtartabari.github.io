@@ -6,6 +6,11 @@ on:
   repository_dispatch:
     types: [charts-updated]
   workflow_dispatch:
+  schedule:
+    # Safety net: rebuild periodically so newly generated charts in the private
+    # data-viz repos get pulled in even when the viz pipeline can't trigger a
+    # rebuild directly (its PAT is read-only on this repo). Every 6 hours.
+    - cron: "0 */6 * * *"
 
 permissions:
   contents: read
