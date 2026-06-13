@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "~/layouts/BaseLayout.astro";
-import { vizTopics, type VizManifest } from "~/data/visualizations";
+import { vizTopics, type VizManifest, type ChartEntry } from "~/data/visualizations";
 import inflationManifest from "~/data/charts-manifest-inflation.json";
 import gdpManifest from "~/data/charts-manifest-gdp.json";
 import tradeManifest from "~/data/charts-manifest-trade.json";
@@ -55,6 +55,14 @@ function slugToTitle(slug: string) {
   return slug
     .replace(/_/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+// Prefer SVG for on-page display when available (crisp, scalable, and smaller
+// than PNG for light charts); fall back to PNG for dense charts (maps/heatmaps).
+function displayImage(chart: ChartEntry) {
+  return chart.formats?.includes("svg")
+    ? chart.filename.replace(/\.png$/i, ".svg")
+    : chart.filename;
 }
 ---
 
@@ -188,6 +196,9 @@ function slugToTitle(slug: string) {
                   data-category={chart.category ?? ""}
                   data-title={title}
                   data-caption={caption}
+                  data-base={chart.filename.replace(/\.png$/i, "")}
+                  data-formats={(chart.formats ?? ["png"]).join(",")}
+                  data-dir={topic.chartsDir}
                   role="button"
                   tabindex="0"
                   aria-label={`Open chart: ${title}`}
@@ -195,7 +206,7 @@ function slugToTitle(slug: string) {
                 >
                   <div class="overflow-hidden" style="background-color: var(--chart-bg)">
                     <img
-                      src={`${topic.chartsDir}${chart.filename}`}
+                      src={`${topic.chartsDir}${displayImage(chart)}`}
                       alt={title}
                       class="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.02]"
                       loading="lazy"
@@ -245,14 +256,32 @@ function slugToTitle(slug: string) {
       <div class="flex items-center justify-between px-1">
         <span id="lb-counter" class="text-white/60 text-sm tabular-nums"></span>
         <div class="flex items-center gap-2">
-          <a
-            id="lb-download"
-            download
-            class="inline-flex items-center gap-1.5 text-sm text-white/70 hover:text-white px-3 py-1.5 rounded-lg border border-white/20 hover:border-white/40 transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Download PNG
-          </a>
+          <!-- Download menu (formats populated per-chart by JS) -->
+          <div class="relative" id="lb-download-wrap">
+            <button
+              id="lb-download-btn"
+              class="inline-flex items-center gap-1.5 text-sm text-white/70 hover:text-white px-3 py-1.5 rounded-lg border border-white/20 hover:border-white/40 transition-colors"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div
+              id="lb-download-menu"
+              class="hidden absolute right-0 mt-2 w-60 rounded-xl border border-white/15 bg-neutral-900/95 backdrop-blur-sm shadow-2xl p-1.5 z-20"
+              role="menu"
+            >
+              <div id="lb-download-links"></div>
+              <p class="px-2.5 pt-2 pb-1 text-[11px] leading-snug text-white/45 border-t border-white/10 mt-1">
+                <span class="font-medium text-white/60">SVG</span> for slides &amp; web ·
+                <span class="font-medium text-white/60">PDF</span> for LaTeX &amp; print ·
+                <span class="font-medium text-white/60">PNG</span> for Word &amp; email.
+                Please keep the source line on the chart.
+              </p>
+            </div>
+          </div>
           <button
             id="lb-close"
             class="p-1.5 rounded-lg text-white/70 hover:text-white border border-white/20 hover:border-white/40 transition-colors"
@@ -359,7 +388,9 @@ function slugToTitle(slug: string) {
     const lbImg = document.getElementById("lb-img") as HTMLImageElement;
     const lbCaption = document.getElementById("lb-caption")!;
     const lbCounter = document.getElementById("lb-counter")!;
-    const lbDownload = document.getElementById("lb-download") as HTMLAnchorElement;
+    const lbDownloadBtn = document.getElementById("lb-download-btn")!;
+    const lbDownloadMenu = document.getElementById("lb-download-menu")!;
+    const lbDownloadLinks = document.getElementById("lb-download-links")!;
     const lbClose = document.getElementById("lb-close")!;
     const lbPrev = document.getElementById("lb-prev")!;
     const lbNext = document.getElementById("lb-next")!;
@@ -373,6 +404,17 @@ function slugToTitle(slug: string) {
 
     let current = 0;
 
+    const FORMAT_LABELS: Record<string, string> = {
+      svg: "vector · slides & web",
+      pdf: "vector · LaTeX & print",
+      png: "image · Word & email",
+    };
+
+    const closeMenu = () => {
+      lbDownloadMenu.classList.add("hidden");
+      lbDownloadBtn.setAttribute("aria-expanded", "false");
+    };
+
     const open = (idx: number) => {
       const pool = visibleCards();
       if (!pool.length) return;
@@ -384,8 +426,24 @@ function slugToTitle(slug: string) {
       lbImg.alt = img.alt;
       lbCaption.textContent = caption;
       lbCounter.textContent = `${current + 1} / ${pool.length}`;
-      lbDownload.href = img.src;
-      lbDownload.download = img.src.split("/").pop() ?? "chart.png";
+
+      // Build per-format download links for this chart.
+      const base = card.dataset.base ?? "";
+      const dir = card.dataset.dir ?? "";
+      const formats = (card.dataset.formats ?? "png").split(",").filter(Boolean);
+      // Stable, useful order regardless of manifest order.
+      const ordered = ["svg", "pdf", "png"].filter((f) => formats.includes(f));
+      lbDownloadLinks.innerHTML = ordered
+        .map(
+          (f) =>
+            `<a role="menuitem" href="${dir}${base}.${f}" download class="flex items-center justify-between gap-3 px-2.5 py-2 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors">` +
+            `<span class="font-medium uppercase">${f}</span>` +
+            `<span class="text-[11px] text-white/45">${FORMAT_LABELS[f] ?? ""}</span>` +
+            `</a>`,
+        )
+        .join("");
+      closeMenu();
+
       lb.classList.remove("hidden");
       lb.classList.add("flex");
       document.body.style.overflow = "hidden";
@@ -393,10 +451,24 @@ function slugToTitle(slug: string) {
     };
 
     const close = () => {
+      closeMenu();
       lb.classList.add("hidden");
       lb.classList.remove("flex");
       document.body.style.overflow = "";
     };
+
+    // Download menu toggle
+    lbDownloadBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isHidden = lbDownloadMenu.classList.toggle("hidden");
+      lbDownloadBtn.setAttribute("aria-expanded", isHidden ? "false" : "true");
+    });
+    // Close the menu when clicking outside it (links still work).
+    document.addEventListener("click", (e) => {
+      if (lbDownloadMenu.classList.contains("hidden")) return;
+      const wrap = document.getElementById("lb-download-wrap");
+      if (wrap && !wrap.contains(e.target as Node)) closeMenu();
+    });
 
     cards.forEach((card) => {
       const openCard = () => {
