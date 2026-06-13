@@ -4,6 +4,7 @@ export interface ChartEntry {
   title: string;
   description?: string;
   category?: string;
+  span?: string; // "full" → chart spans the full grid width
 }
 
 export interface VizManifest {

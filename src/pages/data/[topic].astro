@@ -174,9 +174,13 @@ function slugToTitle(slug: string) {
               {group.items.map((chart, i) => {
                 const title = chart.title ?? slugToTitle(chart.slug);
                 const caption = chart.description || title;
+                const full = chart.span === "full";
                 return (
                 <figure
-                  class="reveal chart-card group relative rounded-2xl border border-default bg-elevated overflow-hidden cursor-zoom-in hover:border-accent-200 dark:hover:border-accent-800 hover:shadow-xl transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500"
+                  class:list={[
+                    "reveal chart-card group relative rounded-2xl border border-default bg-elevated overflow-hidden cursor-zoom-in hover:border-accent-200 dark:hover:border-accent-800 hover:shadow-xl transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500",
+                    full && "sm:col-span-2",
+                  ]}
                   data-category={chart.category ?? ""}
                   data-title={title}
                   data-caption={caption}
