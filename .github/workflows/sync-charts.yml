@@ -49,45 +49,45 @@ jobs:
 
           # Download each PNG listed in the manifest (with auth for private repo URLs)
           python3 - <<'PYEOF'
-import json, os, sys
-import urllib.request
+          import json, os, sys
+          import urllib.request
 
-TOKEN = os.environ.get("GH_PAT", "")
+          TOKEN = os.environ.get("GH_PAT", "")
 
-try:
-    manifest = json.load(open("src/data/charts-manifest-inflation.json"))
-except Exception as e:
-    print(f"Could not read inflation manifest: {e}")
-    sys.exit(0)
+          try:
+              manifest = json.load(open("src/data/charts-manifest-inflation.json"))
+          except Exception as e:
+              print(f"Could not read inflation manifest: {e}")
+              sys.exit(0)
 
-charts = manifest.get("charts", [])
-if not charts:
-    print("No charts in inflation manifest — nothing to download")
-    sys.exit(0)
+          charts = manifest.get("charts", [])
+          if not charts:
+              print("No charts in inflation manifest — nothing to download")
+              sys.exit(0)
 
-ok, fail = 0, 0
-for c in charts:
-    url  = c.get("url", "")
-    dest = f"public/charts/inflation/{c['filename']}"
-    if not url:
-        print(f"  ⚠ {c['filename']}: no url field, skipping")
-        continue
-    try:
-        req = urllib.request.Request(url)
-        if TOKEN and "githubusercontent.com" in url:
-            req.add_header("Authorization", f"token {TOKEN}")
-        with urllib.request.urlopen(req) as resp, open(dest, "wb") as f:
-            f.write(resp.read())
-        print(f"  ✓ {c['filename']}")
-        ok += 1
-    except Exception as ex:
-        print(f"  ✗ {c['filename']}: {ex}")
-        fail += 1
+          ok, fail = 0, 0
+          for c in charts:
+              url  = c.get("url", "")
+              dest = f"public/charts/inflation/{c['filename']}"
+              if not url:
+                  print(f"  ⚠ {c['filename']}: no url field, skipping")
+                  continue
+              try:
+                  req = urllib.request.Request(url)
+                  if TOKEN and "githubusercontent.com" in url:
+                      req.add_header("Authorization", f"token {TOKEN}")
+                  with urllib.request.urlopen(req) as resp, open(dest, "wb") as f:
+                      f.write(resp.read())
+                  print(f"  ✓ {c['filename']}")
+                  ok += 1
+              except Exception as ex:
+                  print(f"  ✗ {c['filename']}: {ex}")
+                  fail += 1
 
-print(f"Inflation: {ok} downloaded, {fail} failed")
-if fail > 0:
-    sys.exit(1)
-PYEOF
+          print(f"Inflation: {ok} downloaded, {fail} failed")
+          if fail > 0:
+              sys.exit(1)
+          PYEOF
 
       - name: Sync GDP charts
         env:
@@ -116,45 +116,45 @@ PYEOF
 
           # Download each PNG listed in the manifest (with auth for private repo URLs)
           python3 - <<'PYEOF'
-import json, os, sys
-import urllib.request
+          import json, os, sys
+          import urllib.request
 
-TOKEN = os.environ.get("GH_PAT", "")
+          TOKEN = os.environ.get("GH_PAT", "")
 
-try:
-    manifest = json.load(open("src/data/charts-manifest-gdp.json"))
-except Exception as e:
-    print(f"Could not read GDP manifest: {e}")
-    sys.exit(0)
+          try:
+              manifest = json.load(open("src/data/charts-manifest-gdp.json"))
+          except Exception as e:
+              print(f"Could not read GDP manifest: {e}")
+              sys.exit(0)
 
-charts = manifest.get("charts", [])
-if not charts:
-    print("No charts in GDP manifest — nothing to download")
-    sys.exit(0)
+          charts = manifest.get("charts", [])
+          if not charts:
+              print("No charts in GDP manifest — nothing to download")
+              sys.exit(0)
 
-ok, fail = 0, 0
-for c in charts:
-    url  = c.get("url", "")
-    dest = f"public/charts/gdp/{c['filename']}"
-    if not url:
-        print(f"  ⚠ {c['filename']}: no url field, skipping")
-        continue
-    try:
-        req = urllib.request.Request(url)
-        if TOKEN and "githubusercontent.com" in url:
-            req.add_header("Authorization", f"token {TOKEN}")
-        with urllib.request.urlopen(req) as resp, open(dest, "wb") as f:
-            f.write(resp.read())
-        print(f"  ✓ {c['filename']}")
-        ok += 1
-    except Exception as ex:
-        print(f"  ✗ {c['filename']}: {ex}")
-        fail += 1
+          ok, fail = 0, 0
+          for c in charts:
+              url  = c.get("url", "")
+              dest = f"public/charts/gdp/{c['filename']}"
+              if not url:
+                  print(f"  ⚠ {c['filename']}: no url field, skipping")
+                  continue
+              try:
+                  req = urllib.request.Request(url)
+                  if TOKEN and "githubusercontent.com" in url:
+                      req.add_header("Authorization", f"token {TOKEN}")
+                  with urllib.request.urlopen(req) as resp, open(dest, "wb") as f:
+                      f.write(resp.read())
+                  print(f"  ✓ {c['filename']}")
+                  ok += 1
+              except Exception as ex:
+                  print(f"  ✗ {c['filename']}: {ex}")
+                  fail += 1
 
-print(f"GDP: {ok} downloaded, {fail} failed")
-if fail > 0:
-    sys.exit(1)
-PYEOF
+          print(f"GDP: {ok} downloaded, {fail} failed")
+          if fail > 0:
+              sys.exit(1)
+          PYEOF
 
       - name: Commit changes
         run: |
