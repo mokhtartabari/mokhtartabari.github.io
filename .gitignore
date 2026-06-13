@@ -29,3 +29,7 @@ pnpm-debug.log*
 .quarto/
 _site/
 about_files/
+
+# Dynamically fetched data charts and manifests
+public/charts/
+src/data/charts-manifest-*.json
