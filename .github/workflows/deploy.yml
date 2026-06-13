@@ -3,6 +3,8 @@ name: Deploy site to GitHub Pages
 on:
   push:
     branches: [main]
+  repository_dispatch:
+    types: [charts-updated]
   workflow_dispatch:
 
 permissions:
@@ -30,7 +32,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build site
+      - name: Build site (includes fetching data)
+        env:
+          GH_PAT: ${{ secrets.WEBSITE_DISPATCH_TOKEN }}
         run: npm run build
 
       - name: Upload artifact
