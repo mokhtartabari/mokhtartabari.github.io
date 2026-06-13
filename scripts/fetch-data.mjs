@@ -9,7 +9,8 @@ const token = process.env.GH_PAT || process.env.WEBSITE_DISPATCH_TOKEN;
 const repos = {
   inflation: 'mokhtartabari/inflation-data-viz',
   gdp: 'mokhtartabari/gdp-data-viz',
-  trade: 'mokhtartabari/trade-data-viz'
+  trade: 'mokhtartabari/trade-data-viz',
+  employment: 'mokhtartabari/employment-data-viz'
 };
 
 // The data-viz repos are private. raw.githubusercontent.com does NOT accept

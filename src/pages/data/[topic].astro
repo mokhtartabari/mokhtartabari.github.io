@@ -4,6 +4,7 @@ import { vizTopics, type VizManifest } from "~/data/visualizations";
 import inflationManifest from "~/data/charts-manifest-inflation.json";
 import gdpManifest from "~/data/charts-manifest-gdp.json";
 import tradeManifest from "~/data/charts-manifest-trade.json";
+import employmentManifest from "~/data/charts-manifest-employment.json";
 
 export function getStaticPaths() {
   return vizTopics.map((t) => ({ params: { topic: t.slug } }));
@@ -16,6 +17,7 @@ const manifestMap: Record<string, VizManifest> = {
   inflation: inflationManifest as unknown as VizManifest,
   gdp: gdpManifest as unknown as VizManifest,
   trade: tradeManifest as unknown as VizManifest,
+  employment: employmentManifest as unknown as VizManifest,
 };
 const manifest = manifestMap[topicSlug!];
 const charts = manifest.charts;
@@ -24,7 +26,7 @@ const rawCategories = [...new Set(charts.map((c) => c.category).filter(Boolean))
 const hasCategories = rawCategories.length > 1;
 
 // Preferred reading order for category sections/filter (unknown categories appended).
-const CATEGORY_ORDER = ["Overview", "Per Capita", "Provincial", "Sectors", "Industries", "Cyclical"];
+const CATEGORY_ORDER = ["Overview", "Per Capita", "Demographics", "Provincial", "Sectors", "Industries", "Cyclical"];
 const catRank = (c: string) => {
   const i = CATEGORY_ORDER.indexOf(c);
   return i === -1 ? CATEGORY_ORDER.length : i;

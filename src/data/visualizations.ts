@@ -57,4 +57,15 @@ export const vizTopics: VizTopic[] = [
     repoLabel: "trade-data-viz",
     chartsDir: "/charts/trade/",
   },
+  {
+    slug: "employment",
+    title: "Employment & Labour",
+    description:
+      "Canada's labour market — unemployment, employment levels, and participation by age and industry.",
+    longDescription:
+      "Canada's labour market from the Labour Force Survey — the headline unemployment rate and employment level, full- vs part-time composition, unemployment and participation by age group, the provincial unemployment map, and industry-level comparisons. Refreshed automatically with each LFS release.",
+    repo: "https://github.com/mokhtartabari/employment-data-viz",
+    repoLabel: "employment-data-viz",
+    chartsDir: "/charts/employment/",
+  },
 ];
