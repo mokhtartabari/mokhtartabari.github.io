@@ -95,9 +95,10 @@ justifies it.
 
 1. **Release-day email alerts (Resend).** The signup form is **live** and already
    collecting addresses into the `subscribers` table — but no email is *sent* yet.
-   To finish:
-   - Deploy `supabase/functions/notify-subscribers/` (code is written; release-day
-     blast + unsubscribe). See its `README.md` for steps.
+   Resend is intentionally **not wired** for now. To finish later:
+   - Re-add the `notify-subscribers` Supabase Edge Function (release-day blast +
+     unsubscribe). A complete, working version was committed then removed — recover
+     it from git history (PR #12 / search the log for `notify-subscribers`).
    - Needs a **verified sending domain** (you can't send from a `@gmail.com`
      address). Send from `mokhtartabari.ca` with `REPLY_TO` set to the Gmail so
      replies land there.
