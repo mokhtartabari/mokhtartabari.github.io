@@ -53,14 +53,16 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
     <script is:inline>
-      (() => {
+      const applyTheme = () => {
         const stored = localStorage.getItem("theme");
         const prefersDark = window.matchMedia(
           "(prefers-color-scheme: dark)",
         ).matches;
         const isDark = stored ? stored === "dark" : prefersDark;
         document.documentElement.classList.toggle("dark", isDark);
-      })();
+      };
+      applyTheme();
+      document.addEventListener("astro:after-swap", applyTheme);
     </script>
 
     <ClientRouter />
@@ -99,7 +101,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
         els.forEach((el) => io.observe(el));
       };
 
-      setupReveal();
       document.addEventListener("astro:page-load", setupReveal);
     </script>
   </body>
