@@ -13,9 +13,9 @@ export type TeachingAppointment = {
 };
 
 export const philosophy = [
-  "My teaching is grounded in three commitments. First, meeting students where they are: I teach learners from a wide range of academic, cultural, and professional backgrounds — from first-year undergraduates encountering supply and demand for the first time to working-professional MBAs — and I design my courses so that economic theory becomes accessible without losing rigor.",
-  "Second, evidence-based pedagogy. I treat my own teaching as an empirical question. I have designed and tested classroom approaches that combine flipped instruction, peer assessment, generative AI for active learning, and live case studies, and I have published this work in peer-reviewed venues.",
-  "Third, connecting theory to the world. I want students to leave a course with the analytical habits to make sense of the economy they will graduate into — using contemporary policy debates, real data, and case material drawn from the firms and markets they will encounter.",
+  "His teaching is grounded in three commitments. First, meeting students where they are: he teaches learners from a wide range of academic, cultural, and professional backgrounds — from first-year undergraduates encountering supply and demand for the first time to working-professional MBAs — and designs his courses so that economic theory becomes accessible without losing rigor.",
+  "Second, evidence-based pedagogy. He treats teaching as an empirical question. He has designed and tested classroom approaches that combine flipped instruction, peer assessment, generative AI for active learning, and live case studies, and has published this work in peer-reviewed venues.",
+  "Third, connecting theory to the world. He wants students to leave a course with the analytical habits to make sense of the economy they will graduate into — using contemporary policy debates, real data, and case material drawn from the firms and markets they will encounter.",
 ];
 
 export const interests = [
