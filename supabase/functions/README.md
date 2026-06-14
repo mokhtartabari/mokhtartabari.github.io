@@ -10,8 +10,13 @@ one-click unsubscribe link.
 
 ### One-time setup
 
-1. **Verify a sending domain** in Resend (e.g. `mokhtartabari.ca`) and pick a
-   from-address like `Mokhtar Tabari <updates@mokhtartabari.ca>`.
+1. **Verify a sending domain** in Resend. It must be a domain you own — **not a
+   gmail.com address** (Resend can't verify Gmail and DMARC will block it). Use
+   `mokhtartabari.ca` (add the TXT/DKIM records Resend shows; these are separate
+   from the site's web-forwarding and won't affect it). Pick a from-address like
+   `Mokhtar Tabari <updates@mokhtartabari.ca>`.
+   To have replies land in your Gmail, set `REPLY_TO=tabari.mokhtar@gmail.com`
+   (a secret, below) — subscribers who reply will reach your Gmail inbox.
 
 2. **Install + log in** to the Supabase CLI, then link the charts project:
    ```bash
@@ -25,6 +30,7 @@ one-click unsubscribe link.
      RESEND_API_KEY="$(security find-generic-password -s resend-api-key-website -w)" \
      NOTIFY_SECRET="$(openssl rand -hex 24)" \
      FROM_EMAIL="Mokhtar Tabari <updates@mokhtartabari.ca>" \
+     REPLY_TO="tabari.mokhtar@gmail.com" \
      --project-ref <CHARTS_PROJECT_REF>
    ```
    Save the `NOTIFY_SECRET` value — the orchestrator needs it. (SUPABASE_URL and

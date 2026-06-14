@@ -66,9 +66,10 @@ Deno.serve(async (req) => {
   const key = Deno.env.get("RESEND_API_KEY")!;
   let sent = 0;
 
+  const replyTo = Deno.env.get("REPLY_TO"); // e.g. your Gmail, so replies reach you
   for (const s of subs ?? []) {
     const unsub = `${url.origin}${url.pathname}?unsubscribe=${s.confirm_token}`;
-    const body = {
+    const body: Record<string, unknown> = {
       from,
       to: s.email,
       subject,
@@ -77,6 +78,7 @@ Deno.serve(async (req) => {
         <a href="${SITE}/charts/">${SITE.replace("https://", "")}/charts</a>.
         <a href="${unsub}">Unsubscribe</a>.</p>`,
     };
+    if (replyTo) body.reply_to = replyTo;
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
