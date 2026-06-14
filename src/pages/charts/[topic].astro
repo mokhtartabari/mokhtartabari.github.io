@@ -423,6 +423,8 @@ function displayImage(chart: ChartEntry) {
 </style>
 
 <script>
+  import { logChartEvent } from "~/utils/analytics";
+
   // ── Supabase Analytics Setup ─────────────────────────────────────────
   const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
@@ -481,8 +483,13 @@ function displayImage(chart: ChartEntry) {
   };
 
   const recordMetric = async (card: HTMLElement, metric: "views" | "downloads") => {
+    if (localStorage.getItem("exclude_analytics") === "true") {
+      return;
+    }
     const slug = card.dataset.slug;
     if (!slug || !supabaseUrl || !supabaseAnonKey) return;
+
+    logChartEvent(supabaseUrl, supabaseAnonKey, slug, metric);
 
     const stat = localStats.get(slug) || { slug, views: 0, downloads: 0 };
     if (metric === "views") stat.views++;
