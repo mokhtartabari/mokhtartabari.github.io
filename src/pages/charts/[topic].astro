@@ -661,27 +661,25 @@ function displayImage(chart: ChartEntry) {
     const lbBackdrop = document.getElementById("lb-backdrop")!;
     const lbZoom = document.getElementById("lb-zoom")!;
     const lbImgWrap = document.getElementById("lb-imgwrap")!;
-    const lbPanel = document.getElementById("lb-panel")!;
 
     // ── Fit / full-size toggle (STATIC charts only) ─────────────────────
     // Interactive charts keep ggiraph's own zoom + lasso, which work better than
     // resizing an iframe — so this toggle is shown for static charts only.
+    // Fit = whole chart on screen. Full = enlarge to 2.5× the panel width and
+    // scroll/pan in both directions (works on mobile, where the panel is already
+    // full-width so a mere width:100% changed nothing).
     const IMG_FIT = "max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl p-3 cursor-zoom-in";
-    const IMG_FULL = "w-full h-auto max-w-none rounded-xl shadow-2xl p-3 cursor-zoom-out";
+    const IMG_FULL = "w-[250%] max-w-none h-auto rounded-xl shadow-2xl p-3 cursor-zoom-out";
     const WRAP_FIT = "relative z-0 flex items-center justify-center";
-    const WRAP_FULL_IMG = "relative z-0 flex justify-center overflow-auto max-h-[85vh]";
+    const WRAP_FULL_IMG = "relative z-0 overflow-auto max-h-[85vh]"; // pan both axes
     let zoomed = false;
     const applyZoom = (z: boolean) => {
       zoomed = z;
-      // "Full" widens the whole panel so the chart uses more of the screen.
-      lbPanel.classList.toggle("max-w-5xl", !z);
-      lbPanel.classList.toggle("max-w-[96vw]", z);
       lbImg.className = z ? IMG_FULL : IMG_FIT;            // clears "hidden" — static only
       lbImgWrap.className = z ? WRAP_FULL_IMG : WRAP_FIT;
       lbPrev.classList.toggle("hidden", z);               // arrows get in the way while zoomed
       lbNext.classList.toggle("hidden", z);
       lbZoom.setAttribute("title", z ? "Fit to screen" : "Full size");
-      if (z) lbImgWrap.scrollTop = 0;
     };
     lbZoom.addEventListener("click", (e) => { e.stopPropagation(); applyZoom(!zoomed); });
     lbImg.addEventListener("click", (e) => { e.stopPropagation(); applyZoom(!zoomed); });
@@ -776,8 +774,6 @@ function displayImage(chart: ChartEntry) {
         lbImg.removeAttribute("src");
         lbZoom.classList.add("hidden");
         lbImgWrap.className = WRAP_FIT;
-        lbPanel.classList.add("max-w-5xl");
-        lbPanel.classList.remove("max-w-[96vw]");
         lbPrev.classList.remove("hidden");
         lbNext.classList.remove("hidden");
         zoomed = false;
