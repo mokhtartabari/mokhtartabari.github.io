@@ -9,6 +9,8 @@ export interface ChartEntry {
   formats?: string[];
   /** True when a <base>_interactive.html ggiraph widget exists (hover tooltips). */
   interactive?: boolean;
+  /** True when a <base>.csv of the underlying series exists for download. */
+  csv?: boolean;
 }
 
 export interface VizManifest {
