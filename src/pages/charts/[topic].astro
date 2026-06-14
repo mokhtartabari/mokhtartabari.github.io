@@ -412,11 +412,20 @@ function displayImage(chart: ChartEntry) {
   const updateCardBadges = (card: HTMLElement, stat: { views: number; downloads: number }) => {
     const showViews = stat.views > 50;
     const showDownloads = stat.downloads > 50;
+    const isPopular = card.dataset.popular === "1";
     const container = card.querySelector<HTMLElement>(".chart-stats");
     if (!container) return;
 
-    if (showViews || showDownloads) {
+    if (isPopular || showViews || showDownloads) {
       let html = "";
+      if (isPopular) {
+        html += `
+          <span class="inline-flex items-center gap-1 font-medium text-amber-600 dark:text-amber-400">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <span>Popular</span>
+          </span>
+        `;
+      }
       if (showViews) {
         html += `
           <span class="inline-flex items-center gap-1 text-ink-500 dark:text-ink-400">
@@ -439,6 +448,16 @@ function displayImage(chart: ChartEntry) {
       container.innerHTML = "";
       container.classList.add("opacity-0");
     }
+  };
+
+  // Flag the most-viewed charts on the page as "Popular" (top 3, modest floor).
+  const markPopular = (cards: HTMLElement[]) => {
+    cards
+      .map((c) => ({ c, v: localStats.get(c.dataset.slug ?? "")?.views ?? 0 }))
+      .filter((x) => x.v >= 20)
+      .sort((a, b) => b.v - a.v)
+      .slice(0, 3)
+      .forEach(({ c }) => { c.dataset.popular = "1"; });
   };
 
   const recordMetric = async (card: HTMLElement, metric: "views" | "downloads") => {
@@ -511,12 +530,14 @@ function displayImage(chart: ChartEntry) {
 
       data.forEach((d) => localStats.set(d.slug, d));
 
+      markPopular(cards);
+
       cards.forEach((card) => {
         const slug = card.dataset.slug;
         if (!slug) return;
         const stat = localStats.get(slug);
-        if (stat) {
-          updateCardBadges(card, stat);
+        if (stat || card.dataset.popular === "1") {
+          updateCardBadges(card, stat ?? { views: 0, downloads: 0 });
         }
       });
     } catch (err) {
