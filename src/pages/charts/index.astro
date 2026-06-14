@@ -17,6 +17,13 @@ const manifests: Record<string, VizManifest> = {
   housing: housingManifest as unknown as VizManifest,
 };
 
+// Only surface topics that actually have charts. Placeholder topics whose
+// data pipeline hasn't produced anything yet stay hidden until their manifest
+// fills in (auto-reverses — no manual step needed).
+const visibleTopics = vizTopics.filter(
+  (t) => (manifests[t.slug]?.charts.length ?? 0) > 0,
+);
+
 const totalCharts = Object.values(manifests).reduce(
   (n, m) => n + m.charts.length,
   0,
@@ -66,7 +73,7 @@ function fmtDate(iso: string | null) {
       {
         totalCharts > 0 && (
           <span class="text-muted">
-            {totalCharts} charts across {vizTopics.length} topics
+            {totalCharts} charts across {visibleTopics.length} topics
           </span>
         )
       }
@@ -77,7 +84,7 @@ function fmtDate(iso: string | null) {
   <section class="container-wide pb-16">
     <div class="grid md:grid-cols-2 gap-6">
       {
-        vizTopics.map((topic, i) => {
+        visibleTopics.map((topic, i) => {
           const manifest = manifests[topic.slug];
           const chartCount = manifest.charts.length;
           const updated = fmtDate(manifest.updated);

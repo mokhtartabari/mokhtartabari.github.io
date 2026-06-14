@@ -9,7 +9,19 @@ import productivityManifest from "~/data/charts-manifest-productivity.json";
 import housingManifest from "~/data/charts-manifest-housing.json";
 
 export function getStaticPaths() {
-  return vizTopics.map((t) => ({ params: { topic: t.slug } }));
+  // Only build pages for topics that have charts; placeholder topics with an
+  // empty manifest are skipped until their pipeline produces data.
+  const counts: Record<string, number> = {
+    inflation: (inflationManifest as unknown as VizManifest).charts.length,
+    gdp: (gdpManifest as unknown as VizManifest).charts.length,
+    trade: (tradeManifest as unknown as VizManifest).charts.length,
+    employment: (employmentManifest as unknown as VizManifest).charts.length,
+    productivity: (productivityManifest as unknown as VizManifest).charts.length,
+    housing: (housingManifest as unknown as VizManifest).charts.length,
+  };
+  return vizTopics
+    .filter((t) => (counts[t.slug] ?? 0) > 0)
+    .map((t) => ({ params: { topic: t.slug } }));
 }
 
 const { topic: topicSlug } = Astro.params;
