@@ -87,6 +87,33 @@ Optional fields: `venue`, `venueShort`. Each link in `links` needs `label`, `hre
 
 Pushing to `main` triggers the GitHub Actions workflow (`.github/workflows/deploy.yml`), which runs `npm ci && npm run build` and deploys `./dist` to GitHub Pages. No manual deployment step is needed.
 
+## Deferred features — revisit ~September 2026
+
+Paused intentionally: the site has little/no traffic yet, so audience-building
+plumbing isn't worth the time until there's real demand. Revisit when traffic
+justifies it.
+
+1. **Release-day email alerts (Resend).** The signup form is **live** and already
+   collecting addresses into the `subscribers` table — but no email is *sent* yet.
+   To finish:
+   - Deploy `supabase/functions/notify-subscribers/` (code is written; release-day
+     blast + unsubscribe). See its `README.md` for steps.
+   - Needs a **verified sending domain** (you can't send from a `@gmail.com`
+     address). Send from `mokhtartabari.ca` with `REPLY_TO` set to the Gmail so
+     replies land there.
+   - Set secrets (`RESEND_API_KEY`, `NOTIFY_SECRET`, `FROM_EMAIL`, `REPLY_TO`) and
+     wire `content-machine-orchestrator` to POST to the function on release day.
+   - The Resend API key is in the macOS Keychain (`resend-api-key-website`) but was
+     shared in chat — **rotate it** before going live.
+
+2. **Domain: leave GoDaddy.** `mokhtartabari.ca` (GoDaddy) **expires October 2026**.
+   Plan: transfer it to **Namecheap** (where `fyxa.ca` already lives — one
+   dashboard) before expiry; a transfer adds +1 year (~CA$12–16). Then point it at
+   GitHub Pages and add the Resend DNS records there. Don't let it lapse if keeping
+   the name.
+
+Engagement features that ARE live and need nothing further: chart view/download
+analytics, "Popular" badges, reactions, and the feedback form (all Supabase-backed).
 
 ---
 
