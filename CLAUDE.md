@@ -87,6 +87,39 @@ Optional fields: `venue`, `venueShort`. Each link in `links` needs `label`, `hre
 
 Pushing to `main` triggers the GitHub Actions workflow (`.github/workflows/deploy.yml`), which runs `npm ci && npm run build` and deploys `./dist` to GitHub Pages. No manual deployment step is needed.
 
+## Site positioning — academic job search (current)
+
+As of June 2026, Mokhtar applied for a **teaching-focused Visiting Assistant
+Professor (VAP)** position. The site is deliberately presented as a
+**pure-academic** profile. The following commercial elements were hidden — they
+are **intentionally reversible, not dead code; do not delete them**:
+
+- **Consulting.** Removed from the homepage hero, the header nav, and the About
+  sidebar. The `/consulting` page (`src/pages/consulting.astro`) is still live
+  but **unlinked**.
+- **Monetization.** The Stripe "Support" link and GitHub Sponsors were removed
+  from `SocialLinks.astro` and the charts-page donation card. Both links
+  **remain in `src/data/site.ts`** (`socials.stripe`, `socials.sponsor`), just
+  unrendered.
+- **Restore plan** (after the search concludes): re-link `/consulting` in the
+  header + homepage, and re-render the `site.ts` monetization links.
+
+Academic materials added for the search:
+
+- **CV.** `public/files/cv.pdf` is a **phone-redacted public copy** (the
+  submitted/source CV keeps the phone number). Linked from the hero, the About
+  page, and the header nav (the nav uses an `external: true` flag to open the
+  PDF in a new tab and bypass the ClientRouter). Regenerate the public copy the
+  same way if the CV changes — and re-strip the phone.
+- **Teaching evidence.** Institution-neutral data lives in `src/data/teaching.ts`
+  (`effectiveness`, `studentQuotes`, `peerObservations`, `professionalDevelopment`)
+  and renders in the Teaching effectiveness section of `teaching.astro`.
+  **USF-tailored statement PDFs were intentionally NOT published** (they name the
+  target institution throughout); only neutral substance was lifted onto the page.
+- **MBAF 504 lecture playlist** (YouTube, Unlisted, ~3k views): kept **unlinked**
+  by choice (student-privacy + institutional-rights caution). The "3,000+ views"
+  stat stays without an outbound link.
+
 ## Deferred features — revisit ~September 2026
 
 Paused intentionally: the site has little/no traffic yet, so audience-building
