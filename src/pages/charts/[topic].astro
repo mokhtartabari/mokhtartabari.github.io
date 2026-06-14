@@ -398,7 +398,7 @@ function displayImage(chart: ChartEntry) {
 
         <div class="w-full max-w-lg border-t border-white/10 pt-3.5">
           <form id="lb-feedback-form" class="w-full flex flex-col gap-2">
-            <div class="flex gap-2 w-full">
+            <div class="flex flex-col sm:flex-row gap-2 w-full">
               <textarea
                 id="lb-feedback-textarea"
                 required
@@ -407,18 +407,20 @@ function displayImage(chart: ChartEntry) {
                 placeholder="Spotted an issue or have a suggestion? Type here..."
                 class="flex-grow border border-white/15 hover:border-white/25 focus:border-white/40 focus:outline-none focus:ring-0 rounded-xl bg-white/5 text-white text-xs px-3.5 py-2 resize-none placeholder-white/30 min-h-[36px]"
               ></textarea>
-              <input
-                id="lb-feedback-email"
-                type="email"
-                placeholder="email (optional)"
-                class="w-36 border border-white/15 hover:border-white/25 focus:border-white/40 focus:outline-none focus:ring-0 rounded-xl bg-white/5 text-white text-xs px-3 py-2 placeholder-white/30"
-              />
-              <button
-                type="submit"
-                class="px-4 py-2 text-xs font-medium rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white transition-colors flex-shrink-0"
-              >
-                Send
-              </button>
+              <div class="flex gap-2 sm:flex-shrink-0">
+                <input
+                  id="lb-feedback-email"
+                  type="email"
+                  placeholder="email (optional)"
+                  class="flex-grow sm:w-36 border border-white/15 hover:border-white/25 focus:border-white/40 focus:outline-none focus:ring-0 rounded-xl bg-white/5 text-white text-xs px-3 py-2 placeholder-white/30"
+                />
+                <button
+                  type="submit"
+                  class="px-4 py-2 text-xs font-semibold rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white transition-colors"
+                >
+                  Send
+                </button>
+              </div>
             </div>
             <p id="lb-feedback-status" class="text-[10px] text-white/50 text-center empty:hidden" role="status"></p>
           </form>
