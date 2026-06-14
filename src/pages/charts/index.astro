@@ -257,8 +257,125 @@ function fmtDate(iso: string | null) {
         </a>
       </div>
     </div>
+
+    <!-- Stay involved: notify + feedback (hidden if Supabase isn't configured) -->
+    <div id="engage" class="reveal mt-6 grid md:grid-cols-2 gap-6" style="display:none">
+      <!-- Email alerts -->
+      <div class="p-6 rounded-2xl border border-default bg-elevated">
+        <h2 class="font-medium text-sm mb-1">Get notified on new data</h2>
+        <p class="text-sm text-muted leading-relaxed mb-4">
+          A short email when Statistics Canada releases new figures and the charts update. No spam.
+        </p>
+        <form id="subscribe-form" class="flex flex-col sm:flex-row gap-2">
+          <input type="email" name="email" required placeholder="you@example.com"
+            class="flex-1 px-3 py-2 rounded-lg border border-default bg-surface text-sm focus:outline-none focus:ring-2 focus:ring-accent-500" />
+          <!-- honeypot: real users leave this empty -->
+          <input type="text" name="company" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true" />
+          <button type="submit"
+            class="px-4 py-2 rounded-lg text-sm font-medium border border-default bg-elevated hover:border-accent-500 text-accent-700 dark:text-accent-300 transition-colors">
+            Notify me
+          </button>
+        </form>
+        <p id="subscribe-msg" class="text-xs mt-2 text-muted" role="status"></p>
+      </div>
+
+      <!-- Feedback / request a chart -->
+      <div class="p-6 rounded-2xl border border-default bg-elevated">
+        <h2 class="font-medium text-sm mb-1">Request a chart or send feedback</h2>
+        <p class="text-sm text-muted leading-relaxed mb-4">
+          Want a series that isn't here, or spotted something off? Let me know.
+        </p>
+        <form id="feedback-form" class="flex flex-col gap-2">
+          <textarea name="message" required rows="2" maxlength="2000" placeholder="Your request or feedback…"
+            class="px-3 py-2 rounded-lg border border-default bg-surface text-sm resize-y focus:outline-none focus:ring-2 focus:ring-accent-500"></textarea>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input type="email" name="email" placeholder="email (optional)"
+              class="flex-1 px-3 py-2 rounded-lg border border-default bg-surface text-sm focus:outline-none focus:ring-2 focus:ring-accent-500" />
+            <input type="text" name="company" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true" />
+            <button type="submit"
+              class="px-4 py-2 rounded-lg text-sm font-medium border border-default bg-elevated hover:border-accent-500 text-accent-700 dark:text-accent-300 transition-colors">
+              Send
+            </button>
+          </div>
+        </form>
+        <p id="feedback-msg" class="text-xs mt-2 text-muted" role="status"></p>
+      </div>
+    </div>
   </section>
 </BaseLayout>
+
+<script>
+  // Engagement forms — only active when Supabase is configured.
+  const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL;
+  const SB_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+
+  const engageSetup = () => {
+    const engage = document.getElementById("engage");
+    if (!engage || !SB_URL || !SB_KEY) return;
+    engage.style.display = "";
+
+    const headers = {
+      apikey: SB_KEY,
+      Authorization: `Bearer ${SB_KEY}`,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    };
+
+    const subForm = document.getElementById("subscribe-form") as HTMLFormElement | null;
+    const subMsg = document.getElementById("subscribe-msg");
+    if (subForm && subMsg && !subForm.dataset.bound) {
+      subForm.dataset.bound = "1";
+      subForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const data = new FormData(subForm);
+        if (data.get("company")) return; // honeypot tripped
+        const email = String(data.get("email") || "").trim();
+        if (!email) return;
+        subMsg.textContent = "Adding you…";
+        try {
+          const res = await fetch(`${SB_URL}/rest/v1/subscribers`, {
+            method: "POST", headers, body: JSON.stringify({ email }),
+          });
+          if (res.ok) { subForm.reset(); subMsg.textContent = "Thanks! You'll hear from me when new data lands."; }
+          else if (res.status === 409) { subForm.reset(); subMsg.textContent = "You're already on the list — thanks!"; }
+          else throw new Error(`HTTP ${res.status}`);
+        } catch (err) {
+          subMsg.textContent = "Something went wrong — please try again later.";
+          console.warn("subscribe failed:", err);
+        }
+      });
+    }
+
+    const fbForm = document.getElementById("feedback-form") as HTMLFormElement | null;
+    const fbMsg = document.getElementById("feedback-msg");
+    if (fbForm && fbMsg && !fbForm.dataset.bound) {
+      fbForm.dataset.bound = "1";
+      fbForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const data = new FormData(fbForm);
+        if (data.get("company")) return; // honeypot tripped
+        const message = String(data.get("message") || "").trim();
+        const email = String(data.get("email") || "").trim() || null;
+        if (!message) return;
+        fbMsg.textContent = "Sending…";
+        try {
+          const res = await fetch(`${SB_URL}/rest/v1/feedback`, {
+            method: "POST", headers, body: JSON.stringify({ message, email }),
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          fbForm.reset();
+          fbMsg.textContent = "Thank you — I read every message.";
+        } catch (err) {
+          fbMsg.textContent = "Something went wrong — please try again later.";
+          console.warn("feedback failed:", err);
+        }
+      });
+    }
+  };
+
+  engageSetup();
+  document.addEventListener("astro:page-load", engageSetup);
+</script>
 
 <style>
   @keyframes pulse {

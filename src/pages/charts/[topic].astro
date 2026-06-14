@@ -374,6 +374,14 @@ function displayImage(chart: ChartEntry) {
 
       <!-- Caption -->
       <p id="lb-caption" class="text-center text-white/80 text-sm px-8"></p>
+
+      <!-- Reactions ("Was this useful?") -->
+      <div id="lb-reactions" class="flex items-center justify-center gap-2 text-sm text-white/55" style="display:none">
+        <span id="lb-react-prompt">Was this chart useful?</span>
+        <button id="lb-react-up" class="px-2.5 py-1 rounded-lg border border-white/20 hover:border-white/40 hover:text-white transition-colors" aria-label="Yes, useful">👍</button>
+        <button id="lb-react-down" class="px-2.5 py-1 rounded-lg border border-white/20 hover:border-white/40 hover:text-white transition-colors" aria-label="Not useful">👎</button>
+        <span id="lb-react-thanks" class="hidden text-emerald-400">Thanks for the feedback!</span>
+      </div>
     </div>
   </div>
 </BaseLayout>
@@ -638,6 +646,50 @@ function displayImage(chart: ChartEntry) {
     const lbNext = document.getElementById("lb-next")!;
     const lbBackdrop = document.getElementById("lb-backdrop")!;
 
+    // ── Reactions ("Was this useful?") ───────────────────────────────────
+    const lbReactions = document.getElementById("lb-reactions")!;
+    const lbReactPrompt = document.getElementById("lb-react-prompt")!;
+    const lbReactUp = document.getElementById("lb-react-up")!;
+    const lbReactDown = document.getElementById("lb-react-down")!;
+    const lbReactThanks = document.getElementById("lb-react-thanks")!;
+    const reactionsEnabled = !!supabaseUrl && !!supabaseAnonKey;
+    if (reactionsEnabled) lbReactions.style.display = "";
+    const reactedKey = "reacted_charts";
+    const getReacted = (): Set<string> => {
+      try { return new Set(JSON.parse(sessionStorage.getItem(reactedKey) || "[]")); }
+      catch { return new Set(); }
+    };
+    const renderReactState = (slug: string) => {
+      const reacted = getReacted().has(slug);
+      lbReactPrompt.classList.toggle("hidden", reacted);
+      lbReactUp.classList.toggle("hidden", reacted);
+      lbReactDown.classList.toggle("hidden", reacted);
+      lbReactThanks.classList.toggle("hidden", !reacted);
+    };
+    let openSlug = "";
+    const react = async (reaction: "helpful" | "not_helpful") => {
+      const slug = openSlug;
+      if (!slug || !reactionsEnabled) return;
+      const reacted = getReacted();
+      if (reacted.has(slug)) return;
+      reacted.add(slug);
+      try { sessionStorage.setItem(reactedKey, JSON.stringify([...reacted])); } catch (e) {}
+      renderReactState(slug);
+      try {
+        await fetch(`${supabaseUrl}/rest/v1/rpc/increment_reaction`, {
+          method: "POST",
+          headers: {
+            apikey: supabaseAnonKey,
+            Authorization: `Bearer ${supabaseAnonKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ chart_slug: slug, reaction }),
+        });
+      } catch (err) { console.warn("reaction failed:", err); }
+    };
+    lbReactUp.addEventListener("click", (e) => { e.stopPropagation(); react("helpful"); });
+    lbReactDown.addEventListener("click", (e) => { e.stopPropagation(); react("not_helpful"); });
+
     if (!lb || !cards.length) return;
 
     // Visible cards only (respects category filter)
@@ -668,6 +720,8 @@ function displayImage(chart: ChartEntry) {
       const caption = card.dataset.caption ?? "";
       lbCaption.textContent = caption;
       lbCounter.textContent = `${current + 1} / ${pool.length}`;
+      openSlug = card.dataset.slug ?? "";
+      if (reactionsEnabled) renderReactState(openSlug);
 
       // Build per-format download links for this chart.
       const base = card.dataset.base ?? "";
