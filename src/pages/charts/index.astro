@@ -31,7 +31,7 @@ function fmtDate(iso: string | null) {
 
 <BaseLayout
   title="Charts"
-  description="High-quality, auto-updated charts on Canadian inflation, GDP, and macroeconomic trends — generated from Statistics Canada microdata."
+  description="High-quality, auto-updated charts on Canadian inflation, GDP, and macroeconomic trends — generated from official sources including Statistics Canada and FRED."
 >
   <!-- Hero ---------------------------------------------------------------->
   <section class="container-wide pt-16 pb-12">
@@ -47,8 +47,8 @@ function fmtDate(iso: string | null) {
         Canadian economy in charts
       </h1>
       <p class="mt-4 text-lg text-muted max-w-2xl leading-relaxed">
-        Publication-quality visualizations built from Statistics Canada
-        microdata — automatically refreshed whenever new data is released.
+        Publication-quality visualizations built from official sources including
+        Statistics Canada and FRED — automatically refreshed whenever new data is released.
       </p>
     </header>
 
@@ -200,18 +200,35 @@ function fmtDate(iso: string | null) {
       <div>
         <h2 class="font-medium text-sm mb-1">About this data</h2>
         <p class="text-sm text-muted leading-relaxed">
-          All charts are generated programmatically from{" "}
-          <a
-            href="https://www.statcan.gc.ca/"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="text-accent-600 dark:text-accent-400 hover:underline"
-          >
-            Statistics Canada
-          </a>{" "}
-          microdata using R and custom ggplot2 styling. Code is open source —
-          each topic page links to its source repository. Charts are automatically
-          regenerated and deployed whenever Statistics Canada publishes new data.
+          All charts are generated programmatically from official and authoritative sources
+        such as{" "}
+        <a
+          href="https://www.statcan.gc.ca/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-accent-600 dark:text-accent-400 hover:underline"
+        >
+          Statistics Canada
+        </a>,{" "}
+        <a
+          href="https://fred.stlouisfed.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-accent-600 dark:text-accent-400 hover:underline"
+        >
+          FRED
+        </a>, and{" "}
+        <a
+          href="https://ec.europa.eu/eurostat"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-accent-600 dark:text-accent-400 hover:underline"
+        >
+          Eurostat
+        </a>{" "}
+        using R and custom ggplot2 styling. Code is open source — each topic page
+        links to its source repository. Charts are automatically regenerated and deployed
+        whenever new data is published.
         </p>
       </div>
     </div>
@@ -264,7 +281,7 @@ function fmtDate(iso: string | null) {
       <div class="p-6 rounded-2xl border border-default bg-elevated">
         <h2 class="font-medium text-sm mb-1">Get notified on new data</h2>
         <p class="text-sm text-muted leading-relaxed mb-4">
-          A short email when Statistics Canada releases new figures and the charts update. No spam.
+          A short email when new economic figures are released and the charts update. No spam.
         </p>
         <form id="subscribe-form" class="flex flex-col sm:flex-row gap-2">
           <input type="email" name="email" required placeholder="you@example.com"
