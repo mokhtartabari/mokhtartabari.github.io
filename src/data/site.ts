@@ -28,6 +28,7 @@ export const site = {
     github: "https://github.com/mokhtartabari",
     bluesky: "https://bsky.app/profile/mokhtartabari.bsky.social",
     sponsor: "https://github.com/sponsors/mokhtartabari",
+    stripe: "https://buy.stripe.com/cNieVd65a9PddYZfT85AQ00",
   },
   researchInterests: [
     "International Trade",
