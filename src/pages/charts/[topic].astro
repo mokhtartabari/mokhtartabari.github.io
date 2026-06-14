@@ -200,7 +200,6 @@ function displayImage(chart: ChartEntry) {
                   data-base={chart.filename.replace(/\.png$/i, "")}
                   data-formats={(chart.formats ?? ["png"]).join(",")}
                   data-dir={topic.chartsDir}
-                  data-interactive={chart.interactive ? "true" : undefined}
                   data-embed={`/embed/${topicSlug}/${chart.slug}/`}
                   data-csv={chart.csv ? "true" : undefined}
                   role="button"
@@ -259,7 +258,7 @@ function displayImage(chart: ChartEntry) {
 
     <!-- Panel -->
     <div id="lb-panel" class="relative z-10 w-full max-w-5xl flex flex-col gap-3 max-h-[95vh]">
-      <!-- Top bar (z-30 so its Download/Embed dropdowns sit above the interactive iframe) -->
+      <!-- Top bar (z-30 so its Download/Embed dropdowns sit above the chart) -->
       <div class="relative z-30 flex items-center justify-between px-1">
         <span id="lb-counter" class="text-white/60 text-sm tabular-nums"></span>
         <div class="flex items-center gap-2">
@@ -320,7 +319,7 @@ function displayImage(chart: ChartEntry) {
               </button>
             </div>
           </div>
-          <!-- Fit / full-size toggle (static charts only; interactive use ggiraph's zoom) -->
+          <!-- Fit / full-size toggle -->
           <button
             id="lb-zoom"
             class="p-1.5 rounded-lg text-white/70 hover:text-white border border-white/20 hover:border-white/40 transition-colors"
@@ -339,7 +338,7 @@ function displayImage(chart: ChartEntry) {
         </div>
       </div>
 
-      <!-- Image (z-0 keeps the iframe trapped below the top bar's dropdowns) -->
+      <!-- Image (z-0 keeps the chart below the top bar's dropdowns) -->
       <div id="lb-imgwrap" class="relative z-0 flex items-center justify-center">
         <button
           id="lb-prev"
@@ -358,15 +357,6 @@ function displayImage(chart: ChartEntry) {
             class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl p-3 cursor-zoom-in"
             style="background-color: var(--chart-bg)"
           />
-
-          <!-- Interactive widget (shown instead of the image for interactive charts) -->
-          <iframe
-            id="lb-iframe"
-            title="Interactive chart"
-            loading="lazy"
-            class="hidden w-full max-w-5xl h-[75vh] rounded-xl shadow-2xl border-0"
-            style="background-color: var(--chart-bg)"
-          ></iframe>
         </div>
 
         <button
@@ -681,7 +671,6 @@ function displayImage(chart: ChartEntry) {
     if (!lb || !cards.length || lb.dataset.lbBound === "1") return;
     lb.dataset.lbBound = "1";
     const lbImg = document.getElementById("lb-img") as HTMLImageElement;
-    const lbIframe = document.getElementById("lb-iframe") as HTMLIFrameElement;
     const lbCaption = document.getElementById("lb-caption")!;
     const lbCounter = document.getElementById("lb-counter")!;
     const lbDownloadBtn = document.getElementById("lb-download-btn")!;
@@ -719,7 +708,6 @@ function displayImage(chart: ChartEntry) {
 
     const applyZoom = (z: boolean) => {
       zoomed = z;
-      lbIframe.classList.add("hidden");
       lbScroll.className = z ? SCROLL_FULL : SCROLL_FIT;   // only the inner box scrolls; prev/next stay put
       lbImg.src = openImgSrc;
       lbImg.alt = openImgAlt;
@@ -864,7 +852,6 @@ function displayImage(chart: ChartEntry) {
       lbZoom.classList.remove("hidden");
       lbPrev.classList.remove("hidden");
       lbNext.classList.remove("hidden");
-      lbIframe.removeAttribute("src");          // not used in the lightbox
       applyZoom(false);                        // reset to Fit
       const formats = (card.dataset.formats ?? "png").split(",").filter(Boolean);
       // Stable, useful order regardless of manifest order.
@@ -909,7 +896,6 @@ function displayImage(chart: ChartEntry) {
 
     const close = () => {
       closeMenu();
-      lbIframe.removeAttribute("src"); // unload the interactive widget
       
       // Reset chart feedback form state
       lbFeedbackTextarea.value = "";

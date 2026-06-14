@@ -7,8 +7,6 @@ export interface ChartEntry {
   span?: string; // "full" → chart spans the full grid width
   /** Formats available for this chart, e.g. ["png","svg","pdf"]. PNG always present. */
   formats?: string[];
-  /** True when a <base>_interactive.html ggiraph widget exists (hover tooltips). */
-  interactive?: boolean;
   /** True when a <base>.csv of the underlying series exists for download. */
   csv?: boolean;
 }

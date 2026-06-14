@@ -1,6 +1,6 @@
 ---
 // Standalone, chrome-less chart page meant to be embedded via <iframe> on other
-// sites. Interactive charts embed their ggiraph widget; the rest show the SVG/PNG.
+// sites. Shows the chart's SVG (or PNG for dense charts) on a clean page.
 // A small attribution footer links back to the source (good for backlinks).
 import { vizTopics, type VizManifest, type ChartEntry, type VizTopic } from "~/data/visualizations";
 import { site } from "~/data/site";
@@ -35,7 +35,6 @@ export function getStaticPaths() {
 const { chart, topic } = Astro.props as { chart: ChartEntry; topic: VizTopic };
 const title = chart.title ?? chart.slug;
 const base = chart.filename.replace(/\.png$/i, "");
-const isInteractive = !!chart.interactive;
 const imgFile = chart.formats?.includes("svg") ? `${base}.svg` : chart.filename;
 const chartPage = `${site.url}/charts/${topic.slug}/`;
 ---
@@ -59,7 +58,6 @@ const chartPage = `${site.url}/charts/${topic.slug}/`;
       @media (prefers-color-scheme: dark) { body { background: #0b0b0c; } }
       .chart { flex: 1 1 auto; min-height: 0; display: flex; }
       .chart img { width: 100%; height: 100%; object-fit: contain; display: block; }
-      .chart iframe { width: 100%; height: 100%; border: 0; display: block; }
       .credit {
         flex: 0 0 auto;
         font-size: 12px;
@@ -74,11 +72,7 @@ const chartPage = `${site.url}/charts/${topic.slug}/`;
   </head>
   <body>
     <div class="chart">
-      {isInteractive ? (
-        <iframe src={`${topic.chartsDir}${base}_interactive.html`} title={title} loading="lazy"></iframe>
-      ) : (
-        <img src={`${topic.chartsDir}${imgFile}`} alt={title} loading="lazy" />
-      )}
+      <img src={`${topic.chartsDir}${imgFile}`} alt={title} loading="lazy" />
     </div>
     <div class="credit">
       <a href={chartPage} target="_blank" rel="noopener">{title}</a>
