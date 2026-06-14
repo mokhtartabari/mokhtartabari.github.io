@@ -83,17 +83,20 @@ function fmtDate(iso: string | null) {
           return (
             <a
               href={`/charts/${topic.slug}/`}
-              class="reveal group relative flex flex-col rounded-2xl border border-default bg-elevated hover:border-accent-300 dark:hover:border-accent-700 hover:shadow-xl transition-all duration-300 overflow-hidden"
+              class="reveal group topic-card relative flex flex-col rounded-2xl border border-default bg-elevated hover:border-accent-500/30 dark:hover:border-accent-500/30 hover:shadow-[0_25px_60px_-15px_rgba(99,102,241,0.12)] dark:hover:shadow-[0_25px_60px_-15px_rgba(99,102,241,0.22)] transition-all duration-300 overflow-hidden"
               style={`animation-delay:${i * 80}ms`}
             >
               {/* Preview strip */}
               <div class="relative h-44 bg-[color-mix(in_srgb,var(--bg)_60%,transparent)] border-b border-default overflow-hidden grid-noise">
+                {/* Glow wash on hover */}
+                <div class="absolute inset-0 bg-gradient-to-br from-accent-500/5 to-transparent dark:from-accent-500/10 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
                 {preview.length > 0 ? (
-                  <div class="absolute inset-2 flex gap-2">
+                  <div class="absolute inset-2 flex gap-2.5">
                     {preview.map((chart, j) => (
                       <div
-                        class="flex-1 rounded-lg overflow-hidden shadow-md"
-                        style={`transform:rotate(${(j - 1) * 1.8}deg) translateY(${Math.abs(j - 1) * 6}px);transition:transform 0.4s ease ${j * 60}ms`}
+                        class={`flex-1 rounded-lg overflow-hidden shadow-md border border-neutral-200/50 dark:border-neutral-800/50 bg-white preview-card-image preview-card-image-${j}`}
+                        style={`transform: rotate(${(j - 1) * 3}deg) translateY(${Math.abs(j - 1) * 6}px) translateX(${(j - 1) * 4}px); transition-delay: ${j * 40}ms;`}
                       >
                         <img
                           src={`${topic.chartsDir}${chart.filename}`}
@@ -135,7 +138,7 @@ function fmtDate(iso: string | null) {
                     {topic.title}
                   </h2>
                   {chartCount > 0 && (
-                    <span class="flex-shrink-0 text-xs font-medium px-2.5 py-1 rounded-full bg-accent-50 dark:bg-accent-900/30 text-accent-700 dark:text-accent-300">
+                    <span class="flex-shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full bg-accent-50/60 dark:bg-accent-950/40 text-accent-600 dark:text-accent-400 border border-accent-100/50 dark:border-accent-900/30 shadow-sm">
                       {chartCount} charts
                     </span>
                   )}
@@ -149,18 +152,19 @@ function fmtDate(iso: string | null) {
                   <span>
                     {updated ? `Updated ${updated}` : "Awaiting first sync"}
                   </span>
-                  <span class="flex items-center gap-1 text-accent-600 dark:text-accent-400 font-medium group-hover:gap-2 transition-all">
+                  <span class="flex items-center gap-1.5 text-accent-600 dark:text-accent-400 font-medium transition-colors">
                     View charts
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      width="13"
-                      height="13"
+                      width="14"
+                      height="14"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
                       stroke-width="2.5"
                       stroke-linecap="round"
                       stroke-linejoin="round"
+                      class="transform transition-transform duration-300 group-hover:translate-x-1"
                       aria-hidden="true"
                     >
                       <path d="M5 12h14M12 5l7 7-7 7" />
@@ -398,5 +402,22 @@ function fmtDate(iso: string | null) {
   @keyframes pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.4; }
+  }
+
+  .preview-card-image {
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
+  }
+  
+  .topic-card:hover .preview-card-image-0 {
+    transform: rotate(-6deg) translateY(-2px) translateX(-18px) scale(1.04) !important;
+  }
+  
+  .topic-card:hover .preview-card-image-1 {
+    transform: rotate(0deg) translateY(-8px) translateX(0) scale(1.06) !important;
+    z-index: 10;
+  }
+  
+  .topic-card:hover .preview-card-image-2 {
+    transform: rotate(6deg) translateY(-2px) translateX(18px) scale(1.04) !important;
   }
 </style>
