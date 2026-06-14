@@ -83,7 +83,8 @@ async function syncTopic(topic, repo) {
           // static charts. Injected here so it applies on every build without
           // regenerating the widgets.
           let html = await res.text();
-          const css = "<style>.ggiraph-toolbar{display:none!important}</style>";
+          const css = "<style>.ggiraph-toolbar{display:none!important}" +
+            "html,body{background:transparent!important;margin:0}</style>"; // show the page's paper bg, no toolbar
           html = html.includes("</head>") ? html.replace("</head>", `${css}</head>`) : css + html;
           fs.writeFileSync(dest, html);
         } else {
