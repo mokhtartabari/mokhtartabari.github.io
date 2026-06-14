@@ -4,7 +4,7 @@ export const site = {
   description:
     "Economist working on development economics and international trade, energy and environmental economics, and the economics of AI. Based in Vancouver, Canada.",
   url: "https://mokhtartabari.github.io",
-  position: "Instructor of Economics",
+  position: "Applied Economist",
   institutions: [
     {
       name: "Capilano University",
