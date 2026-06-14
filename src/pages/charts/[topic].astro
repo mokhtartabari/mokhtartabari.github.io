@@ -265,8 +265,8 @@ function displayImage(chart: ChartEntry) {
 
     <!-- Panel -->
     <div class="relative z-10 w-full max-w-5xl flex flex-col gap-3 max-h-[95vh]">
-      <!-- Top bar -->
-      <div class="flex items-center justify-between px-1">
+      <!-- Top bar (z-30 so its Download/Embed dropdowns sit above the interactive iframe) -->
+      <div class="relative z-30 flex items-center justify-between px-1">
         <span id="lb-counter" class="text-white/60 text-sm tabular-nums"></span>
         <div class="flex items-center gap-2">
           <!-- Download menu (formats populated per-chart by JS) -->
@@ -336,8 +336,8 @@ function displayImage(chart: ChartEntry) {
         </div>
       </div>
 
-      <!-- Image -->
-      <div class="relative flex items-center justify-center">
+      <!-- Image (z-0 keeps the iframe trapped below the top bar's dropdowns) -->
+      <div class="relative z-0 flex items-center justify-center">
         <button
           id="lb-prev"
           class="absolute left-0 z-10 -translate-x-2 md:-translate-x-12 p-2 rounded-xl text-white/70 hover:text-white border border-white/20 hover:border-white/40 bg-black/40 hover:bg-black/60 transition-all"
