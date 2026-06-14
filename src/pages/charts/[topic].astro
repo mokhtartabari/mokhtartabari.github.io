@@ -665,21 +665,29 @@ function displayImage(chart: ChartEntry) {
     const lbZoom = document.getElementById("lb-zoom")!;
     const lbScroll = document.getElementById("lb-scroll")!;
 
-    // ── Fit / full-size toggle (STATIC charts only) ─────────────────────
-    // Interactive charts keep ggiraph's own zoom + lasso, which work better than
-    // resizing an iframe — so this toggle is shown for static charts only.
+    // ── Fit / full-size toggle (static images AND interactive widgets) ───
     // Fit = whole chart on screen. Full = enlarge to 2.5× the panel width and
     // scroll/pan in both directions (works on mobile, where the panel is already
-    // full-width so a mere width:100% changed nothing).
+    // full-width so a mere width:100% changed nothing). Same UX for both types;
+    // interactive charts use ggiraph for hover only (its toolbar is hidden).
     const IMG_FIT = "max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl p-3 cursor-zoom-in";
     const IMG_FULL = "w-[250%] max-w-none h-auto rounded-xl shadow-2xl p-3 cursor-zoom-out";
+    const IFRAME_FIT = "w-full max-w-5xl h-[75vh] rounded-xl shadow-2xl border-0";
+    // aspect-[5/4] is the tallest chart's ratio, so the widget never needs an
+    // internal scrollbar; the outer box does the panning.
+    const IFRAME_FULL = "w-[250%] max-w-none aspect-[5/4] rounded-xl shadow-2xl border-0";
     const SCROLL_FIT = "flex items-center justify-center max-w-full min-w-0";
     const SCROLL_FULL = "w-full min-w-0 overflow-auto max-h-[85vh]"; // pan both axes; arrows stay pinned outside
     let zoomed = false;
+    let openInteractive = false;
     const applyZoom = (z: boolean) => {
       zoomed = z;
-      lbImg.className = z ? IMG_FULL : IMG_FIT;            // clears "hidden" — static only
       lbScroll.className = z ? SCROLL_FULL : SCROLL_FIT;   // only the inner box scrolls; prev/next stay put
+      if (openInteractive) {
+        lbIframe.className = z ? IFRAME_FULL : IFRAME_FIT; // shown; never carries "hidden" here
+      } else {
+        lbImg.className = z ? IMG_FULL : IMG_FIT;          // clears "hidden" — static only
+      }
       lbZoom.setAttribute("title", z ? "Fit to screen" : "Full size");
     };
     lbZoom.addEventListener("click", (e) => { e.stopPropagation(); applyZoom(!zoomed); });
@@ -766,26 +774,24 @@ function displayImage(chart: ChartEntry) {
       const base = card.dataset.base ?? "";
       const dir = card.dataset.dir ?? "";
 
-      // Interactive charts use ggiraph's own zoom/lasso (no fit/full toggle);
-      // static charts get our fit/full toggle.
-      if (card.dataset.interactive === "true") {
+      // Same fit/full toggle for both. Interactive = ggiraph widget (hover only,
+      // its toolbar is hidden); static = image. Both reset to Fit on open.
+      openInteractive = card.dataset.interactive === "true";
+      lbZoom.classList.remove("hidden");
+      lbPrev.classList.remove("hidden");
+      lbNext.classList.remove("hidden");
+      if (openInteractive) {
         lbIframe.src = `${dir}${base}_interactive.html`;
         lbIframe.classList.remove("hidden");
         lbImg.classList.add("hidden");
         lbImg.removeAttribute("src");
-        lbZoom.classList.add("hidden");
-        lbScroll.className = SCROLL_FIT;
-        lbPrev.classList.remove("hidden");
-        lbNext.classList.remove("hidden");
-        zoomed = false;
       } else {
         lbIframe.classList.add("hidden");
         lbIframe.removeAttribute("src");
         lbImg.src = img.src;
         lbImg.alt = img.alt;
-        lbZoom.classList.remove("hidden");
-        applyZoom(false);                      // reset to Fit on each open (also reveals lbImg)
       }
+      applyZoom(false);                        // reset to Fit; reveals the active element
       const formats = (card.dataset.formats ?? "png").split(",").filter(Boolean);
       // Stable, useful order regardless of manifest order.
       const ordered = ["svg", "pdf", "png"].filter((f) => formats.includes(f));
