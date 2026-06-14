@@ -355,22 +355,25 @@ function displayImage(chart: ChartEntry) {
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
 
-        <img
-          id="lb-img"
-          src=""
-          alt=""
-          class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl p-3 cursor-zoom-in"
-          style="background-color: var(--chart-bg)"
-        />
+        <!-- Inner scroll box so a zoomed image pans WITHOUT moving the arrows -->
+        <div id="lb-scroll" class="flex items-center justify-center max-w-full">
+          <img
+            id="lb-img"
+            src=""
+            alt=""
+            class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl p-3 cursor-zoom-in"
+            style="background-color: var(--chart-bg)"
+          />
 
-        <!-- Interactive widget (shown instead of the image for interactive charts) -->
-        <iframe
-          id="lb-iframe"
-          title="Interactive chart"
-          loading="lazy"
-          class="hidden w-full max-w-5xl h-[75vh] rounded-xl shadow-2xl border-0"
-          style="background-color: var(--chart-bg)"
-        ></iframe>
+          <!-- Interactive widget (shown instead of the image for interactive charts) -->
+          <iframe
+            id="lb-iframe"
+            title="Interactive chart"
+            loading="lazy"
+            class="hidden w-full max-w-5xl h-[75vh] rounded-xl shadow-2xl border-0"
+            style="background-color: var(--chart-bg)"
+          ></iframe>
+        </div>
 
         <button
           id="lb-next"
@@ -660,7 +663,7 @@ function displayImage(chart: ChartEntry) {
     const lbNext = document.getElementById("lb-next")!;
     const lbBackdrop = document.getElementById("lb-backdrop")!;
     const lbZoom = document.getElementById("lb-zoom")!;
-    const lbImgWrap = document.getElementById("lb-imgwrap")!;
+    const lbScroll = document.getElementById("lb-scroll")!;
 
     // ── Fit / full-size toggle (STATIC charts only) ─────────────────────
     // Interactive charts keep ggiraph's own zoom + lasso, which work better than
@@ -670,15 +673,13 @@ function displayImage(chart: ChartEntry) {
     // full-width so a mere width:100% changed nothing).
     const IMG_FIT = "max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl p-3 cursor-zoom-in";
     const IMG_FULL = "w-[250%] max-w-none h-auto rounded-xl shadow-2xl p-3 cursor-zoom-out";
-    const WRAP_FIT = "relative z-0 flex items-center justify-center";
-    const WRAP_FULL_IMG = "relative z-0 overflow-auto max-h-[85vh]"; // pan both axes
+    const SCROLL_FIT = "flex items-center justify-center max-w-full min-w-0";
+    const SCROLL_FULL = "w-full min-w-0 overflow-auto max-h-[85vh]"; // pan both axes; arrows stay pinned outside
     let zoomed = false;
     const applyZoom = (z: boolean) => {
       zoomed = z;
       lbImg.className = z ? IMG_FULL : IMG_FIT;            // clears "hidden" — static only
-      lbImgWrap.className = z ? WRAP_FULL_IMG : WRAP_FIT;
-      lbPrev.classList.toggle("hidden", z);               // arrows get in the way while zoomed
-      lbNext.classList.toggle("hidden", z);
+      lbScroll.className = z ? SCROLL_FULL : SCROLL_FIT;   // only the inner box scrolls; prev/next stay put
       lbZoom.setAttribute("title", z ? "Fit to screen" : "Full size");
     };
     lbZoom.addEventListener("click", (e) => { e.stopPropagation(); applyZoom(!zoomed); });
@@ -773,7 +774,7 @@ function displayImage(chart: ChartEntry) {
         lbImg.classList.add("hidden");
         lbImg.removeAttribute("src");
         lbZoom.classList.add("hidden");
-        lbImgWrap.className = WRAP_FIT;
+        lbScroll.className = SCROLL_FIT;
         lbPrev.classList.remove("hidden");
         lbNext.classList.remove("hidden");
         zoomed = false;
