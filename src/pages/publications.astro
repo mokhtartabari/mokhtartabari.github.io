@@ -21,11 +21,23 @@ const groups = {
 };
 
 const totalCount = all.length;
+
+// Per-paper structured data for richer scholarly search results.
+const articlesLd = all.map((p) => ({
+  "@context": "https://schema.org",
+  "@type": "ScholarlyArticle",
+  headline: p.data.title,
+  author: p.data.authors.map((a) => ({ "@type": "Person", name: a })),
+  datePublished: String(p.data.year),
+  abstract: p.data.abstract,
+  ...(p.data.venue ? { publisher: { "@type": "Organization", name: p.data.venue } } : {}),
+}));
 ---
 
 <BaseLayout
   title="Publications"
   description="Research papers, working papers, and academic publications by Mokhtar Tabari."
+  jsonLd={articlesLd}
 >
   <section class="container-wide pt-16 pb-12">
     <header class="reveal max-w-3xl">
