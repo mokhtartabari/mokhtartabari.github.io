@@ -316,7 +316,8 @@ import { site } from "~/data/site";
 
   const loginForm = document.getElementById("login-form") as HTMLFormElement | null;
   const loginError = document.getElementById("login-error");
-  if (loginForm) {
+  if (loginForm && !loginForm.dataset.bound) {
+    loginForm.dataset.bound = "true";
     loginForm.addEventListener("submit", (e) => {
       e.preventDefault();
       const passcodeEl = document.getElementById("passcode") as HTMLInputElement;
@@ -334,7 +335,8 @@ import { site } from "~/data/site";
 
   // Logout button
   const logoutBtn = document.getElementById("btn-logout");
-  if (logoutBtn) {
+  if (logoutBtn && !logoutBtn.dataset.bound) {
+    logoutBtn.dataset.bound = "true";
     logoutBtn.addEventListener("click", () => {
       sessionStorage.removeItem("admin_authorized");
       authCheck();
@@ -344,7 +346,8 @@ import { site } from "~/data/site";
   // Self-Exclusion Toggle Switch
   const setupExclusionToggle = () => {
     const switchBtn = document.getElementById("btn-exclude-toggle");
-    if (!switchBtn) return;
+    if (!switchBtn || switchBtn.dataset.bound) return;
+    switchBtn.dataset.bound = "true";
     
     const updateSwitchState = () => {
       const isExcluded = localStorage.getItem("exclude_analytics") === "true";
@@ -375,6 +378,8 @@ import { site } from "~/data/site";
   const panels = document.querySelectorAll<HTMLDivElement>("#panels .panel");
 
   tabButtons.forEach((btn) => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = "true";
     btn.addEventListener("click", () => {
       const targetIdx = parseInt(btn.dataset.tab || "0");
       tabButtons.forEach((b, idx) => {
