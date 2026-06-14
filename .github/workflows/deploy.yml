@@ -25,6 +25,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Record start time
+        run: echo "PIPELINE_START=$(date +%s)" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -49,6 +52,21 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
+
+      # Log to the admin dashboard, but skip the 6-hourly safety-net rebuilds (noise).
+      - name: Log run to dashboard
+        if: always() && github.event_name != 'schedule'
+        env:
+          SB_URL: ${{ vars.PUBLIC_SUPABASE_URL }}
+          SB_KEY: ${{ vars.PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          [ -z "$SB_URL" ] && exit 0
+          end=$(date +%s); start=${PIPELINE_START:-$end}; dur=$((end - start))
+          [ "${{ job.status }}" = "success" ] && st=success || st=failure
+          curl -s -X POST "$SB_URL/rest/v1/pipeline_logs" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
+            -H "Content-Type: application/json" -H "Prefer: return=minimal" \
+            -d "{\"pipeline_name\":\"deploy\",\"status\":\"$st\",\"message\":\"${{ github.event_name }} run #${{ github.run_number }}\",\"duration_seconds\":$dur}" || true
 
   deploy:
     needs: build
