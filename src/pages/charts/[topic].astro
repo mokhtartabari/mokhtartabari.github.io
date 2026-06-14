@@ -326,6 +326,15 @@ function displayImage(chart: ChartEntry) {
               </button>
             </div>
           </div>
+          <!-- Fit / full-size toggle (static charts only; interactive use ggiraph's zoom) -->
+          <button
+            id="lb-zoom"
+            class="p-1.5 rounded-lg text-white/70 hover:text-white border border-white/20 hover:border-white/40 transition-colors"
+            aria-label="Toggle full size"
+            title="Full size"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+          </button>
           <button
             id="lb-close"
             class="p-1.5 rounded-lg text-white/70 hover:text-white border border-white/20 hover:border-white/40 transition-colors"
@@ -337,7 +346,7 @@ function displayImage(chart: ChartEntry) {
       </div>
 
       <!-- Image (z-0 keeps the iframe trapped below the top bar's dropdowns) -->
-      <div class="relative z-0 flex items-center justify-center">
+      <div id="lb-imgwrap" class="relative z-0 flex items-center justify-center">
         <button
           id="lb-prev"
           class="absolute left-0 z-10 -translate-x-2 md:-translate-x-12 p-2 rounded-xl text-white/70 hover:text-white border border-white/20 hover:border-white/40 bg-black/40 hover:bg-black/60 transition-all"
@@ -350,7 +359,7 @@ function displayImage(chart: ChartEntry) {
           id="lb-img"
           src=""
           alt=""
-          class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl p-3"
+          class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl p-3 cursor-zoom-in"
           style="background-color: var(--chart-bg)"
         />
 
@@ -645,6 +654,26 @@ function displayImage(chart: ChartEntry) {
     const lbPrev = document.getElementById("lb-prev")!;
     const lbNext = document.getElementById("lb-next")!;
     const lbBackdrop = document.getElementById("lb-backdrop")!;
+    const lbZoom = document.getElementById("lb-zoom")!;
+    const lbImgWrap = document.getElementById("lb-imgwrap")!;
+
+    // ── Fit / full-size toggle (static charts) ───────────────────────────
+    const IMG_FIT = "max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl p-3 cursor-zoom-in";
+    const IMG_FULL = "w-full h-auto max-w-none rounded-xl shadow-2xl p-3 cursor-zoom-out";
+    const WRAP_FIT = "relative z-0 flex items-center justify-center";
+    const WRAP_FULL = "relative z-0 flex justify-center overflow-auto max-h-[85vh]";
+    let zoomed = false;
+    const applyZoom = (z: boolean) => {
+      zoomed = z;
+      lbImg.className = z ? IMG_FULL : IMG_FIT;       // note: clears "hidden" — only call for static charts
+      lbImgWrap.className = z ? WRAP_FULL : WRAP_FIT;
+      lbPrev.classList.toggle("hidden", z);          // arrows get in the way when scrolling a full-size chart
+      lbNext.classList.toggle("hidden", z);
+      lbZoom.setAttribute("title", z ? "Fit to screen" : "Full size");
+      if (z) lbImgWrap.scrollTop = 0;
+    };
+    lbZoom.addEventListener("click", (e) => { e.stopPropagation(); applyZoom(!zoomed); });
+    lbImg.addEventListener("click", (e) => { e.stopPropagation(); applyZoom(!zoomed); });
 
     // ── Reactions ("Was this useful?") ───────────────────────────────────
     const lbReactions = document.getElementById("lb-reactions")!;
@@ -731,14 +760,19 @@ function displayImage(chart: ChartEntry) {
       if (card.dataset.interactive === "true") {
         lbIframe.src = `${dir}${base}_interactive.html`;
         lbIframe.classList.remove("hidden");
+        lbImgWrap.className = WRAP_FIT;
         lbImg.classList.add("hidden");
         lbImg.removeAttribute("src");
+        lbZoom.classList.add("hidden");        // ggiraph has its own zoom toolbar
+        lbPrev.classList.remove("hidden");
+        lbNext.classList.remove("hidden");
       } else {
         lbIframe.classList.add("hidden");
         lbIframe.removeAttribute("src");
         lbImg.src = img.src;
         lbImg.alt = img.alt;
-        lbImg.classList.remove("hidden");
+        lbZoom.classList.remove("hidden");
+        applyZoom(false);                      // reset to Fit on each open (also shows lbImg)
       }
       const formats = (card.dataset.formats ?? "png").split(",").filter(Boolean);
       // Stable, useful order regardless of manifest order.
