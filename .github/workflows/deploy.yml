@@ -42,6 +42,7 @@ jobs:
           GH_PAT: ${{ secrets.WEBSITE_DISPATCH_TOKEN }}
           PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL }}
           PUBLIC_SUPABASE_ANON_KEY: ${{ vars.PUBLIC_SUPABASE_ANON_KEY }}
+          PUBLIC_ADMIN_PASSCODE: ${{ secrets.PUBLIC_ADMIN_PASSCODE || vars.PUBLIC_ADMIN_PASSCODE }}
         run: npm run build
 
       - name: Upload artifact
