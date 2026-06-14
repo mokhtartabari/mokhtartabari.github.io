@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { vizTopics, type VizManifest } from "~/data/visualizations";
+import { site } from "~/data/site";
 import inflationManifest from "~/data/charts-manifest-inflation.json";
 import gdpManifest from "~/data/charts-manifest-gdp.json";
 import tradeManifest from "~/data/charts-manifest-trade.json";
@@ -212,6 +213,48 @@ function fmtDate(iso: string | null) {
           each topic page links to its source repository. Charts are automatically
           regenerated and deployed whenever Statistics Canada publishes new data.
         </p>
+      </div>
+    </div>
+
+    <!-- Support my work / Buy me a coffee -->
+    <div
+      class="reveal mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl border border-default bg-elevated"
+    >
+      <div class="flex gap-4">
+        <div class="flex-shrink-0 mt-0.5">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="text-red-500 dark:text-red-400"
+            aria-hidden="true"
+          >
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="font-medium text-sm mb-1">Support this project</h2>
+          <p class="text-sm text-muted leading-relaxed">
+            If you find these auto-updating charts and data pipelines useful for your work or research, consider buying me a coffee to support hosting and data processing costs.
+          </p>
+        </div>
+      </div>
+      <div class="flex-shrink-0">
+        <a
+          href={site.socials.sponsor}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border border-default bg-elevated hover:bg-neutral-50 dark:hover:bg-neutral-800 text-accent-700 dark:text-accent-300 hover:border-accent-500 transition-all duration-200 shadow-sm"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-500"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          Buy me a coffee
+        </a>
       </div>
     </div>
   </section>
