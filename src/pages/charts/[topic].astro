@@ -670,26 +670,41 @@ function displayImage(chart: ChartEntry) {
     // scroll/pan in both directions (works on mobile, where the panel is already
     // full-width so a mere width:100% changed nothing). Same UX for both types;
     // interactive charts use ggiraph for hover only (its toolbar is hidden).
+    // Static charts use the <img>; interactive charts use the live widget for BOTH
+    // fit and full (same rendering + bg in both modes). The iframe is sized in JS
+    // to the chart's real aspect ratio so it fits with no dead space; full = 2.5×.
     const IMG_FIT = "max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl p-3 cursor-zoom-in";
     const IMG_FULL = "w-[250%] max-w-none h-auto rounded-xl shadow-2xl p-3 cursor-zoom-out";
-    const IFRAME_FIT = "w-full max-w-5xl h-[75vh] rounded-xl shadow-2xl border-0";
-    const SCROLL_FIT = "w-full flex items-center justify-center min-w-0"; // w-full so the iframe (no intrinsic width) fills the panel
-    const SCROLL_FULL = "w-full min-w-0 overflow-auto max-h-[85vh]"; // pan both axes; arrows stay pinned outside
+    const IFRAME_BASE = "rounded-xl shadow-2xl border-0 cursor-zoom-in"; // w/h set inline by sizeIframe()
+    const SCROLL_FIT = "w-full flex items-center justify-center min-w-0";
+    const SCROLL_FULL = "w-full min-w-0 overflow-auto max-h-[85vh]"; // block so oversized content pans fully both axes
     let zoomed = false;
     let openInteractive = false;
     let openImgSrc = "";
     let openImgAlt = "";
+    let chartAspect = 1.6;                                 // width/height of the open chart
+
+    // Size the interactive iframe to the chart's aspect ratio: fit = largest box
+    // that fits the viewport; full = 2.5× that (pans inside the scroll box).
+    const sizeIframe = () => {
+      if (!openInteractive) return;
+      const availW = lbScroll.clientWidth || window.innerWidth * 0.9;
+      const maxH = window.innerHeight * 0.8;
+      let w = availW, h = availW / chartAspect;            // object-contain within availW × maxH
+      if (h > maxH) { h = maxH; w = maxH * chartAspect; }
+      const k = zoomed ? 2.5 : 1;
+      lbIframe.style.width = `${Math.round(w * k)}px`;
+      lbIframe.style.height = `${Math.round(h * k)}px`;
+    };
+
     const applyZoom = (z: boolean) => {
       zoomed = z;
       lbScroll.className = z ? SCROLL_FULL : SCROLL_FIT;   // only the inner box scrolls; prev/next stay put
-      if (openInteractive && !z) {
-        // Fit view of an interactive chart: the live ggiraph widget (for hover).
+      if (openInteractive) {
         lbImg.classList.add("hidden");
-        lbIframe.className = IFRAME_FIT;                   // no "hidden" → shown
+        lbIframe.className = IFRAME_BASE;                  // no "hidden" → shown; w/h via sizeIframe
+        sizeIframe();
       } else {
-        // Full/zoom — interactive charts show their static SVG here (reliable
-        // pan, transparent → paper bg, identical to static charts) — and every
-        // static-chart view.
         lbIframe.classList.add("hidden");
         lbImg.src = openImgSrc;
         lbImg.alt = openImgAlt;
@@ -699,6 +714,16 @@ function displayImage(chart: ChartEntry) {
     };
     lbZoom.addEventListener("click", (e) => { e.stopPropagation(); applyZoom(!zoomed); });
     lbImg.addEventListener("click", (e) => { e.stopPropagation(); applyZoom(!zoomed); });
+    // Re-read the chart aspect once the widget loads, then resize to fit.
+    lbIframe.addEventListener("load", () => {
+      try {
+        const svg = lbIframe.contentDocument?.querySelector("svg");
+        const vb = (svg as SVGSVGElement | null)?.viewBox?.baseVal;
+        if (vb && vb.height) chartAspect = vb.width / vb.height;
+      } catch (e) { /* cross-doc read can fail; keep the img-derived aspect */ }
+      sizeIframe();
+    });
+    window.addEventListener("resize", () => { if (!lb.classList.contains("hidden")) sizeIframe(); });
 
     // ── Reactions ("Was this useful?") ───────────────────────────────────
     const lbReactions = document.getElementById("lb-reactions")!;
@@ -781,16 +806,19 @@ function displayImage(chart: ChartEntry) {
       const base = card.dataset.base ?? "";
       const dir = card.dataset.dir ?? "";
 
-      // Same fit/full toggle for both. Interactive = live widget in Fit (hover),
-      // static SVG when zoomed. Static = image always. Both reset to Fit on open.
+      // Static = image; interactive = live widget (fit + full). Reset to Fit on open.
       openInteractive = card.dataset.interactive === "true";
-      openImgSrc = img.src;                     // display image (SVG) — used for the zoomed view
+      openImgSrc = img.src;                     // display image (SVG)
       openImgAlt = img.alt;
+      // Initial aspect from the card image so the widget is sized right before it
+      // loads; refined from the SVG viewBox on iframe load.
+      chartAspect = img.naturalWidth && img.naturalHeight
+        ? img.naturalWidth / img.naturalHeight : 1.6;
       lbZoom.classList.remove("hidden");
       lbPrev.classList.remove("hidden");
       lbNext.classList.remove("hidden");
-      // ?v bust: widgets are fetched/transformed at build (transparent bg, no
-      // toolbar); bump when that transform changes so cached copies refresh.
+      // ?v bust: widgets are transformed at build (transparent bg, no toolbar);
+      // bump when that transform changes so cached copies refresh.
       if (openInteractive) lbIframe.src = `${dir}${base}_interactive.html?v=3`;
       else lbIframe.removeAttribute("src");
       applyZoom(false);                        // reset to Fit; reveals the active element
