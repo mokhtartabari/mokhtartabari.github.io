@@ -387,12 +387,51 @@ function displayImage(chart: ChartEntry) {
       <!-- Caption -->
       <p id="lb-caption" class="text-center text-white/80 text-sm px-8"></p>
 
-      <!-- Reactions ("Was this useful?") -->
-      <div id="lb-reactions" class="flex items-center justify-center gap-2 text-sm text-white/55" style="display:none">
-        <span id="lb-react-prompt">Was this chart useful?</span>
-        <button id="lb-react-up" class="px-2.5 py-1 rounded-lg border border-white/20 hover:border-white/40 hover:text-white transition-colors" aria-label="Yes, useful">👍</button>
-        <button id="lb-react-down" class="px-2.5 py-1 rounded-lg border border-white/20 hover:border-white/40 hover:text-white transition-colors" aria-label="Not useful">👎</button>
-        <span id="lb-react-thanks" class="hidden text-emerald-400">Thanks for the feedback!</span>
+      <!-- Reactions ("Was this useful?") & Feedback Form -->
+      <div id="lb-reactions" class="flex flex-col items-center justify-center gap-4 text-sm text-white/55" style="display:none">
+        <div class="flex items-center gap-2">
+          <span id="lb-react-prompt">Was this chart useful?</span>
+          <button id="lb-react-up" class="px-2.5 py-1 rounded-lg border border-white/20 hover:border-white/40 hover:text-white transition-colors" aria-label="Yes, useful">👍</button>
+          <button id="lb-react-down" class="px-2.5 py-1 rounded-lg border border-white/20 hover:border-white/40 hover:text-white transition-colors" aria-label="Not useful">👎</button>
+          <span id="lb-react-thanks" class="hidden text-emerald-400">Thanks for the feedback!</span>
+        </div>
+
+        <div id="lb-feedback-section" class="w-full max-w-md border-t border-white/10 pt-3 mt-1">
+          <div class="flex flex-col items-center gap-2">
+            <button
+              id="lb-feedback-toggle"
+              class="text-xs text-white/50 hover:text-white underline transition-colors"
+            >
+              Spotted something off? Send feedback or suggestion for this chart
+            </button>
+            
+            <form id="lb-feedback-form" class="hidden w-full flex flex-col gap-2 mt-2">
+              <textarea
+                id="lb-feedback-textarea"
+                required
+                rows="2"
+                maxlength="2000"
+                placeholder="What's wrong or how can we improve this chart?..."
+                class="w-full border border-white/15 hover:border-white/25 focus:border-white/40 focus:outline-none focus:ring-0 rounded-xl bg-white/5 text-white text-xs px-3 py-2 resize-none placeholder-white/30"
+              ></textarea>
+              <div class="flex gap-2">
+                <input
+                  id="lb-feedback-email"
+                  type="email"
+                  placeholder="email (optional)"
+                  class="flex-grow border border-white/15 hover:border-white/25 focus:border-white/40 focus:outline-none focus:ring-0 rounded-xl bg-white/5 text-white text-xs px-3 py-1.5 placeholder-white/30"
+                />
+                <button
+                  type="submit"
+                  class="px-4 py-1.5 text-xs font-semibold rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white transition-colors"
+                >
+                  Send
+                </button>
+              </div>
+              <p id="lb-feedback-status" class="text-[10px] text-white/50 text-center" role="status"></p>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -672,6 +711,13 @@ function displayImage(chart: ChartEntry) {
     const lbZoom = document.getElementById("lb-zoom")!;
     const lbScroll = document.getElementById("lb-scroll")!;
 
+    const lbFeedbackSection = document.getElementById("lb-feedback-section")!;
+    const lbFeedbackToggle = document.getElementById("lb-feedback-toggle")!;
+    const lbFeedbackForm = document.getElementById("lb-feedback-form") as HTMLFormElement;
+    const lbFeedbackTextarea = document.getElementById("lb-feedback-textarea") as HTMLTextAreaElement;
+    const lbFeedbackEmail = document.getElementById("lb-feedback-email") as HTMLInputElement;
+    const lbFeedbackStatus = document.getElementById("lb-feedback-status")!;
+
     // ── Fit / full-size toggle (static images AND interactive widgets) ───
     // Fit = whole chart on screen. Full = enlarge to 2.5× the panel width and
     // scroll/pan in both directions (works on mobile, where the panel is already
@@ -776,6 +822,67 @@ function displayImage(chart: ChartEntry) {
     lbReactUp.addEventListener("click", (e) => { e.stopPropagation(); react("helpful"); });
     lbReactDown.addEventListener("click", (e) => { e.stopPropagation(); react("not_helpful"); });
 
+    // ── Chart Feedback Form Setup ────────────────────────────────────────
+    lbFeedbackToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isHidden = lbFeedbackForm.classList.toggle("hidden");
+      lbFeedbackToggle.textContent = isHidden 
+        ? "Spotted something off? Send feedback or suggestion for this chart" 
+        : "Cancel feedback";
+      if (!isHidden) {
+        lbFeedbackTextarea.focus();
+      }
+    });
+
+    lbFeedbackForm.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+
+    lbFeedbackForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const message = lbFeedbackTextarea.value.trim();
+      const email = lbFeedbackEmail.value.trim() || null;
+      if (!message || !openSlug) return;
+
+      lbFeedbackStatus.textContent = "Sending...";
+      lbFeedbackStatus.className = "text-[11px] text-white/60 text-center";
+
+      try {
+        const res = await fetch(`${supabaseUrl}/rest/v1/feedback`, {
+          method: "POST",
+          headers: {
+            apikey: supabaseAnonKey,
+            Authorization: `Bearer ${supabaseAnonKey}`,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal",
+          },
+          body: JSON.stringify({
+            message: `[Chart: ${openSlug}] ${message}`,
+            email: email,
+          }),
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        lbFeedbackStatus.textContent = "Thank you! Your feedback has been sent.";
+        lbFeedbackStatus.className = "text-[11px] text-emerald-400 text-center font-medium";
+        lbFeedbackTextarea.value = "";
+        
+        setTimeout(() => {
+          lbFeedbackForm.classList.add("hidden");
+          lbFeedbackToggle.textContent = "Spotted something off? Send feedback or suggestion for this chart";
+          lbFeedbackStatus.textContent = "";
+        }, 3000);
+
+      } catch (err) {
+        console.warn("Feedback submission failed:", err);
+        lbFeedbackStatus.textContent = "Something went wrong. Please try again later.";
+        lbFeedbackStatus.className = "text-[11px] text-rose-400 text-center font-medium";
+      }
+    });
+
     if (!lb || !cards.length) return;
 
     // Visible cards only (respects category filter)
@@ -859,6 +966,13 @@ function displayImage(chart: ChartEntry) {
         : "";
       closeMenu();
 
+      // Reset chart feedback form state
+      lbFeedbackForm.classList.add("hidden");
+      lbFeedbackToggle.textContent = "Spotted something off? Send feedback or suggestion for this chart";
+      lbFeedbackTextarea.value = "";
+      lbFeedbackEmail.value = "";
+      lbFeedbackStatus.textContent = "";
+
       lb.classList.remove("hidden");
       lb.classList.add("flex");
       document.body.style.overflow = "hidden";
@@ -868,6 +982,14 @@ function displayImage(chart: ChartEntry) {
     const close = () => {
       closeMenu();
       lbIframe.removeAttribute("src"); // unload the interactive widget
+      
+      // Reset chart feedback form state
+      lbFeedbackForm.classList.add("hidden");
+      lbFeedbackToggle.textContent = "Spotted something off? Send feedback or suggestion for this chart";
+      lbFeedbackTextarea.value = "";
+      lbFeedbackEmail.value = "";
+      lbFeedbackStatus.textContent = "";
+
       lb.classList.add("hidden");
       lb.classList.remove("flex");
       document.body.style.overflow = "";
