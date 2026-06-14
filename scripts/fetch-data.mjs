@@ -78,11 +78,12 @@ async function syncTopic(topic, repo) {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const dest = path.join(chartsDir, fname);
         if (fname.endsWith("_interactive.html")) {
-          // Hide only ggiraph's "save as png" button — the site has its own
-          // Download menu — while keeping ggiraph's zoom + lasso. Injected here so
-          // it applies on every build without regenerating the widgets.
+          // Hide ggiraph's whole in-chart toolbar (zoom/lasso/save) — the site
+          // provides its own fit/full-size toggle + Download menu, identical to
+          // static charts. Injected here so it applies on every build without
+          // regenerating the widgets.
           let html = await res.text();
-          const css = "<style>.ggiraph-toolbar-icon-saveaspng{display:none!important}</style>";
+          const css = "<style>.ggiraph-toolbar{display:none!important}</style>";
           html = html.includes("</head>") ? html.replace("</head>", `${css}</head>`) : css + html;
           fs.writeFileSync(dest, html);
         } else {
