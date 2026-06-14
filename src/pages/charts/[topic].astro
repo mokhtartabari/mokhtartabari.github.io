@@ -791,7 +791,7 @@ function displayImage(chart: ChartEntry) {
       lbNext.classList.remove("hidden");
       // ?v bust: widgets are fetched/transformed at build (transparent bg, no
       // toolbar); bump when that transform changes so cached copies refresh.
-      if (openInteractive) lbIframe.src = `${dir}${base}_interactive.html?v=2`;
+      if (openInteractive) lbIframe.src = `${dir}${base}_interactive.html?v=3`;
       else lbIframe.removeAttribute("src");
       applyZoom(false);                        // reset to Fit; reveals the active element
       const formats = (card.dataset.formats ?? "png").split(",").filter(Boolean);

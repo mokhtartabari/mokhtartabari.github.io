@@ -84,7 +84,10 @@ async function syncTopic(topic, repo) {
           // regenerating the widgets.
           let html = await res.text();
           const css = "<style>.ggiraph-toolbar{display:none!important}" +
-            "html,body{background:transparent!important;margin:0}</style>"; // show the page's paper bg, no toolbar
+            // girafe paints an opaque white background rect; make it transparent
+            // so the page's paper bg shows. Plus hide the toolbar + clear body bg.
+            ".ggiraph-svg-bg{fill:transparent!important;stroke:none!important}" +
+            "html,body{background:transparent!important;margin:0}</style>";
           html = html.includes("</head>") ? html.replace("</head>", `${css}</head>`) : css + html;
           fs.writeFileSync(dest, html);
         } else {
