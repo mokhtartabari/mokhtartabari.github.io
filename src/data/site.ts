@@ -27,6 +27,7 @@ export const site = {
     linkedin: "https://www.linkedin.com/in/mokhtar-tabari/",
     github: "https://github.com/mokhtartabari",
     bluesky: "https://bsky.app/profile/mokhtartabari.bsky.social",
+    sponsor: "https://github.com/sponsors/mokhtartabari",
   },
   researchInterests: [
     "International Trade",
