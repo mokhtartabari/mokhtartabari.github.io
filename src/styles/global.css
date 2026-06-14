@@ -65,7 +65,7 @@
        ink, so this MUST stay light in both themes. Single knob to re-theme all
        charts site-wide. Soft warm off-white ("paper") so charts feel printed
        rather than sitting on a stark white block. */
-    --chart-bg: #faf7f1;
+    --chart-bg: #f6f1e5;
   }
 
   .dark {
@@ -78,7 +78,7 @@
     /* Dark mode: charts have dark ink, so they must sit on a light "paper"
        panel (can't follow --bg-elevated, which is dark). Warm paper tone instead
        of stark white — gentler glow against the dark page, still fully readable. */
-    --chart-bg: #efebe3;
+    --chart-bg: #ece6d9;
   }
 
   html {
