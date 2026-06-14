@@ -102,6 +102,13 @@ justifies it.
    - Needs a **verified sending domain** (you can't send from a `@gmail.com`
      address). Send from `mokhtartabari.ca` with `REPLY_TO` set to the Gmail so
      replies land there.
+   - **Chosen addresses** (set up once the domain is on Namecheap):
+     - `updates@mokhtartabari.ca` → the Resend **From** for release-day alerts,
+       with `REPLY_TO: mokhtar@mokhtartabari.ca`.
+     - `mokhtar@mokhtartabari.ca` → personal/contact address (CV, site footer).
+     - *Sending* only needs Resend domain verification. *Receiving* replies needs
+       email forwarding on the domain (free Cloudflare Email Routing, or
+       Namecheap's forwarding) pointing both addresses at the Gmail.
    - Set secrets (`RESEND_API_KEY`, `NOTIFY_SECRET`, `FROM_EMAIL`, `REPLY_TO`) and
      wire `content-machine-orchestrator` to POST to the function on release day.
    - The Resend API key is in the macOS Keychain (`resend-api-key-website`) but was
