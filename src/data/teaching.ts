@@ -24,6 +24,71 @@ export const interests = [
   "Panel data econometrics and quantitative methods",
 ];
 
+// Institution-neutral teaching evidence (evaluations, peer observations, PD).
+export const effectiveness = {
+  evalCourse: "MBAF 504: Business Economics",
+  evalBefore: 87.4,
+  evalPeak: 94.2,
+  videoViews: "3,000+",
+};
+
+export const studentQuotes = [
+  {
+    quote:
+      "This has been a very interactive and effective class. The instructor made sure we learned, wrote, and practiced.",
+    source: "MBA student, Spring 2022",
+  },
+  {
+    quote:
+      "I am very impressed with the teaching method through video and in-class activities. It helped me grasp and learn economics fundamentals easily.",
+    source: "MBA student, Fall 2021",
+  },
+];
+
+export const peerObservations = [
+  {
+    quote:
+      "Creative, inclusive, and clearly communicated … an exemplary colleague whose practices align with the vision of the department and university in fostering academic excellence and innovation.",
+    name: "Eduardo Azmitia",
+    role: "Capilano University",
+  },
+  {
+    quote:
+      "An excellent instructor who treats his students with respect and tries to instil motivation in them to learn more. His class covered the learning outcomes of the course uniquely and ingeniously.",
+    name: "Chieko Tanimura",
+    role: "Economics Department Convenor, Capilano University",
+  },
+  {
+    quote:
+      "Articulate, enthusiastic, confident, prepared … easy to follow and explains complex ideas very clearly. Dr. Tabari is a gifted teacher who cares a lot about his students learning the course material.",
+    name: "Peter Tsigaris",
+    role: "Thompson Rivers University",
+  },
+];
+
+export const professionalDevelopment = [
+  {
+    title: "LEADing in Learning: Teaching with AI (Certificate)",
+    org: "Capilano University",
+    year: "2024",
+  },
+  {
+    title: "Centre for Excellence in Learning and Teaching workshops",
+    org: "Thompson Rivers University",
+    year: "",
+  },
+  {
+    title: "Teaching Online Series",
+    org: "UBC Sauder School of Business",
+    year: "",
+  },
+  {
+    title: "Instructional Skills Workshop (ISW)",
+    org: "Taylor Institute, University of Calgary",
+    year: "2018",
+  },
+];
+
 export const innovations = [
   {
     title: "AI-Generated Think-Pair-Share (AI-TPS) Framework",
