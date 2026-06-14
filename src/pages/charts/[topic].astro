@@ -676,7 +676,7 @@ function displayImage(chart: ChartEntry) {
     // aspect-[5/4] is the tallest chart's ratio, so the widget never needs an
     // internal scrollbar; the outer box does the panning.
     const IFRAME_FULL = "w-[250%] max-w-none aspect-[5/4] rounded-xl shadow-2xl border-0";
-    const SCROLL_FIT = "flex items-center justify-center max-w-full min-w-0";
+    const SCROLL_FIT = "w-full flex items-center justify-center min-w-0"; // w-full so the iframe (no intrinsic width) fills the panel
     const SCROLL_FULL = "w-full min-w-0 overflow-auto max-h-[85vh]"; // pan both axes; arrows stay pinned outside
     let zoomed = false;
     let openInteractive = false;
