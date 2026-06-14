@@ -3,7 +3,6 @@ import { getCollection } from "astro:content";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import {
   philosophy,
-  interests,
   innovations,
   appointments,
   serviceRoles,
@@ -33,7 +32,7 @@ const pubBySlug = Object.fromEntries(publications.map((p) => [p.id, p]));
         Teaching & Pedagogy
       </h1>
       <p class="mt-5 text-lg text-muted leading-relaxed">
-        Course history, teaching interests, and research on pedagogy.
+        Course history and research on pedagogy.
       </p>
     </header>
   </section>
@@ -52,23 +51,6 @@ const pubBySlug = Object.fromEntries(publications.map((p) => [p.id, p]));
         {philosophy.map((p) => <p class="reveal">{p}</p>)}
       </div>
     </div>
-  </section>
-
-  <!-- Teaching interests -->
-  <section class="container-wide py-12">
-    <div class="reveal mb-8">
-      <h2 class="font-serif text-3xl font-semibold">Teaching interests</h2>
-    </div>
-    <ul class="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-3" role="list">
-      {
-        interests.map((interest) => (
-          <li class="flex items-start gap-3 rounded-xl border border-default bg-elevated p-4">
-            <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-accent-500 flex-shrink-0" />
-            <span class="text-sm font-medium">{interest}</span>
-          </li>
-        ))
-      }
-    </ul>
   </section>
 
   <!-- Research on teaching -->
