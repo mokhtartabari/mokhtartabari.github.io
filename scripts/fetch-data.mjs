@@ -72,7 +72,7 @@ async function logPipeline(pipelineName, status, message, durationSeconds) {
         pipeline_name: pipelineName,
         status: status,
         message: message,
-        duration_seconds: parseFloat(durationSeconds.toFixed(3))
+        duration_seconds: Math.round(durationSeconds)
       })
     });
 
