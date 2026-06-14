@@ -20,7 +20,6 @@ export const site = {
   location: "Vancouver, Canada",
   email: "mokhtartabari@capilanou.ca",
   emailPersonal: "mokhtar.tab@gmail.com",
-  cv: "/files/cv.pdf",
   socials: {
     scholar:
       "https://scholar.google.com/citations?user=Eti_yWQAAAAJ&hl=en",
