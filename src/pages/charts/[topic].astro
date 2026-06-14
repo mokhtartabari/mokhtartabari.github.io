@@ -264,7 +264,7 @@ function displayImage(chart: ChartEntry) {
     <div id="lb-backdrop" class="absolute inset-0 bg-black/85 backdrop-blur-sm"></div>
 
     <!-- Panel -->
-    <div class="relative z-10 w-full max-w-5xl flex flex-col gap-3 max-h-[95vh]">
+    <div id="lb-panel" class="relative z-10 w-full max-w-5xl flex flex-col gap-3 max-h-[95vh]">
       <!-- Top bar (z-30 so its Download/Embed dropdowns sit above the interactive iframe) -->
       <div class="relative z-30 flex items-center justify-between px-1">
         <span id="lb-counter" class="text-white/60 text-sm tabular-nums"></span>
@@ -656,21 +656,33 @@ function displayImage(chart: ChartEntry) {
     const lbBackdrop = document.getElementById("lb-backdrop")!;
     const lbZoom = document.getElementById("lb-zoom")!;
     const lbImgWrap = document.getElementById("lb-imgwrap")!;
+    const lbPanel = document.getElementById("lb-panel")!;
 
-    // ── Fit / full-size toggle (static charts) ───────────────────────────
+    // ── Fit / full-size toggle (static images AND interactive widgets) ───
     const IMG_FIT = "max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl p-3 cursor-zoom-in";
     const IMG_FULL = "w-full h-auto max-w-none rounded-xl shadow-2xl p-3 cursor-zoom-out";
+    const IFRAME_FIT = "w-full max-w-5xl h-[75vh] rounded-xl shadow-2xl border-0";
+    const IFRAME_FULL = "w-full h-[85vh] rounded-xl shadow-2xl border-0";
     const WRAP_FIT = "relative z-0 flex items-center justify-center";
-    const WRAP_FULL = "relative z-0 flex justify-center overflow-auto max-h-[85vh]";
+    const WRAP_FULL_IMG = "relative z-0 flex justify-center overflow-auto max-h-[85vh]";
     let zoomed = false;
+    let openInteractive = false;
     const applyZoom = (z: boolean) => {
       zoomed = z;
-      lbImg.className = z ? IMG_FULL : IMG_FIT;       // note: clears "hidden" — only call for static charts
-      lbImgWrap.className = z ? WRAP_FULL : WRAP_FIT;
-      lbPrev.classList.toggle("hidden", z);          // arrows get in the way when scrolling a full-size chart
+      // "Full" widens the whole panel so the chart uses more of the screen.
+      lbPanel.classList.toggle("max-w-5xl", !z);
+      lbPanel.classList.toggle("max-w-[96vw]", z);
+      if (openInteractive) {
+        lbIframe.className = z ? IFRAME_FULL : IFRAME_FIT; // iframe shown; never carries "hidden" here
+        lbImgWrap.className = WRAP_FIT;
+      } else {
+        lbImg.className = z ? IMG_FULL : IMG_FIT;          // clears "hidden" — static only
+        lbImgWrap.className = z ? WRAP_FULL_IMG : WRAP_FIT;
+        if (z) lbImgWrap.scrollTop = 0;
+      }
+      lbPrev.classList.toggle("hidden", z);               // arrows get in the way while zoomed
       lbNext.classList.toggle("hidden", z);
       lbZoom.setAttribute("title", z ? "Fit to screen" : "Full size");
-      if (z) lbImgWrap.scrollTop = 0;
     };
     lbZoom.addEventListener("click", (e) => { e.stopPropagation(); applyZoom(!zoomed); });
     lbImg.addEventListener("click", (e) => { e.stopPropagation(); applyZoom(!zoomed); });
@@ -757,23 +769,20 @@ function displayImage(chart: ChartEntry) {
       const dir = card.dataset.dir ?? "";
 
       // Interactive charts load the ggiraph widget in an iframe; others show the image.
-      if (card.dataset.interactive === "true") {
+      openInteractive = card.dataset.interactive === "true";
+      lbZoom.classList.remove("hidden");       // fit/full toggle on both, for consistency
+      if (openInteractive) {
         lbIframe.src = `${dir}${base}_interactive.html`;
         lbIframe.classList.remove("hidden");
-        lbImgWrap.className = WRAP_FIT;
         lbImg.classList.add("hidden");
         lbImg.removeAttribute("src");
-        lbZoom.classList.add("hidden");        // ggiraph has its own zoom toolbar
-        lbPrev.classList.remove("hidden");
-        lbNext.classList.remove("hidden");
       } else {
         lbIframe.classList.add("hidden");
         lbIframe.removeAttribute("src");
         lbImg.src = img.src;
         lbImg.alt = img.alt;
-        lbZoom.classList.remove("hidden");
-        applyZoom(false);                      // reset to Fit on each open (also shows lbImg)
       }
+      applyZoom(false);                        // reset to Fit on each open (also reveals the right element)
       const formats = (card.dataset.formats ?? "png").split(",").filter(Boolean);
       // Stable, useful order regardless of manifest order.
       const ordered = ["svg", "pdf", "png"].filter((f) => formats.includes(f));

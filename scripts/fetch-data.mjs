@@ -76,7 +76,18 @@ async function syncTopic(topic, repo) {
       try {
         const res = await fetch(apiUrl(repo, fname), { headers });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        fs.writeFileSync(path.join(chartsDir, fname), Buffer.from(await res.arrayBuffer()));
+        const dest = path.join(chartsDir, fname);
+        if (fname.endsWith("_interactive.html")) {
+          // Hide ggiraph's built-in toolbar (zoom/lasso/save-as-png) — the site
+          // provides its own download + fit/full-size controls. Injected here so
+          // it applies on every build without regenerating the widgets.
+          let html = await res.text();
+          const css = "<style>.ggiraph-toolbar{display:none!important}</style>";
+          html = html.includes("</head>") ? html.replace("</head>", `${css}</head>`) : css + html;
+          fs.writeFileSync(dest, html);
+        } else {
+          fs.writeFileSync(dest, Buffer.from(await res.arrayBuffer()));
+        }
         console.log(`  ✓ ${fname}`);
       } catch (err) {
         console.error(`  ✗ Failed to download ${fname}: ${err.message}`);
