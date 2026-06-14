@@ -913,12 +913,14 @@ function displayImage(chart: ChartEntry) {
       if (e.key === "ArrowRight") open(current + 1);
     });
 
-    // Touch swipe
+    // Touch swipe → prev/next. Disabled while zoomed so a pan gesture pans the
+    // image (native scroll) instead of jumping to the next/previous chart.
     let touchStartX = 0;
     lb.addEventListener("touchstart", (e) => {
       touchStartX = e.touches[0].clientX;
     });
     lb.addEventListener("touchend", (e) => {
+      if (zoomed) return;
       const dx = e.changedTouches[0].clientX - touchStartX;
       if (Math.abs(dx) > 50) open(dx < 0 ? current + 1 : current - 1);
     });
