@@ -68,9 +68,11 @@ async function syncTopic(topic, repo) {
         console.error(`  ✗ Failed to download ${fname}: ${err.message}`);
       }
     }
-    // Interactive ggiraph widget (self-contained HTML), when the chart has one.
-    if (chart.interactive) {
-      const fname = `${base}_interactive.html`;
+    // Extra artifacts: interactive widget (HTML) and underlying data (CSV).
+    const extras = [];
+    if (chart.interactive) extras.push(`${base}_interactive.html`);
+    if (chart.csv) extras.push(`${base}.csv`);
+    for (const fname of extras) {
       try {
         const res = await fetch(apiUrl(repo, fname), { headers });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
