@@ -1,0 +1,88 @@
+---
+// Standalone, chrome-less chart page meant to be embedded via <iframe> on other
+// sites. Interactive charts embed their ggiraph widget; the rest show the SVG/PNG.
+// A small attribution footer links back to the source (good for backlinks).
+import { vizTopics, type VizManifest, type ChartEntry, type VizTopic } from "~/data/visualizations";
+import { site } from "~/data/site";
+import inflationManifest from "~/data/charts-manifest-inflation.json";
+import gdpManifest from "~/data/charts-manifest-gdp.json";
+import tradeManifest from "~/data/charts-manifest-trade.json";
+import employmentManifest from "~/data/charts-manifest-employment.json";
+
+const manifests: Record<string, VizManifest> = {
+  inflation: inflationManifest as unknown as VizManifest,
+  gdp: gdpManifest as unknown as VizManifest,
+  trade: tradeManifest as unknown as VizManifest,
+  employment: employmentManifest as unknown as VizManifest,
+};
+
+export function getStaticPaths() {
+  const map: Record<string, VizManifest> = {
+    inflation: inflationManifest as unknown as VizManifest,
+    gdp: gdpManifest as unknown as VizManifest,
+    trade: tradeManifest as unknown as VizManifest,
+    employment: employmentManifest as unknown as VizManifest,
+  };
+  const paths: { params: { topic: string; slug: string }; props: { chart: ChartEntry; topic: VizTopic } }[] = [];
+  for (const t of vizTopics) {
+    for (const c of map[t.slug]?.charts ?? []) {
+      paths.push({ params: { topic: t.slug, slug: c.slug }, props: { chart: c, topic: t } });
+    }
+  }
+  return paths;
+}
+
+const { chart, topic } = Astro.props as { chart: ChartEntry; topic: VizTopic };
+const title = chart.title ?? chart.slug;
+const base = chart.filename.replace(/\.png$/i, "");
+const isInteractive = !!chart.interactive;
+const imgFile = chart.formats?.includes("svg") ? `${base}.svg` : chart.filename;
+const chartPage = `${site.url}/charts/${topic.slug}/`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>{title}</title>
+    <style>
+      :root { color-scheme: light dark; }
+      html, body { margin: 0; height: 100%; }
+      body {
+        display: flex;
+        flex-direction: column;
+        font-family: Georgia, "Times New Roman", serif;
+        background: #fff;
+      }
+      @media (prefers-color-scheme: dark) { body { background: #0b0b0c; } }
+      .chart { flex: 1 1 auto; min-height: 0; display: flex; }
+      .chart img { width: 100%; height: 100%; object-fit: contain; display: block; }
+      .chart iframe { width: 100%; height: 100%; border: 0; display: block; }
+      .credit {
+        flex: 0 0 auto;
+        font-size: 12px;
+        padding: 6px 12px;
+        border-top: 1px solid rgba(128,128,128,0.25);
+        display: flex; justify-content: space-between; gap: 8px;
+      }
+      .credit a { color: #4f46e5; text-decoration: none; }
+      .credit a:hover { text-decoration: underline; }
+      .credit .muted { color: #888; }
+    </style>
+  </head>
+  <body>
+    <div class="chart">
+      {isInteractive ? (
+        <iframe src={`${topic.chartsDir}${base}_interactive.html`} title={title} loading="lazy"></iframe>
+      ) : (
+        <img src={`${topic.chartsDir}${imgFile}`} alt={title} loading="lazy" />
+      )}
+    </div>
+    <div class="credit">
+      <a href={chartPage} target="_blank" rel="noopener">{title}</a>
+      <span class="muted">Mokhtar Tabari · Statistics Canada</span>
+    </div>
+  </body>
+</html>

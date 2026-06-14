@@ -201,6 +201,7 @@ function displayImage(chart: ChartEntry) {
                   data-formats={(chart.formats ?? ["png"]).join(",")}
                   data-dir={topic.chartsDir}
                   data-interactive={chart.interactive ? "true" : undefined}
+                  data-embed={`/embed/${topicSlug}/${chart.slug}/`}
                   role="button"
                   tabindex="0"
                   aria-label={`Open chart: ${title}`}
@@ -291,6 +292,37 @@ function displayImage(chart: ChartEntry) {
                 <span class="font-medium text-white/60">PNG</span> for Word &amp; email.
                 Please keep the source line on the chart.
               </p>
+            </div>
+          </div>
+          <!-- Embed menu -->
+          <div class="relative" id="lb-embed-wrap">
+            <button
+              id="lb-embed-btn"
+              class="inline-flex items-center gap-1.5 text-sm text-white/70 hover:text-white px-3 py-1.5 rounded-lg border border-white/20 hover:border-white/40 transition-colors"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              Embed
+            </button>
+            <div
+              id="lb-embed-menu"
+              class="hidden absolute right-0 mt-2 w-80 max-w-[90vw] rounded-xl border border-white/15 bg-neutral-900/95 backdrop-blur-sm shadow-2xl p-3 z-20"
+              role="menu"
+            >
+              <p class="text-[11px] text-white/60 mb-2">Paste this into any site to embed the chart:</p>
+              <textarea
+                id="lb-embed-code"
+                readonly
+                rows="3"
+                class="w-full text-[11px] font-mono text-white/85 bg-black/40 border border-white/15 rounded-lg p-2 resize-none focus:outline-none focus:ring-1 focus:ring-accent-400"
+              ></textarea>
+              <button
+                id="lb-embed-copy"
+                class="mt-2 w-full text-sm text-white/80 hover:text-white px-3 py-1.5 rounded-lg border border-white/20 hover:border-white/40 transition-colors"
+              >
+                Copy embed code
+              </button>
             </div>
           </div>
           <button
@@ -575,6 +607,10 @@ function displayImage(chart: ChartEntry) {
     const lbDownloadBtn = document.getElementById("lb-download-btn")!;
     const lbDownloadMenu = document.getElementById("lb-download-menu")!;
     const lbDownloadLinks = document.getElementById("lb-download-links")!;
+    const lbEmbedBtn = document.getElementById("lb-embed-btn")!;
+    const lbEmbedMenu = document.getElementById("lb-embed-menu")!;
+    const lbEmbedCode = document.getElementById("lb-embed-code") as HTMLTextAreaElement;
+    const lbEmbedCopy = document.getElementById("lb-embed-copy")!;
     const lbClose = document.getElementById("lb-close")!;
     const lbPrev = document.getElementById("lb-prev")!;
     const lbNext = document.getElementById("lb-next")!;
@@ -597,6 +633,8 @@ function displayImage(chart: ChartEntry) {
     const closeMenu = () => {
       lbDownloadMenu.classList.add("hidden");
       lbDownloadBtn.setAttribute("aria-expanded", "false");
+      lbEmbedMenu.classList.add("hidden");
+      lbEmbedBtn.setAttribute("aria-expanded", "false");
     };
 
     const open = (idx: number) => {
@@ -638,6 +676,13 @@ function displayImage(chart: ChartEntry) {
             `</a>`,
         )
         .join("");
+
+      // Build the embed snippet for this chart.
+      const embedPath = card.dataset.embed ?? "";
+      const safeTitle = (card.dataset.title ?? "Chart").replace(/"/g, "&quot;");
+      lbEmbedCode.value = embedPath
+        ? `<iframe src="${location.origin}${embedPath}" width="100%" height="460" style="border:0" loading="lazy" title="${safeTitle}"></iframe>`
+        : "";
       closeMenu();
 
       lb.classList.remove("hidden");
@@ -654,17 +699,49 @@ function displayImage(chart: ChartEntry) {
       document.body.style.overflow = "";
     };
 
-    // Download menu toggle
+    // Download menu toggle (closes the embed menu first)
     lbDownloadBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      const isHidden = lbDownloadMenu.classList.toggle("hidden");
-      lbDownloadBtn.setAttribute("aria-expanded", isHidden ? "false" : "true");
+      const willOpen = lbDownloadMenu.classList.contains("hidden");
+      closeMenu();
+      if (willOpen) {
+        lbDownloadMenu.classList.remove("hidden");
+        lbDownloadBtn.setAttribute("aria-expanded", "true");
+      }
     });
-    // Close the menu when clicking outside it (links still work).
+    // Embed menu toggle (closes the download menu first)
+    lbEmbedBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const willOpen = lbEmbedMenu.classList.contains("hidden");
+      closeMenu();
+      if (willOpen) {
+        lbEmbedMenu.classList.remove("hidden");
+        lbEmbedBtn.setAttribute("aria-expanded", "true");
+      }
+    });
+    lbEmbedCopy.addEventListener("click", async () => {
+      const done = () => {
+        lbEmbedCopy.textContent = "Copied!";
+        setTimeout(() => { lbEmbedCopy.textContent = "Copy embed code"; }, 1800);
+      };
+      try {
+        await navigator.clipboard.writeText(lbEmbedCode.value);
+        done();
+      } catch {
+        lbEmbedCode.select();
+        document.execCommand("copy");
+        done();
+      }
+    });
+    // Close either menu when clicking outside both.
     document.addEventListener("click", (e) => {
-      if (lbDownloadMenu.classList.contains("hidden")) return;
-      const wrap = document.getElementById("lb-download-wrap");
-      if (wrap && !wrap.contains(e.target as Node)) closeMenu();
+      const open = !lbDownloadMenu.classList.contains("hidden") ||
+                   !lbEmbedMenu.classList.contains("hidden");
+      if (!open) return;
+      const t = e.target as Node;
+      const dWrap = document.getElementById("lb-download-wrap");
+      const eWrap = document.getElementById("lb-embed-wrap");
+      if ((!dWrap || !dWrap.contains(t)) && (!eWrap || !eWrap.contains(t))) closeMenu();
     });
 
     // Handle download tracking
