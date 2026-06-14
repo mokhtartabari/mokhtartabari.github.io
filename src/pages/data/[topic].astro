@@ -22,7 +22,7 @@ const manifestMap: Record<string, VizManifest> = {
 const manifest = manifestMap[topicSlug!];
 const charts = manifest.charts;
 
-const rawCategories = [...new Set(charts.map((c) => c.category).filter(Boolean))];
+const rawCategories = [...new Set(charts.map((c) => c.category).filter((c): c is string => !!c))];
 const hasCategories = rawCategories.length > 1;
 
 // Preferred reading order for category sections/filter (unknown categories appended).
@@ -194,11 +194,13 @@ function displayImage(chart: ChartEntry) {
                     full && "sm:col-span-2",
                   ]}
                   data-category={chart.category ?? ""}
+                  data-slug={chart.slug}
                   data-title={title}
                   data-caption={caption}
                   data-base={chart.filename.replace(/\.png$/i, "")}
                   data-formats={(chart.formats ?? ["png"]).join(",")}
                   data-dir={topic.chartsDir}
+                  data-interactive={chart.interactive ? "true" : undefined}
                   role="button"
                   tabindex="0"
                   aria-label={`Open chart: ${title}`}
@@ -213,10 +215,19 @@ function displayImage(chart: ChartEntry) {
                       decoding="async"
                     />
                   </div>
+                  {chart.interactive && (
+                    <div class="absolute top-3 left-3 inline-flex items-center gap-1 rounded-full bg-accent-600/90 text-white text-[11px] font-medium px-2 py-0.5 backdrop-blur-sm shadow-sm">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/></svg>
+                      Interactive
+                    </div>
+                  )}
                   <figcaption class="px-4 py-3 flex items-start justify-between gap-3">
-                    <span class="text-sm leading-snug text-muted">
-                      {caption}
-                    </span>
+                    <div class="flex flex-col gap-1 min-w-0">
+                      <span class="text-sm leading-snug text-muted">
+                        {caption}
+                      </span>
+                      <div class="chart-stats flex flex-wrap gap-x-3 gap-y-1 mt-1 opacity-0 transition-opacity duration-300 empty:hidden" data-slug={chart.slug}></div>
+                    </div>
                     {chart.category && (
                       <span class="flex-shrink-0 text-[11px] font-medium px-2 py-0.5 rounded-full bg-accent-50 dark:bg-accent-900/30 text-accent-700 dark:text-accent-300">
                         {chart.category}
@@ -310,6 +321,15 @@ function displayImage(chart: ChartEntry) {
           style="background-color: var(--chart-bg)"
         />
 
+        <!-- Interactive widget (shown instead of the image for interactive charts) -->
+        <iframe
+          id="lb-iframe"
+          title="Interactive chart"
+          loading="lazy"
+          class="hidden w-full max-w-5xl h-[75vh] rounded-xl shadow-2xl border-0"
+          style="background-color: var(--chart-bg)"
+        ></iframe>
+
         <button
           id="lb-next"
           class="absolute right-0 z-10 translate-x-2 md:translate-x-12 p-2 rounded-xl text-white/70 hover:text-white border border-white/20 hover:border-white/40 bg-black/40 hover:bg-black/60 transition-all"
@@ -350,6 +370,169 @@ function displayImage(chart: ChartEntry) {
 </style>
 
 <script>
+  // ── Supabase Analytics Setup ─────────────────────────────────────────
+  const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+
+  const localStats = new Map<string, { slug: string; views: number; downloads: number }>();
+
+  const updateCardBadges = (card: HTMLElement, stat: { views: number; downloads: number }) => {
+    const showViews = stat.views > 50;
+    const showDownloads = stat.downloads > 50;
+    const container = card.querySelector<HTMLElement>(".chart-stats");
+    if (!container) return;
+
+    if (showViews || showDownloads) {
+      let html = "";
+      if (showViews) {
+        html += `
+          <span class="inline-flex items-center gap-1 text-ink-500 dark:text-ink-400">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-70"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>${stat.views.toLocaleString()} views</span>
+          </span>
+        `;
+      }
+      if (showDownloads) {
+        html += `
+          <span class="inline-flex items-center gap-1 text-ink-500 dark:text-ink-400">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-70"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>${stat.downloads.toLocaleString()} downloads</span>
+          </span>
+        `;
+      }
+      container.innerHTML = html;
+      container.classList.remove("opacity-0");
+    } else {
+      container.innerHTML = "";
+      container.classList.add("opacity-0");
+    }
+  };
+
+  const recordMetric = async (card: HTMLElement, metric: "views" | "downloads") => {
+    const slug = card.dataset.slug;
+    if (!slug || !supabaseUrl || !supabaseAnonKey) return;
+
+    const stat = localStats.get(slug) || { slug, views: 0, downloads: 0 };
+    if (metric === "views") stat.views++;
+    else if (metric === "downloads") stat.downloads++;
+    localStats.set(slug, stat);
+    updateCardBadges(card, stat);
+
+    try {
+      await fetch(`${supabaseUrl}/rest/v1/rpc/increment_chart_metric`, {
+        method: "POST",
+        headers: {
+          "apikey": supabaseAnonKey,
+          "Authorization": `Bearer ${supabaseAnonKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ chart_slug: slug, metric_name: metric }),
+      });
+    } catch (err) {
+      console.warn(`Failed to record ${metric} for ${slug}:`, err);
+      if (metric === "views") stat.views--;
+      else if (metric === "downloads") stat.downloads--;
+      localStats.set(slug, stat);
+      updateCardBadges(card, stat);
+    }
+  };
+
+  let activeObserver: IntersectionObserver | null = null;
+  const timers = new Map<HTMLElement, number>();
+
+  const analyticsSetup = async () => {
+    if (!supabaseUrl || !supabaseAnonKey) return;
+
+    const cards = Array.from(document.querySelectorAll<HTMLElement>(".chart-card"));
+    if (!cards.length) return;
+
+    const slugs = cards.map((c) => c.dataset.slug).filter(Boolean);
+    if (!slugs.length) return;
+
+    if (activeObserver) {
+      activeObserver.disconnect();
+      activeObserver = null;
+    }
+    for (const timerId of timers.values()) {
+      clearTimeout(timerId);
+    }
+    timers.clear();
+
+    // 1. Fetch stats
+    try {
+      const res = await fetch(
+        `${supabaseUrl}/rest/v1/chart_stats?slug=in.(${slugs.join(",")})`,
+        {
+          headers: {
+            apikey: supabaseAnonKey,
+            Authorization: `Bearer ${supabaseAnonKey}`,
+          },
+        }
+      );
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+      const data = (await res.json()) as Array<{
+        slug: string;
+        views: number;
+        downloads: number;
+      }>;
+
+      data.forEach((d) => localStats.set(d.slug, d));
+
+      cards.forEach((card) => {
+        const slug = card.dataset.slug;
+        if (!slug) return;
+        const stat = localStats.get(slug);
+        if (stat) {
+          updateCardBadges(card, stat);
+        }
+      });
+    } catch (err) {
+      console.warn("Failed to fetch chart stats:", err);
+    }
+
+    // 2. Setup IntersectionObserver for views
+    let viewedSlugs = new Set<string>();
+    try {
+      const saved = sessionStorage.getItem("viewed_charts");
+      if (saved) viewedSlugs = new Set(JSON.parse(saved));
+    } catch (e) {}
+
+    activeObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const card = entry.target as HTMLElement;
+          const slug = card.dataset.slug;
+          if (!slug || viewedSlugs.has(slug)) return;
+
+          if (entry.isIntersecting) {
+            if (!timers.has(card)) {
+              const timerId = window.setTimeout(() => {
+                recordMetric(card, "views");
+                viewedSlugs.add(slug);
+                try {
+                  sessionStorage.setItem(
+                    "viewed_charts",
+                    JSON.stringify(Array.from(viewedSlugs))
+                  );
+                } catch (e) {}
+                timers.delete(card);
+              }, 1500);
+              timers.set(card, timerId);
+            }
+          } else {
+            if (timers.has(card)) {
+              clearTimeout(timers.get(card));
+              timers.delete(card);
+            }
+          }
+        });
+      },
+      { threshold: 0.3 }
+    );
+
+    cards.forEach((card) => activeObserver!.observe(card));
+  };
+
   // ── Category filter ──────────────────────────────────────────────────
   const filterSetup = () => {
     const btns = document.querySelectorAll<HTMLButtonElement>(".category-btn");
@@ -386,6 +569,7 @@ function displayImage(chart: ChartEntry) {
     );
     const lb = document.getElementById("lightbox")!;
     const lbImg = document.getElementById("lb-img") as HTMLImageElement;
+    const lbIframe = document.getElementById("lb-iframe") as HTMLIFrameElement;
     const lbCaption = document.getElementById("lb-caption")!;
     const lbCounter = document.getElementById("lb-counter")!;
     const lbDownloadBtn = document.getElementById("lb-download-btn")!;
@@ -422,14 +606,26 @@ function displayImage(chart: ChartEntry) {
       const card = pool[current];
       const img = card.querySelector("img")!;
       const caption = card.dataset.caption ?? "";
-      lbImg.src = img.src;
-      lbImg.alt = img.alt;
       lbCaption.textContent = caption;
       lbCounter.textContent = `${current + 1} / ${pool.length}`;
 
       // Build per-format download links for this chart.
       const base = card.dataset.base ?? "";
       const dir = card.dataset.dir ?? "";
+
+      // Interactive charts load the ggiraph widget in an iframe; others show the image.
+      if (card.dataset.interactive === "true") {
+        lbIframe.src = `${dir}${base}_interactive.html`;
+        lbIframe.classList.remove("hidden");
+        lbImg.classList.add("hidden");
+        lbImg.removeAttribute("src");
+      } else {
+        lbIframe.classList.add("hidden");
+        lbIframe.removeAttribute("src");
+        lbImg.src = img.src;
+        lbImg.alt = img.alt;
+        lbImg.classList.remove("hidden");
+      }
       const formats = (card.dataset.formats ?? "png").split(",").filter(Boolean);
       // Stable, useful order regardless of manifest order.
       const ordered = ["svg", "pdf", "png"].filter((f) => formats.includes(f));
@@ -452,6 +648,7 @@ function displayImage(chart: ChartEntry) {
 
     const close = () => {
       closeMenu();
+      lbIframe.removeAttribute("src"); // unload the interactive widget
       lb.classList.add("hidden");
       lb.classList.remove("flex");
       document.body.style.overflow = "";
@@ -468,6 +665,18 @@ function displayImage(chart: ChartEntry) {
       if (lbDownloadMenu.classList.contains("hidden")) return;
       const wrap = document.getElementById("lb-download-wrap");
       if (wrap && !wrap.contains(e.target as Node)) closeMenu();
+    });
+
+    // Handle download tracking
+    lbDownloadLinks.addEventListener("click", (e) => {
+      const link = (e.target as HTMLElement).closest("a[download]");
+      if (link) {
+        const pool = visibleCards();
+        const activeCard = pool[current];
+        if (activeCard) {
+          recordMetric(activeCard, "downloads");
+        }
+      }
     });
 
     cards.forEach((card) => {
@@ -510,8 +719,10 @@ function displayImage(chart: ChartEntry) {
 
   filterSetup();
   lightboxSetup();
+  analyticsSetup();
   document.addEventListener("astro:page-load", () => {
     filterSetup();
     lightboxSetup();
+    analyticsSetup();
   });
 </script>

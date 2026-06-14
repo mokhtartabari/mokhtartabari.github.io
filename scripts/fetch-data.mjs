@@ -68,6 +68,18 @@ async function syncTopic(topic, repo) {
         console.error(`  ✗ Failed to download ${fname}: ${err.message}`);
       }
     }
+    // Interactive ggiraph widget (self-contained HTML), when the chart has one.
+    if (chart.interactive) {
+      const fname = `${base}_interactive.html`;
+      try {
+        const res = await fetch(apiUrl(repo, fname), { headers });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        fs.writeFileSync(path.join(chartsDir, fname), Buffer.from(await res.arrayBuffer()));
+        console.log(`  ✓ ${fname}`);
+      } catch (err) {
+        console.error(`  ✗ Failed to download ${fname}: ${err.message}`);
+      }
+    }
   }
 }
 

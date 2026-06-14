@@ -29,7 +29,15 @@ There are two distinct ways content is managed:
 
 ### Page → Data Flow
 
-Pages in `src/pages/` are mostly thin wrappers: they import from `src/data/` or query the publications collection, then render components. There is no API layer or client-side data fetching — everything is resolved at build time.
+Pages in `src/pages/` are mostly thin wrappers: they import from `src/data/` or query the publications collection, then render components. Core content is fully resolved at build time (no content APIs at runtime). The only runtime fetch is client-side analytics (views & downloads) querying and updating Supabase.
+
+### Chart Analytics & Tracking (Supabase)
+
+Charts on the data pages track impressions (views) and download events using a lightweight client-side script connecting to Supabase:
+- **Direct REST Calls**: Done via native browser `fetch()` using the public anonymous key (`PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_ANON_KEY`), completely avoiding heavy client SDKs.
+- **RPC Incrementing**: Updates call the postgres function `increment_chart_metric(slug, metric)` which runs with `security definer` privileges (bypassing RLS write restrictions on the public client).
+- **Session Locking**: Active impressions are tracked with an `IntersectionObserver` (1.5-second visible dwell time required) and locked in `sessionStorage` to prevent double-counting.
+- **Threshold Limit**: View and download badges are only rendered/visible when their count exceeds `50`.
 
 ### Shared Layout
 
