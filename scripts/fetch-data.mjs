@@ -139,31 +139,13 @@ async function syncTopic(topic, repo) {
         failedCount++;
       }
     }
-    // Extra artifacts: interactive widget (HTML) and underlying data (CSV).
-    const extras = [];
-    if (chart.interactive) extras.push(`${base}_interactive.html`);
-    if (chart.csv) extras.push(`${base}.csv`);
-    for (const fname of extras) {
+    // Underlying data (CSV) download, when the chart has one.
+    if (chart.csv) {
+      const fname = `${base}.csv`;
       try {
         const res = await fetch(apiUrl(repo, fname), { headers });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const dest = path.join(chartsDir, fname);
-        if (fname.endsWith("_interactive.html")) {
-          // Hide ggiraph's whole in-chart toolbar (zoom/lasso/save) — the site
-          // provides its own fit/full-size toggle + Download menu, identical to
-          // static charts. Injected here so it applies on every build without
-          // regenerating the widgets.
-          let html = await res.text();
-          const css = "<style>.ggiraph-toolbar{display:none!important}" +
-            // girafe paints an opaque white background rect; make it transparent
-            // so the page's paper bg shows. Plus hide the toolbar + clear body bg.
-            ".ggiraph-svg-bg{fill:transparent!important;stroke:none!important}" +
-            "html,body{background:transparent!important;margin:0}</style>";
-          html = html.includes("</head>") ? html.replace("</head>", `${css}</head>`) : css + html;
-          fs.writeFileSync(dest, html);
-        } else {
-          fs.writeFileSync(dest, Buffer.from(await res.arrayBuffer()));
-        }
+        fs.writeFileSync(path.join(chartsDir, fname), Buffer.from(await res.arrayBuffer()));
         console.log(`  ✓ ${fname}`);
         downloadedCount++;
       } catch (err) {
