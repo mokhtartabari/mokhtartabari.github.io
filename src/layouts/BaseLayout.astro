@@ -63,6 +63,26 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
       };
       applyTheme();
       document.addEventListener("astro:after-swap", applyTheme);
+
+      const checkExclusionParam = () => {
+        try {
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.has("exclude")) {
+            const val = urlParams.get("exclude");
+            if (val === "true") {
+              localStorage.setItem("exclude_analytics", "true");
+              alert("Self-Exclusion Enabled: This browser is now EXCLUDED from analytics tracking.");
+            } else if (val === "false") {
+              localStorage.removeItem("exclude_analytics");
+              alert("Self-Exclusion Disabled: This browser is now INCLUDED in analytics tracking.");
+            }
+            const cleanUrl = window.location.pathname + window.location.hash;
+            window.history.replaceState({}, document.title, cleanUrl);
+          }
+        } catch (e) {}
+      };
+      checkExclusionParam();
+      document.addEventListener("astro:after-swap", checkExclusionParam);
     </script>
 
     <ClientRouter />
