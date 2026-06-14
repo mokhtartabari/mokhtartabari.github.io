@@ -72,4 +72,26 @@ export const vizTopics: VizTopic[] = [
     repoLabel: "employment-data-viz",
     chartsDir: "/charts/employment/",
   },
+  {
+    slug: "productivity",
+    title: "Productivity & Competitiveness",
+    description:
+      "Labour and multifactor productivity trends, investment patterns, and G7 competitiveness benchmarks.",
+    longDescription:
+      "Canada's productivity challenge analyzed through multi-decade trends — labour and multifactor productivity growth, comparisons against G7 peers (specifically the United States), investment-to-wage dynamics, and sectoral breakdowns. Refreshed automatically.",
+    repo: "https://github.com/mokhtartabari/productivity-data-viz",
+    repoLabel: "productivity-data-viz",
+    chartsDir: "/charts/productivity/",
+  },
+  {
+    slug: "housing",
+    title: "Housing & Affordability",
+    description:
+      "Real estate price indices, construction volume vs population growth, mortgage rates, and debt burdens.",
+    longDescription:
+      "A rigorous macro look at Canadian housing supply and demand — home price indices compared to household income and rents, housing starts/completions against immigration-driven population growth, mortgage rates, and household debt service ratios. Refreshed automatically.",
+    repo: "https://github.com/mokhtartabari/housing-data-viz",
+    repoLabel: "housing-data-viz",
+    chartsDir: "/charts/housing/",
+  },
 ];

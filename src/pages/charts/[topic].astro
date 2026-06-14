@@ -5,6 +5,8 @@ import inflationManifest from "~/data/charts-manifest-inflation.json";
 import gdpManifest from "~/data/charts-manifest-gdp.json";
 import tradeManifest from "~/data/charts-manifest-trade.json";
 import employmentManifest from "~/data/charts-manifest-employment.json";
+import productivityManifest from "~/data/charts-manifest-productivity.json";
+import housingManifest from "~/data/charts-manifest-housing.json";
 
 export function getStaticPaths() {
   return vizTopics.map((t) => ({ params: { topic: t.slug } }));
@@ -18,6 +20,8 @@ const manifestMap: Record<string, VizManifest> = {
   gdp: gdpManifest as unknown as VizManifest,
   trade: tradeManifest as unknown as VizManifest,
   employment: employmentManifest as unknown as VizManifest,
+  productivity: productivityManifest as unknown as VizManifest,
+  housing: housingManifest as unknown as VizManifest,
 };
 const manifest = manifestMap[topicSlug!];
 const charts = manifest.charts;

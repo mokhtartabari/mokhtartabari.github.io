@@ -35,7 +35,9 @@ const repos = {
   inflation: 'mokhtartabari/inflation-data-viz',
   gdp: 'mokhtartabari/gdp-data-viz',
   trade: 'mokhtartabari/trade-data-viz',
-  employment: 'mokhtartabari/employment-data-viz'
+  employment: 'mokhtartabari/employment-data-viz',
+  productivity: 'mokhtartabari/productivity-data-viz',
+  housing: 'mokhtartabari/housing-data-viz'
 };
 
 // The data-viz repos are private. raw.githubusercontent.com does NOT accept
