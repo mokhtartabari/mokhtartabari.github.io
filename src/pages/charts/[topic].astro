@@ -639,6 +639,11 @@ function displayImage(chart: ChartEntry) {
       document.querySelectorAll<HTMLElement>(".chart-card"),
     );
     const lb = document.getElementById("lightbox")!;
+    // Guard against double-binding: this runs once inline AND again on
+    // astro:page-load, which would attach every handler twice. With the toggle
+    // handlers doubled, a click fires applyZoom() twice and cancels itself out.
+    if (!lb || !cards.length || lb.dataset.lbBound === "1") return;
+    lb.dataset.lbBound = "1";
     const lbImg = document.getElementById("lb-img") as HTMLImageElement;
     const lbIframe = document.getElementById("lb-iframe") as HTMLIFrameElement;
     const lbCaption = document.getElementById("lb-caption")!;
