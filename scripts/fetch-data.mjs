@@ -4,6 +4,31 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
+
+// Load environment variables from .env file if it exists (for local development)
+try {
+  const envPath = path.join(rootDir, '.env');
+  if (fs.existsSync(envPath)) {
+    const envContent = fs.readFileSync(envPath, 'utf8');
+    envContent.split('\n').forEach(line => {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) return;
+      const index = trimmed.indexOf('=');
+      if (index > 0) {
+        const key = trimmed.substring(0, index).trim();
+        let val = trimmed.substring(index + 1).trim();
+        if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1);
+        else if (val.startsWith("'") && val.endsWith("'")) val = val.slice(1, -1);
+        if (!process.env[key]) {
+          process.env[key] = val;
+        }
+      }
+    });
+  }
+} catch (err) {
+  console.warn(`[fetch-data] Could not read .env: ${err.message}`);
+}
+
 const token = process.env.GH_PAT || process.env.WEBSITE_DISPATCH_TOKEN;
 
 const repos = {
@@ -22,7 +47,46 @@ const apiUrl = (repo, filePath) =>
 
 console.log(`[fetch-data] auth token present: ${!!token}`);
 
+async function logPipeline(pipelineName, status, message, durationSeconds) {
+  const supabaseUrl = process.env.PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    console.warn(`[fetch-data] Supabase URL or Anon Key is missing. Skipping pipeline log for ${pipelineName}.`);
+    return;
+  }
+
+  try {
+    const url = `${supabaseUrl.replace(/\/$/, '')}/rest/v1/pipeline_logs`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        pipeline_name: pipelineName,
+        status: status,
+        message: message,
+        duration_seconds: parseFloat(durationSeconds.toFixed(3))
+      })
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error(`[fetch-data] Failed to write pipeline log to Supabase: ${res.status} ${errText}`);
+    } else {
+      console.log(`[fetch-data] Logged ${pipelineName} status (${status}) to Supabase.`);
+    }
+  } catch (err) {
+    console.error(`[fetch-data] Error sending pipeline log: ${err.message}`);
+  }
+}
+
 async function syncTopic(topic, repo) {
+  const startTime = performance.now();
   const manifestPath = path.join(rootDir, 'src', 'data', `charts-manifest-${topic}.json`);
   const chartsDir = path.join(rootDir, 'public', 'charts', topic);
 
@@ -45,8 +109,13 @@ async function syncTopic(topic, repo) {
       console.log(`Writing empty stub for ${topic} manifest...`);
       fs.writeFileSync(manifestPath, JSON.stringify({ topic, updated: null, charts: [] }, null, 2));
     }
+    const duration = (performance.now() - startTime) / 1000;
+    await logPipeline(topic, 'failure', `Failed to fetch manifest: ${err.message}`, duration);
     return;
   }
+
+  let downloadedCount = 0;
+  let failedCount = 0;
 
   // Download every available format for each chart (PNG always; SVG/PDF when
   // present). All formats live at the data-viz repo root sharing the same base
@@ -64,8 +133,10 @@ async function syncTopic(topic, repo) {
         const arrayBuffer = await res.arrayBuffer();
         fs.writeFileSync(dest, Buffer.from(arrayBuffer));
         console.log(`  ✓ ${fname}`);
+        downloadedCount++;
       } catch (err) {
         console.error(`  ✗ Failed to download ${fname}: ${err.message}`);
+        failedCount++;
       }
     }
     // Extra artifacts: interactive widget (HTML) and underlying data (CSV).
@@ -94,16 +165,39 @@ async function syncTopic(topic, repo) {
           fs.writeFileSync(dest, Buffer.from(await res.arrayBuffer()));
         }
         console.log(`  ✓ ${fname}`);
+        downloadedCount++;
       } catch (err) {
         console.error(`  ✗ Failed to download ${fname}: ${err.message}`);
+        failedCount++;
       }
     }
   }
+
+  const duration = (performance.now() - startTime) / 1000;
+  const status = failedCount === 0 ? 'success' : 'failure';
+  const message = `Synced ${manifestData.charts?.length || 0} charts. Downloaded ${downloadedCount} assets${failedCount > 0 ? `, ${failedCount} failed` : ''}.`;
+  await logPipeline(topic, status, message, duration);
 }
 
 async function main() {
+  const startTime = performance.now();
+  let overallSuccess = true;
+  let overallMessage = '';
+
   for (const [topic, repo] of Object.entries(repos)) {
-    await syncTopic(topic, repo);
+    try {
+      await syncTopic(topic, repo);
+    } catch (err) {
+      overallSuccess = false;
+      overallMessage += `${topic} failed: ${err.message}. `;
+    }
+  }
+
+  const duration = (performance.now() - startTime) / 1000;
+  if (overallSuccess) {
+    await logPipeline('all', 'success', 'All pipelines completed successfully.', duration);
+  } else {
+    await logPipeline('all', 'failure', `Pipeline run failed: ${overallMessage}`, duration);
   }
 }
 

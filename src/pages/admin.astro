@@ -123,33 +123,18 @@ import { site } from "~/data/site";
               </div>
             </div>
 
-            <!-- Health Status -->
-            <div class="lg:col-span-4 p-6 rounded-2xl border border-default bg-elevated space-y-4">
-              <h2 class="font-serif text-lg font-semibold">System Status</h2>
-              <ul class="space-y-3.5 text-sm" role="list">
-                <li class="flex items-center justify-between pb-3 border-b border-default">
-                  <span class="text-muted">R Pipelines Status</span>
-                  <span class="inline-flex items-center gap-1.5 font-medium text-emerald-500">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Operational
-                  </span>
-                </li>
-                <li class="flex items-center justify-between pb-3 border-b border-default">
-                  <span class="text-muted">Supabase DB</span>
-                  <span class="inline-flex items-center gap-1.5 font-medium text-emerald-500">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Connected
-                  </span>
-                </li>
-                <li class="flex items-center justify-between pb-3 border-b border-default">
-                  <span class="text-muted">Last Data Ingestion</span>
-                  <span id="sync-timestamp" class="font-mono text-xs">Loading...</span>
-                </li>
-                <li class="flex items-center justify-between">
-                  <span class="text-muted">Analytics Collector</span>
-                  <span id="sync-collector" class="font-medium text-emerald-500">Active</span>
-                </li>
-              </ul>
+            <!-- Pipeline Runs Log -->
+            <div class="lg:col-span-4 p-6 rounded-2xl border border-default bg-elevated space-y-4 flex flex-col">
+              <div class="flex items-center justify-between">
+                <h2 class="font-serif text-lg font-semibold">Pipeline Runs</h2>
+                <span class="inline-flex items-center gap-1.5 font-medium text-emerald-500 text-xs">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Active
+                </span>
+              </div>
+              <div id="pipeline-logs-list" class="space-y-3.5 max-h-[260px] overflow-y-auto pr-1 no-scrollbar flex-grow">
+                <div class="text-center py-12 text-muted text-xs">Loading pipeline logs...</div>
+              </div>
             </div>
           </div>
         </div>
@@ -517,12 +502,58 @@ import { site } from "~/data/site";
         }).join("");
       }
 
-      // Check sync pulses
-      if (stats.length > 0) {
-        const lastSync = new Date(Math.max(...stats.map((s: any) => new Date(s.updated_at).getTime())));
-        document.getElementById("sync-timestamp")!.textContent = lastSync.toLocaleString();
-      } else {
-        document.getElementById("sync-timestamp")!.textContent = "N/A";
+      // Fetch pipeline logs
+      try {
+        const pipeRes = await fetch(`${SB_URL}/rest/v1/pipeline_logs?select=*&limit=8&order=created_at.desc`, { headers });
+        const pipelineLogs = pipeRes.ok ? await pipeRes.json() : [];
+        const divPipe = document.getElementById("pipeline-logs-list")!;
+        
+        const timeAgo = (dateStr: string) => {
+          const d = new Date(dateStr);
+          const now = new Date();
+          const diffMs = now.getTime() - d.getTime();
+          const diffSec = Math.floor(diffMs / 1000);
+          const diffMin = Math.floor(diffSec / 60);
+          const diffHr = Math.floor(diffMin / 60);
+          const diffDay = Math.floor(diffHr / 24);
+
+          if (diffSec < 60) return "Just now";
+          if (diffMin < 60) return `${diffMin}m ago`;
+          if (diffHr < 24) return `${diffHr}h ago`;
+          return `${diffDay}d ago`;
+        };
+
+        if (pipelineLogs.length === 0) {
+          divPipe.innerHTML = `<div class="text-center py-12 text-muted text-xs">No pipeline runs logged yet.</div>`;
+        } else {
+          divPipe.innerHTML = pipelineLogs.map((log: any) => {
+            const duration = log.duration_seconds != null ? `${log.duration_seconds}s` : "N/A";
+            const isSuccess = log.status === "success";
+            const statusColor = isSuccess 
+              ? "bg-emerald-500" 
+              : "bg-rose-500";
+            
+            return `
+              <div class="flex items-start justify-between gap-3 text-xs border-b border-default/40 pb-2.5 last:border-b-0 last:pb-0">
+                <div class="space-y-1 min-w-0 flex-1">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="w-1.5 h-1.5 rounded-full ${statusColor}"></span>
+                    <span class="font-mono font-semibold uppercase tracking-wider text-[10px] text-muted">${log.pipeline_name}</span>
+                    <span class="font-mono text-[10px] text-muted">(${duration})</span>
+                  </div>
+                  <p class="text-fg font-medium text-[11px] leading-tight break-words" title="${log.message}">${log.message}</p>
+                </div>
+                <span class="text-muted text-[10px] whitespace-nowrap">${timeAgo(log.created_at)}</span>
+              </div>
+            `;
+          }).join("");
+        }
+      } catch (err) {
+        console.warn("Failed to fetch pipeline logs:", err);
+        const divPipe = document.getElementById("pipeline-logs-list");
+        if (divPipe) {
+          divPipe.innerHTML = `<div class="text-center py-12 text-red-500 text-xs">Error loading logs.</div>`;
+        }
       }
 
       // 4. Fetch detailed log events (chart_events) to build geolocation & referrals
