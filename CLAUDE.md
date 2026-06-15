@@ -39,6 +39,14 @@ Charts on the data pages track impressions (views) and download events using a l
 - **Session Locking**: Active impressions are tracked with an `IntersectionObserver` (1.5-second visible dwell time required) and locked in `sessionStorage` to prevent double-counting.
 - **Threshold Limit**: View and download badges are only rendered/visible when their count exceeds `50`.
 
+### Chart design system (single source of truth)
+
+**The visual standard for every chart lives in `canadianeconomy/DESIGN_SYSTEM.md`** (color system,
+formats/backgrounds, dimensions, typography, source line/credit, freshness labels). The website
+side of it: chart cards render `data_through`/"Updated" (below), and the download menu carries the
+format help text + the `Free to use with attribution — CC BY 4.0.` line. Keep website chart UI
+consistent with that document.
+
 ### Chart freshness labels (`data_through` / `updated`)
 
 Each chart in `charts-manifest-<topic>.json` carries `data_through` (latest data period, e.g.
