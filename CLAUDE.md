@@ -39,6 +39,16 @@ Charts on the data pages track impressions (views) and download events using a l
 - **Session Locking**: Active impressions are tracked with an `IntersectionObserver` (1.5-second visible dwell time required) and locked in `sessionStorage` to prevent double-counting.
 - **Threshold Limit**: View and download badges are only rendered/visible when their count exceeds `50`.
 
+### Chart freshness labels (`data_through` / `updated`)
+
+Each chart in `charts-manifest-<topic>.json` carries `data_through` (latest data period, e.g.
+"Apr 2026" or "2024") and `updated` (ISO date the data last advanced). `src/pages/charts/[topic].astro`
+renders a quiet **"Data through …"** line under each chart and a green **"Updated"** pill for ~7 days
+(`Date.now() - Date.parse(chart.updated) < 7d`). These fields are produced upstream by the data-viz
+runners (`enrich_records()` in `canadianeconomy/code/manifest_helpers.R`) — the website only displays
+them, and degrades gracefully if a manifest predates the fields. `ChartEntry` in
+`src/data/visualizations.ts` types them as optional.
+
 ### Shared Layout
 
 All pages use `src/layouts/BaseLayout.astro`, which handles: `<head>` meta/OG tags, dark mode toggle with `localStorage` persistence, Astro `<ClientRouter>` for view transitions, reveal-on-scroll animation setup, and `<Header>` / `<Footer>` components.
