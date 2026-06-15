@@ -76,12 +76,15 @@ function slugToTitle(slug: string) {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-// Prefer SVG for on-page display when available (crisp, scalable, and smaller
-// than PNG for light charts); fall back to PNG for dense charts (maps/heatmaps).
+// Display the PNG on-page. The chart fonts (Fraunces title + Inter body) are
+// distinctive web fonts, not system fonts — and an <img>-loaded SVG cannot use
+// the page's web fonts (it renders in an isolated document and browsers block it
+// from fetching external fonts). So an inline SVG would show fallback fonts for
+// any visitor without Inter/Fraunces installed. PNG bakes the fonts in, so it
+// matches the site for everyone (the data-journalism standard). The crisp vector
+// SVG + PDF stay available in the per-chart download menu.
 function displayImage(chart: ChartEntry) {
-  return chart.formats?.includes("svg")
-    ? chart.filename.replace(/\.png$/i, ".svg")
-    : chart.filename;
+  return chart.filename;
 }
 ---
 
@@ -316,7 +319,7 @@ function displayImage(chart: ChartEntry) {
                 <span class="font-medium text-white/60">SVG</span> for slides &amp; web ·
                 <span class="font-medium text-white/60">PDF</span> for LaTeX &amp; print ·
                 <span class="font-medium text-white/60">PNG</span> for Word &amp; email.
-                Please keep the source line on the chart.
+                Free to use with attribution — CC BY 4.0.
               </p>
             </div>
           </div>

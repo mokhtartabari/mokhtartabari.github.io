@@ -61,10 +61,11 @@
     --fg: var(--color-ink-900);
     --fg-muted: var(--color-ink-600);
     --border: var(--color-ink-200);
-    /* Surface behind chart images. Charts are exported transparent with dark
-       ink, so this MUST stay light in both themes. Single knob to re-theme all
-       charts site-wide. Soft warm off-white ("paper") so charts feel printed
-       rather than sitting on a stark white block. */
+    /* Surface behind chart images. On-page charts are displayed as PNGs with a
+       baked-in #f9f4ea "paper" background, so this panel MUST match #f9f4ea (in
+       both themes) for a seamless, framed-print look — any letterbox/mat area
+       around the image then blends with the chart paper. Single knob to re-theme
+       all charts site-wide. */
     --chart-bg: #f9f4ea;
   }
 
@@ -75,10 +76,10 @@
     --fg: var(--color-ink-50);
     --fg-muted: var(--color-ink-300);
     --border: var(--color-ink-800);
-    /* Dark mode: charts have dark ink, so they must sit on a light "paper"
-       panel (can't follow --bg-elevated, which is dark). Warm paper tone instead
-       of stark white — gentler glow against the dark page, still fully readable. */
-    --chart-bg: #ece7dc;
+    /* Dark mode: keep the chart panel at the same #f9f4ea as the PNG's baked-in
+       paper background so the image blends seamlessly (no two-tone mat/seam in
+       the lightbox or around letterboxed tall charts). */
+    --chart-bg: #f9f4ea;
   }
 
   html {

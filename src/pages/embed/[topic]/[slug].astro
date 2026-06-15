@@ -34,8 +34,9 @@ export function getStaticPaths() {
 
 const { chart, topic } = Astro.props as { chart: ChartEntry; topic: VizTopic };
 const title = chart.title ?? chart.slug;
-const base = chart.filename.replace(/\.png$/i, "");
-const imgFile = chart.formats?.includes("svg") ? `${base}.svg` : chart.filename;
+// Use PNG: an <img>-loaded SVG can't access the page's Inter/Fraunces web fonts,
+// so it would show fallback fonts on third-party embeds. PNG bakes the fonts in.
+const imgFile = chart.filename;
 const chartPage = `${site.url}/charts/${topic.slug}/`;
 ---
 
