@@ -77,6 +77,17 @@ export const vizTopics: VizTopic[] = [
     chartsDir: "/charts/employment/",
   },
   {
+    slug: "rates",
+    title: "Interest & Exchange Rates",
+    description:
+      "Central-bank policy rates, the USD/CAD exchange rate, and cross-country inflation.",
+    longDescription:
+      "Monetary policy and open-economy indicators — the Bank of Canada policy rate alongside the U.S. Federal Reserve and ECB, the USD/CAD exchange rate, and headline inflation across Canada, the U.S., and the euro area. Built from central-bank and statistical-agency data (Bank of Canada, U.S. Federal Reserve, ECB, Statistics Canada) and refreshed daily.",
+    repo: "https://github.com/mokhtartabari/rates-data-viz",
+    repoLabel: "rates-data-viz",
+    chartsDir: "/charts/rates/",
+  },
+  {
     slug: "productivity",
     title: "Productivity & Competitiveness",
     description:

@@ -6,6 +6,7 @@ import gdpManifest from "~/data/charts-manifest-gdp.json";
 import tradeManifest from "~/data/charts-manifest-trade.json";
 import employmentManifest from "~/data/charts-manifest-employment.json";
 import productivityManifest from "~/data/charts-manifest-productivity.json";
+import ratesManifest from "~/data/charts-manifest-rates.json";
 import housingManifest from "~/data/charts-manifest-housing.json";
 
 const manifests: Record<string, VizManifest> = {
@@ -14,6 +15,7 @@ const manifests: Record<string, VizManifest> = {
   trade: tradeManifest as unknown as VizManifest,
   employment: employmentManifest as unknown as VizManifest,
   productivity: productivityManifest as unknown as VizManifest,
+  rates: ratesManifest as unknown as VizManifest,
   housing: housingManifest as unknown as VizManifest,
 };
 

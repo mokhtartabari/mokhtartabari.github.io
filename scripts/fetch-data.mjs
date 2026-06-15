@@ -37,6 +37,7 @@ const repos = {
   trade: 'mokhtartabari/trade-data-viz',
   employment: 'mokhtartabari/employment-data-viz',
   productivity: 'mokhtartabari/productivity-data-viz',
+  rates: 'mokhtartabari/rates-data-viz',
   housing: 'mokhtartabari/housing-data-viz'
 };
 
