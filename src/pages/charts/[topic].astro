@@ -203,6 +203,9 @@ function displayImage(chart: ChartEntry) {
                 const title = chart.title ?? slugToTitle(chart.slug);
                 const caption = chart.description || title;
                 const full = chart.span === "full";
+                const recentlyUpdated =
+                  !!chart.updated &&
+                  Date.now() - Date.parse(chart.updated) < 7 * 24 * 60 * 60 * 1000;
                 return (
                 <figure
                   class:list={[
@@ -223,6 +226,11 @@ function displayImage(chart: ChartEntry) {
                   aria-label={`Open chart: ${title}`}
                   style={`animation-delay:${(i % 6) * 60}ms`}
                 >
+                  {recentlyUpdated && (
+                    <span class="absolute top-3 left-3 z-10 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500 text-white shadow-sm">
+                      Updated
+                    </span>
+                  )}
                   <div class="overflow-hidden" style="background-color: var(--chart-bg)">
                     <img
                       src={`${topic.chartsDir}${displayImage(chart)}`}
@@ -237,6 +245,11 @@ function displayImage(chart: ChartEntry) {
                       <span class="text-sm leading-snug text-muted">
                         {caption}
                       </span>
+                      {chart.data_through && (
+                        <span class="text-[11px] text-muted/70">
+                          Data through {chart.data_through}
+                        </span>
+                      )}
                       <div class="chart-stats flex flex-wrap gap-x-3 gap-y-1 mt-1 opacity-0 transition-opacity duration-300 empty:hidden" data-slug={chart.slug}></div>
                     </div>
                     {chart.category && (

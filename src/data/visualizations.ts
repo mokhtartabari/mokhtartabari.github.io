@@ -9,6 +9,10 @@ export interface ChartEntry {
   formats?: string[];
   /** True when a <base>.csv of the underlying series exists for download. */
   csv?: boolean;
+  /** Latest data period the chart covers, e.g. "Apr 2026" or "2024". */
+  data_through?: string;
+  /** ISO date the data last advanced (carried forward across rebuilds). */
+  updated?: string;
 }
 
 export interface VizManifest {
