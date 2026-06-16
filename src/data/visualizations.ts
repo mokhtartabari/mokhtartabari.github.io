@@ -102,11 +102,22 @@ export const vizTopics: VizTopic[] = [
     slug: "housing",
     title: "Housing & Affordability",
     description:
-      "Real estate price indices, construction volume vs population growth, mortgage rates, and debt burdens.",
+      "New-home prices, shelter-cost inflation, and housing starts across Canada.",
     longDescription:
-      "A rigorous macro look at Canadian housing supply and demand — home price indices compared to household income and rents, housing starts/completions against immigration-driven population growth, mortgage rates, and household debt service ratios. Refreshed automatically.",
+      "Canada's housing market through prices, costs, and supply — the New Housing Price Index, year-over-year shelter inflation split into rent and mortgage interest cost, and CMHC housing starts. Based on Statistics Canada data and refreshed automatically.",
     repo: "https://github.com/mokhtartabari/housing-data-viz",
     repoLabel: "housing-data-viz",
     chartsDir: "/charts/housing/",
+  },
+  {
+    slug: "energy",
+    title: "Energy & Gas",
+    description:
+      "Retail gasoline prices and energy-cost inflation across Canada.",
+    longDescription:
+      "Canadian energy costs at the pump and in the CPI — the monthly average retail price of regular unleaded gasoline, and year-over-year inflation for energy and gasoline. Based on Statistics Canada data and refreshed automatically.",
+    repo: "https://github.com/mokhtartabari/energy-data-viz",
+    repoLabel: "energy-data-viz",
+    chartsDir: "/charts/energy/",
   },
 ];

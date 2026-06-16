@@ -8,6 +8,7 @@ import employmentManifest from "~/data/charts-manifest-employment.json";
 import productivityManifest from "~/data/charts-manifest-productivity.json";
 import ratesManifest from "~/data/charts-manifest-rates.json";
 import housingManifest from "~/data/charts-manifest-housing.json";
+import energyManifest from "~/data/charts-manifest-energy.json";
 
 const manifests: Record<string, VizManifest> = {
   inflation: inflationManifest as unknown as VizManifest,
@@ -17,6 +18,7 @@ const manifests: Record<string, VizManifest> = {
   productivity: productivityManifest as unknown as VizManifest,
   rates: ratesManifest as unknown as VizManifest,
   housing: housingManifest as unknown as VizManifest,
+  energy: energyManifest as unknown as VizManifest,
 };
 
 // Only surface topics that actually have charts. Placeholder topics whose

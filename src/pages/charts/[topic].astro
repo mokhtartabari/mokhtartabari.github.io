@@ -10,6 +10,7 @@ import employmentManifest from "~/data/charts-manifest-employment.json";
 import productivityManifest from "~/data/charts-manifest-productivity.json";
 import ratesManifest from "~/data/charts-manifest-rates.json";
 import housingManifest from "~/data/charts-manifest-housing.json";
+import energyManifest from "~/data/charts-manifest-energy.json";
 
 export function getStaticPaths() {
   // Only build pages for topics that have charts; placeholder topics with an
@@ -22,6 +23,7 @@ export function getStaticPaths() {
     productivity: (productivityManifest as unknown as VizManifest).charts.length,
     rates: (ratesManifest as unknown as VizManifest).charts.length,
     housing: (housingManifest as unknown as VizManifest).charts.length,
+    energy: (energyManifest as unknown as VizManifest).charts.length,
   };
   return vizTopics
     .filter((t) => (counts[t.slug] ?? 0) > 0)
@@ -39,6 +41,7 @@ const manifestMap: Record<string, VizManifest> = {
   productivity: productivityManifest as unknown as VizManifest,
   rates: ratesManifest as unknown as VizManifest,
   housing: housingManifest as unknown as VizManifest,
+  energy: energyManifest as unknown as VizManifest,
 };
 const manifest = manifestMap[topicSlug!];
 const charts = manifest.charts;
