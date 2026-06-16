@@ -100,24 +100,29 @@
     width: 100%;
     height: auto;
   }
-  /* Lightbox: Fit = whole chart within the viewport; Full = 2.5× width, panned. */
+  /* Lightbox: Fit = whole chart within the viewport. */
   #lb-img.is-fit svg {
     width: auto;
     height: auto;
     max-width: 100%;
     max-height: 75vh;
   }
-  #lb-img.is-full svg {
-    width: 250%;
-    max-width: none;
-    height: auto;
-  }
   #lb-img.is-fit img {
     max-width: 100%;
     max-height: 75vh;
   }
+  /* Full size: the paper panel grows to wrap the enlarged chart (so the cream
+     background covers all of it, not just the first viewport), and the chart is
+     sized off the viewport — not a % of the panel, which would be circular with
+     width:max-content. #lb-scroll pans it; it's left/top-aligned, so the title
+     sits at the scroll origin (no clipped left edge). */
+  #lb-img.is-full {
+    width: max-content;
+    max-width: none;
+  }
+  #lb-img.is-full svg,
   #lb-img.is-full img {
-    width: 250%;
+    width: 175vw;
     max-width: none;
     height: auto;
   }
