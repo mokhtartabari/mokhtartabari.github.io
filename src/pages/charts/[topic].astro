@@ -1,4 +1,6 @@
 ---
+import fs from "node:fs";
+import path from "node:path";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { vizTopics, type VizManifest, type ChartEntry } from "~/data/visualizations";
 import inflationManifest from "~/data/charts-manifest-inflation.json";
@@ -76,15 +78,24 @@ function slugToTitle(slug: string) {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-// Display the PNG on-page. The chart fonts (Fraunces title + Inter body) are
-// distinctive web fonts, not system fonts — and an <img>-loaded SVG cannot use
-// the page's web fonts (it renders in an isolated document and browsers block it
-// from fetching external fonts). So an inline SVG would show fallback fonts for
-// any visitor without Inter/Fraunces installed. PNG bakes the fonts in, so it
-// matches the site for everyone (the data-journalism standard). The crisp vector
-// SVG + PDF stay available in the per-chart download menu.
-function displayImage(chart: ChartEntry) {
-  return chart.filename;
+// Read a chart's SVG markup at build time so it can be inlined into the page DOM.
+// Inline <svg> (unlike <img src=…svg>) is part of the document, so the page's
+// Inter/Fraunces web fonts apply and it stays transparent + vector. Returns null
+// for charts without an SVG (dense maps/heatmaps), which fall back to a PNG <img>.
+// Strips the XML prolog/doctype so the <svg> drops straight into the HTML.
+function inlineSvg(chart: ChartEntry): string | null {
+  if (!chart.formats?.includes("svg")) return null;
+  const base = chart.filename.replace(/\.png$/i, "");
+  const file = path.join(process.cwd(), "public", "charts", topicSlug!, `${base}.svg`);
+  try {
+    return fs
+      .readFileSync(file, "utf-8")
+      .replace(/<\?xml[^>]*\?>/i, "")
+      .replace(/<!DOCTYPE[^>]*>/i, "")
+      .trim();
+  } catch {
+    return null;
+  }
 }
 ---
 
@@ -212,6 +223,7 @@ function displayImage(chart: ChartEntry) {
                 const recentlyUpdated =
                   !!chart.updated &&
                   Date.now() - Date.parse(chart.updated) < 7 * 24 * 60 * 60 * 1000;
+                const svg = inlineSvg(chart);
                 return (
                 <figure
                   class:list={[
@@ -238,13 +250,17 @@ function displayImage(chart: ChartEntry) {
                     </span>
                   )}
                   <div class="overflow-hidden" style="background-color: var(--chart-bg)">
-                    <img
-                      src={`${topic.chartsDir}${displayImage(chart)}`}
-                      alt={title}
-                      class="w-full h-auto block"
-                      loading="lazy"
-                      decoding="async"
-                    />
+                    {svg ? (
+                      <div class="chart-svg w-full" role="img" aria-label={title} set:html={svg} />
+                    ) : (
+                      <img
+                        src={`${topic.chartsDir}${chart.filename}`}
+                        alt={title}
+                        class="w-full h-auto block"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    )}
                   </div>
                   <figcaption class="px-4 py-3 flex items-start justify-between gap-3">
                     <div class="flex flex-col gap-1 min-w-0">
@@ -385,13 +401,13 @@ function displayImage(chart: ChartEntry) {
 
         <!-- Inner scroll box so a zoomed image pans WITHOUT moving the arrows -->
         <div id="lb-scroll" class="flex items-center justify-center max-w-full">
-          <img
+          <!-- Holds the chart's inline <svg> (cloned from the card) or a PNG <img>
+               for dense charts. Sized via .is-fit / .is-full in global.css. -->
+          <div
             id="lb-img"
-            src=""
-            alt=""
-            class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl p-3 cursor-zoom-in"
+            class="is-fit rounded-xl shadow-2xl p-3 cursor-zoom-in"
             style="background-color: var(--chart-bg)"
-          />
+          ></div>
         </div>
 
         <button
@@ -705,7 +721,7 @@ function displayImage(chart: ChartEntry) {
     // handlers doubled, a click fires applyZoom() twice and cancels itself out.
     if (!lb || !cards.length || lb.dataset.lbBound === "1") return;
     lb.dataset.lbBound = "1";
-    const lbImg = document.getElementById("lb-img") as HTMLImageElement;
+    const lbImg = document.getElementById("lb-img") as HTMLElement;
     const lbCaption = document.getElementById("lb-caption")!;
     const lbCounter = document.getElementById("lb-counter")!;
     const lbDownloadBtn = document.getElementById("lb-download-btn")!;
@@ -728,25 +744,19 @@ function displayImage(chart: ChartEntry) {
     const lbFeedbackStatus = document.getElementById("lb-feedback-status")!;
 
     // ── Fit / full-size toggle ──────────────────────────────────────────
-    // The lightbox ALWAYS shows the chart's static SVG (same as the grid card and
-    // the static charts: transparent → paper bg, fits cleanly, zoom + pan). The
-    // live ggiraph hover widget bakes in a white background and a fixed pixel size
-    // that won't fill the lightbox, so it stays in the embed, not here.
+    // The lightbox shows the chart's inline SVG (cloned from the card, so the
+    // page's web fonts apply) or a PNG <img> for dense charts. Sizing is driven by
+    // .is-fit / .is-full on #lb-img (see global.css).
     // Fit = whole chart on screen. Full = 2.5× the panel width, panned in the box.
-    const IMG_FIT = "max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl p-3 cursor-zoom-in";
-    const IMG_FULL = "w-[250%] max-w-none h-auto rounded-xl shadow-2xl p-3 cursor-zoom-out";
+    const LB_BASE = "rounded-xl shadow-2xl p-3 cursor-zoom-in";
     const SCROLL_FIT = "w-full flex items-center justify-center min-w-0";
     const SCROLL_FULL = "w-full min-w-0 overflow-auto max-h-[85vh]"; // block so oversized content pans fully both axes
     let zoomed = false;
-    let openImgSrc = "";
-    let openImgAlt = "";
 
     const applyZoom = (z: boolean) => {
       zoomed = z;
       lbScroll.className = z ? SCROLL_FULL : SCROLL_FIT;   // only the inner box scrolls; prev/next stay put
-      lbImg.src = openImgSrc;
-      lbImg.alt = openImgAlt;
-      lbImg.className = z ? IMG_FULL : IMG_FIT;
+      lbImg.className = `${LB_BASE} ${z ? "is-full" : "is-fit"}`;
       lbZoom.setAttribute("title", z ? "Fit to screen" : "Full size");
     };
     lbZoom.addEventListener("click", (e) => { e.stopPropagation(); applyZoom(!zoomed); });
@@ -870,7 +880,8 @@ function displayImage(chart: ChartEntry) {
       if (!pool.length) return;
       current = ((idx % pool.length) + pool.length) % pool.length;
       const card = pool[current];
-      const img = card.querySelector("img")!;
+      const cardSvg = card.querySelector<SVGSVGElement>(".chart-svg > svg");
+      const cardImg = card.querySelector("img");
       const caption = card.dataset.caption ?? "";
       lbCaption.textContent = caption;
       lbCounter.textContent = `${current + 1} / ${pool.length}`;
@@ -881,9 +892,16 @@ function displayImage(chart: ChartEntry) {
       const base = card.dataset.base ?? "";
       const dir = card.dataset.dir ?? "";
 
-      // Lightbox shows the static SVG for every chart. Reset to Fit on open.
-      openImgSrc = img.src;                     // display image (SVG)
-      openImgAlt = img.alt;
+      // Populate the viewer: clone the card's inline SVG (so the page's web fonts
+      // apply), or a PNG <img> for dense charts. Reset to Fit on open.
+      if (cardSvg) {
+        lbImg.replaceChildren(cardSvg.cloneNode(true));
+      } else if (cardImg) {
+        const im = document.createElement("img");
+        im.src = cardImg.src;
+        im.alt = cardImg.alt;
+        lbImg.replaceChildren(im);
+      }
       lbZoom.classList.remove("hidden");
       lbPrev.classList.remove("hidden");
       lbNext.classList.remove("hidden");
