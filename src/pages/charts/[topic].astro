@@ -245,7 +245,7 @@ function inlineSvg(chart: ChartEntry): string | null {
                   style={`animation-delay:${(i % 6) * 60}ms`}
                 >
                   {recentlyUpdated && (
-                    <span class="absolute top-3 left-3 z-10 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500 text-white shadow-sm">
+                    <span class="absolute top-3 right-3 z-10 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500 text-white shadow-sm">
                       Updated
                     </span>
                   )}
@@ -280,8 +280,8 @@ function inlineSvg(chart: ChartEntry): string | null {
                       </span>
                     )}
                   </figcaption>
-                  {/* Expand hint */}
-                  <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {/* Expand hint (top-left; Updated badge sits top-right) */}
+                  <div class="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity">
                     <div class="bg-black/50 text-white rounded-lg p-1.5 backdrop-blur-sm">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
                     </div>
