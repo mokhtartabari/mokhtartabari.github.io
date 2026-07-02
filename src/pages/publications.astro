@@ -10,14 +10,14 @@ const groups = {
     .filter(
       (p) => p.data.status === "published" || p.data.status === "accepted",
     )
-    .sort((a, b) => a.data.order - b.data.order),
+    .sort((a, b) => b.data.year - a.data.year || a.data.order - b.data.order),
   "Working Papers & R&R": all
     .filter(
       (p) =>
         p.data.status === "working-paper" ||
         p.data.status === "revise-and-resubmit",
     )
-    .sort((a, b) => a.data.order - b.data.order),
+    .sort((a, b) => b.data.year - a.data.year || a.data.order - b.data.order),
 };
 
 const totalCount = all.length;
