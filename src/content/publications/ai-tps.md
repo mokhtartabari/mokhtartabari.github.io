@@ -2,7 +2,7 @@
 title: "The AI-TPS Framework: Using Generative AI for Active Learning in Principles of Economics"
 authors:
   - "Mokhtar Tabari"
-year: 2025
+year: 2026
 venue: "Journal of Economics Teaching"
 venueShort: "JET"
 status: "accepted"
