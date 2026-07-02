@@ -1,0 +1,281 @@
+name: Chart pipeline (reusable)
+
+# The single shared production pipeline for every *-data-viz repo. Each of
+# those repos keeps only a thin ~30-line caller workflow that passes its topic
+# parameters here (this repo is public, so private repos can `uses:` it
+# without any Actions access settings). The R side is equally centralized:
+# canadianeconomy/code/run_topic_charts.R + install_packages.R.
+#
+# Flow: checkout data-viz repo → clone canadianeconomy (PAT) → install R deps
+# from the central list → StatCan preflight (skippable) → optional prefetch →
+# generate charts per publish.yml → optional post-gen (content drafts) → QA
+# design-system lint → commit outputs → fail loudly if any published chart is
+# missing → trigger website rebuild → notify/log/auto-retry.
+
+on:
+  workflow_call:
+    inputs:
+      topic:
+        description: "Topic key in canadianeconomy/publish.yml (also the Supabase pipeline name)"
+        required: true
+        type: string
+      dispatch_event:
+        description: "repository_dispatch event for fresh-runner auto-retry (e.g. trade-release-day)"
+        required: true
+        type: string
+      analysis_dir:
+        description: "figures/<dir> the topic's scripts write to (e.g. trade_analysis)"
+        required: true
+        type: string
+      statcan_table:
+        description: "StatCan productId for the network preflight; empty skips it (keyless topics like rates)"
+        required: false
+        type: string
+        default: ""
+      prefetch_script:
+        description: "Optional repo-local R script to run before chart generation (e.g. scripts/fetch_cpi.R)"
+        required: false
+        type: string
+        default: ""
+      postgen_script:
+        description: "Optional repo-local R script to run after chart generation (e.g. scripts/generate_content.R)"
+        required: false
+        type: string
+        default: ""
+      review_issue:
+        description: "Open a review-notification issue on success (human-in-the-loop topics)"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+
+    steps:
+      - name: Record start time
+        run: echo "PIPELINE_START=$(date +%s)" >> "$GITHUB_ENV"
+
+      - name: Checkout data-viz repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Clone canadianeconomy
+        # The (private) lab repo holds all chart code, publish.yml, the shared
+        # runner, and the central package list. Needs the PAT — the default
+        # GITHUB_TOKEN can't read other private repos.
+        env:
+          WEBSITE_PAT: ${{ secrets.WEBSITE_DISPATCH_TOKEN }}
+        run: |
+          git clone --depth 1 "https://x-access-token:${WEBSITE_PAT}@github.com/mokhtartabari/canadianeconomy" canadianeconomy
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: '4.3.1'
+
+      - name: Cache R packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          # Hash of the central package list — editing it re-primes every
+          # topic's cache automatically. No more per-repo "-v3" key bumps.
+          key: ${{ runner.os }}-r-4.3.1-shared-${{ hashFiles('canadianeconomy/code/install_packages.R') }}
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libcurl4-openssl-dev libssl-dev libxml2-dev \
+            libgdal-dev libproj-dev libgeos-dev libudunits2-dev \
+            libfontconfig1-dev libcairo2-dev libfreetype6-dev
+
+      - name: Install R packages (central list)
+        run: Rscript canadianeconomy/code/install_packages.R
+
+      - name: Network preflight (is StatCan reachable from this runner?)
+        id: preflight
+        if: inputs.statcan_table != ''
+        run: |
+          # StatCan intermittently blocks GitHub Actions IP ranges. Probe first so
+          # a block fails in ~1 min with a clear message instead of an 18-min hang.
+          for i in 1 2 3; do
+            if curl -sSf -o /dev/null --max-time 20 --connect-timeout 15 \
+                 -r 0-0 "https://www150.statcan.gc.ca/n1/tbl/csv/${{ inputs.statcan_table }}-eng.zip"; then
+              echo "✓ StatCan reachable from this runner."
+              exit 0
+            fi
+            echo "Attempt $i/3: StatCan unreachable from this runner; retrying in 15s..."
+            sleep 15
+          done
+          echo "::error::StatCan is unreachable from this GitHub runner (likely an IP block)."
+          echo "::error::Not a code/data problem. Re-run the workflow (new runner = new IP),"
+          echo "::error::or run the local fallback on a machine that can reach StatCan:"
+          echo "::error::  bash scripts/local_fallback.sh    (see scripts/LOCAL_FALLBACK.md)"
+          exit 1
+
+      - name: Prefetch data
+        if: inputs.prefetch_script != ''
+        timeout-minutes: 20
+        env:
+          CM_API_KEY: ${{ secrets.CANCENSUS_API_KEY }}
+        run: Rscript ${{ inputs.prefetch_script }}
+
+      - name: Generate charts from canadianeconomy
+        timeout-minutes: 35
+        env:
+          # cancensus reads CM_API_KEY; map charts need it
+          CM_API_KEY: ${{ secrets.CANCENSUS_API_KEY }}
+        run: Rscript canadianeconomy/code/run_topic_charts.R "${{ inputs.topic }}" "${{ inputs.analysis_dir }}"
+
+      - name: Post-generation script
+        if: inputs.postgen_script != ''
+        timeout-minutes: 15
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: Rscript ${{ inputs.postgen_script }}
+
+      - name: Verify outputs
+        run: |
+          count=$(ls *.png 2>/dev/null | wc -l)
+          echo "PNGs produced: $count"
+          if [ "$count" -eq 0 ]; then echo "ERROR: no charts produced"; exit 1; fi
+          ls -la charts-manifest.json
+
+      - name: QA design-system lint (gate — fails the build on violations)
+        run: |
+          set -o pipefail
+          cd canadianeconomy
+          Rscript code/qa_charts.R ${{ inputs.analysis_dir }} | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit outputs
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          shopt -s nullglob
+          files=(*.png *.svg *.pdf *.csv)
+          git add -- "${files[@]}" charts-manifest.json 2>/dev/null || true
+          [ -d drafts ] && git add drafts
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || true
+            git commit -m "AUTO: ${{ inputs.topic }} charts for $(date +'%Y-%m-%d')"
+            git push origin HEAD
+          fi
+
+      - name: Trigger website rebuild
+        env:
+          GH_TOKEN: ${{ secrets.WEBSITE_DISPATCH_TOKEN }}
+        run: |
+          # The PAT has write access on the website repo (verified 2026-06-13),
+          # so this fires immediately; the website's daily cron is only a backstop.
+          if gh api -X POST /repos/mokhtartabari/mokhtartabari.github.io/dispatches \
+               -f event_type=charts-updated 2>/dev/null; then
+            echo "Triggered immediate website rebuild (charts-updated dispatch)."
+          elif gh workflow run deploy.yml --repo mokhtartabari/mokhtartabari.github.io 2>/dev/null; then
+            echo "Triggered immediate website rebuild (workflow_dispatch)."
+          else
+            echo "Could not trigger an immediate rebuild; the website's daily backstop will pick it up."
+          fi
+
+      # A published chart that fails to generate must NOT stay green: the site
+      # would silently serve the stale PNG from the last good run (this happened
+      # — economic_engine_stacked.png with a missing R package). The good charts
+      # were already committed above; now fail the run so the 3-strike notifier
+      # and the dashboard see it.
+      - name: Fail if any published chart is missing
+        run: |
+          if [ -f .failed-charts ]; then
+            echo "::error::These published charts failed to generate (stale versions remain live):"
+            sed 's/^/::error::  /' .failed-charts
+            exit 1
+          fi
+          echo "All published charts generated."
+
+      - name: Create review notification
+        if: inputs.review_issue && success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `${{ inputs.topic }}: release-day outputs ready (${new Date().toISOString().slice(0, 10)})`,
+              body: `## Automated ${{ inputs.topic }} pipeline complete\n\n` +
+                    `Charts and generated content are committed to the repo root` +
+                    ` (drafts, if any, are in \`drafts/\`).\n\nRun: ${runUrl}`,
+              labels: ['data-ready', 'auto-generated', 'needs-review']
+            });
+
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Count consecutive recent failures (GitHub already emails the owner
+            // on each failed run; only open an ACTION-NEEDED issue once it's
+            // persistent — 3 in a row — to point at the local fallback).
+            const wfFile = process.env.GITHUB_WORKFLOW_REF.split('@')[0].split('/').pop();
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner, repo: context.repo.repo,
+              workflow_id: wfFile, status: 'completed', per_page: 5
+            });
+            let consec = 1; // this run
+            for (const r of runs.data.workflow_runs) {
+              if (r.id === context.runId) continue;
+              if (r.conclusion === 'failure') consec++; else break;
+            }
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const body = `The ${{ inputs.topic }} pipeline failed (consecutive failures: ${consec}).\n\n` +
+              `If this is a StatCan connectivity block from the runner, either re-run the ` +
+              `workflow (new runner = new IP) or run the local fallback on a machine that ` +
+              `can reach StatCan:\n\n\`\`\`\nbash scripts/local_fallback.sh\n\`\`\`\n\nRun: ${runUrl}`;
+            if (consec >= 3) {
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title: `ACTION NEEDED: ${{ inputs.topic }} pipeline failed ${consec}x — run local fallback`,
+                body, labels: ['workflow-failure', 'needs-action']
+              });
+            } else {
+              core.warning(`${{ inputs.topic }} pipeline failed (${consec} consecutive). Will retry next trigger; local fallback available if it persists.`);
+            }
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.topic }}-charts-${{ github.run_number }}
+          path: "*.png"
+          retention-days: 30
+
+      - name: Log run to dashboard
+        if: always()
+        env:
+          SB_URL: "https://vxgncxkneybpuwahfzhz.supabase.co"
+          SB_KEY: "sb_publishable_0dfCL41AUOrrOlv63a2GNQ_go8rqQAZ"
+        run: |
+          end=$(date +%s); start=${PIPELINE_START:-$end}; dur=$((end - start))
+          [ "${{ job.status }}" = "success" ] && st=success || st=failure
+          curl -s -X POST "$SB_URL/rest/v1/pipeline_logs" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
+            -H "Content-Type: application/json" -H "Prefer: return=minimal" \
+            -d "{\"pipeline_name\":\"${{ inputs.topic }}\",\"status\":\"$st\",\"message\":\"${{ github.event_name }} run #${{ github.run_number }}\",\"duration_seconds\":$dur}" || true
+
+      - name: Auto-retry on StatCan block (fresh runner IP)
+        if: failure() && steps.preflight.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.WEBSITE_DISPATCH_TOKEN }}
+        run: |
+          attempt=${{ github.event.client_payload.attempt || 1 }}
+          if [ "$attempt" -lt 5 ]; then
+            echo "StatCan blocked this runner (attempt $attempt) — re-launching on a fresh runner..."
+            sleep 90
+            printf '{"event_type":"${{ inputs.dispatch_event }}","client_payload":{"attempt":%s}}' "$((attempt+1))" \
+              | gh api -X POST /repos/${{ github.repository }}/dispatches --input -
+          else
+            echo "Reached 5 attempts; leaving the 3-strike notify to alert."
+          fi

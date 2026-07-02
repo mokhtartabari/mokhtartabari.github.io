@@ -7,10 +7,11 @@ on:
     types: [charts-updated]
   workflow_dispatch:
   schedule:
-    # Safety net: rebuild periodically so newly generated charts in the private
-    # data-viz repos get pulled in even when the viz pipeline can't trigger a
-    # rebuild directly (its PAT is read-only on this repo). Every 6 hours.
-    - cron: "0 */6 * * *"
+    # Daily backstop only. The data-viz pipelines trigger an immediate rebuild
+    # via repository_dispatch[charts-updated] (the PAT has write access here),
+    # so this cron exists solely to catch a missed dispatch. 15:00 UTC lands
+    # after the 08:30 ET StatCan releases and the daily rates run (12:00 UTC).
+    - cron: "0 15 * * *"
 
 permissions:
   contents: read
