@@ -5,7 +5,7 @@ authors:
 year: 2025
 venue: "Journal of Economics Teaching"
 venueShort: "JET"
-status: "revise-and-resubmit"
+status: "accepted"
 featured: false
 order: 4
 tags: ["AI in Education", "Pedagogy", "Generative AI"]
