@@ -92,49 +92,6 @@ function fmtDate(iso: string | null) {
     </div>
   </section>
 
-  <!-- Original analysis strip (insight-flagged charts across topics) ------>
-  {
-    insights.length > 0 && (
-      <section class="container-wide pb-12">
-        <div class="reveal flex items-baseline gap-3 mb-5">
-          <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-gold-500 text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M12 2l2.4 7.2h7.6l-6.2 4.5 2.4 7.3L12 16.6l-6.2 4.4 2.4-7.3L2 9.2h7.6L12 2z" />
-            </svg>
-            Original analysis
-          </span>
-          <p class="text-sm text-muted">
-            New measures computed from official data — not available anywhere else.
-          </p>
-        </div>
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {insights.map(({ chart, topic }) => (
-            <a
-              href={`/charts/${topic.slug}/`}
-              class="reveal group rounded-2xl border border-default bg-elevated overflow-hidden hover:border-gold-400 hover:shadow-lg transition-all duration-300"
-            >
-              <div class="overflow-hidden" style="background-color: var(--chart-bg)">
-                <img
-                  src={`${topic.chartsDir}${chart.filename}`}
-                  alt={chart.title}
-                  class="w-full h-auto block group-hover:scale-[1.02] transition-transform duration-500"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-              <div class="px-4 py-3">
-                <p class="text-sm font-medium leading-snug group-hover:text-accent-600 dark:group-hover:text-accent-400 transition-colors">
-                  {chart.title}
-                </p>
-                <p class="text-[11px] text-muted mt-1">{topic.title}</p>
-              </div>
-            </a>
-          ))}
-        </div>
-      </section>
-    )
-  }
-
   <!-- Topic cards --------------------------------------------------------->
   <section class="container-wide pb-16">
     <div class="grid md:grid-cols-2 gap-6">
@@ -242,6 +199,50 @@ function fmtDate(iso: string | null) {
         })
       }
     </div>
+
+    <!-- Original analysis (quieter, below the topics) -->
+  {
+    insights.length > 0 && (
+      <div class="mt-14">
+        <div class="reveal flex items-baseline gap-3 mb-5">
+          <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-gold-500 text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 2l2.4 7.2h7.6l-6.2 4.5 2.4 7.3L12 16.6l-6.2 4.4 2.4-7.3L2 9.2h7.6L12 2z" />
+            </svg>
+            Original analysis
+          </span>
+          <p class="text-sm text-muted">
+            Measures computed from official data that you won’t find elsewhere.
+          </p>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {insights.map(({ chart, topic }) => (
+            <a
+              href={`/charts/${topic.slug}/`}
+              class="reveal group rounded-2xl border border-default bg-elevated overflow-hidden hover:border-gold-400 hover:shadow-lg transition-all duration-300"
+            >
+              <div class="overflow-hidden" style="background-color: var(--chart-bg)">
+                <img
+                  src={`${topic.chartsDir}${chart.filename}`}
+                  alt={chart.title}
+                  class="w-full h-auto block group-hover:scale-[1.02] transition-transform duration-500"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <div class="px-4 py-3">
+                <p class="text-sm font-medium leading-snug group-hover:text-accent-600 dark:group-hover:text-accent-400 transition-colors">
+                  {chart.title}
+                </p>
+                <p class="text-[11px] text-muted mt-1">{topic.title}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
 
     <!-- Methodology note -->
     <div
