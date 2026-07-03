@@ -330,7 +330,7 @@ function inlineSvg(chart: ChartEntry): string | null {
         <span id="lb-counter" class="text-white/60 text-sm tabular-nums"></span>
         <div class="flex items-center gap-2">
           <!-- Download menu (formats populated per-chart by JS) -->
-          <div class="relative" id="lb-download-wrap">
+          <div class="static sm:relative" id="lb-download-wrap">
             <button
               id="lb-download-btn"
               class="inline-flex items-center gap-1 text-sm text-white/70 hover:text-white px-2.5 py-1.5 rounded-lg border border-white/20 hover:border-white/40 transition-colors"
@@ -344,7 +344,7 @@ function inlineSvg(chart: ChartEntry): string | null {
             </button>
             <div
               id="lb-download-menu"
-              class="hidden absolute right-0 mt-2 w-60 rounded-xl border border-white/15 bg-neutral-900/95 backdrop-blur-sm shadow-2xl p-1.5 z-20"
+              class="hidden absolute left-2 right-2 top-12 sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-60 max-h-[70vh] overflow-y-auto rounded-xl border border-white/15 bg-neutral-900/95 backdrop-blur-sm shadow-2xl p-1.5 z-20"
               role="menu"
             >
               <div id="lb-download-links"></div>
@@ -357,7 +357,7 @@ function inlineSvg(chart: ChartEntry): string | null {
             </div>
           </div>
           <!-- Share menu (social intents + copy link + embed code) -->
-          <div class="relative" id="lb-embed-wrap">
+          <div class="static sm:relative" id="lb-embed-wrap">
             <button
               id="lb-embed-btn"
               class="inline-flex items-center gap-1.5 text-sm text-white/70 hover:text-white px-3 py-1.5 rounded-lg border border-white/20 hover:border-white/40 transition-colors"
@@ -369,7 +369,7 @@ function inlineSvg(chart: ChartEntry): string | null {
             </button>
             <div
               id="lb-embed-menu"
-              class="hidden absolute right-0 mt-2 w-80 max-w-[90vw] rounded-xl border border-white/15 bg-neutral-900/95 backdrop-blur-sm shadow-2xl p-1.5 z-20"
+              class="hidden absolute left-2 right-2 top-12 sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-80 max-h-[70vh] overflow-y-auto rounded-xl border border-white/15 bg-neutral-900/95 backdrop-blur-sm shadow-2xl p-1.5 z-20"
               role="menu"
             >
               <a id="lb-share-x" role="menuitem" href="#" target="_blank" rel="noopener noreferrer"
