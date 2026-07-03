@@ -8,12 +8,20 @@ import inflationManifest from "~/data/charts-manifest-inflation.json";
 import gdpManifest from "~/data/charts-manifest-gdp.json";
 import tradeManifest from "~/data/charts-manifest-trade.json";
 import employmentManifest from "~/data/charts-manifest-employment.json";
+import productivityManifest from "~/data/charts-manifest-productivity.json";
+import ratesManifest from "~/data/charts-manifest-rates.json";
+import housingManifest from "~/data/charts-manifest-housing.json";
+import energyManifest from "~/data/charts-manifest-energy.json";
 
 const manifests: Record<string, VizManifest> = {
   inflation: inflationManifest as unknown as VizManifest,
   gdp: gdpManifest as unknown as VizManifest,
   trade: tradeManifest as unknown as VizManifest,
   employment: employmentManifest as unknown as VizManifest,
+  productivity: productivityManifest as unknown as VizManifest,
+  rates: ratesManifest as unknown as VizManifest,
+  housing: housingManifest as unknown as VizManifest,
+  energy: energyManifest as unknown as VizManifest,
 };
 
 export function getStaticPaths() {
@@ -22,6 +30,10 @@ export function getStaticPaths() {
     gdp: gdpManifest as unknown as VizManifest,
     trade: tradeManifest as unknown as VizManifest,
     employment: employmentManifest as unknown as VizManifest,
+    productivity: productivityManifest as unknown as VizManifest,
+    rates: ratesManifest as unknown as VizManifest,
+    housing: housingManifest as unknown as VizManifest,
+    energy: energyManifest as unknown as VizManifest,
   };
   const paths: { params: { topic: string; slug: string }; props: { chart: ChartEntry; topic: VizTopic } }[] = [];
   for (const t of vizTopics) {
