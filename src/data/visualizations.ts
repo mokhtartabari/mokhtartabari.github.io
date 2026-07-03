@@ -13,6 +13,11 @@ export interface ChartEntry {
   data_through?: string;
   /** ISO date the data last advanced (carried forward across rebuilds). */
   updated?: string;
+  /** Original derived measure (computed, not a replotted StatCan series) —
+   *  gets the "Original analysis" badge and the /charts featured strip. */
+  insight?: boolean;
+  /** One-sentence how-to-read caption for advanced chart forms. */
+  note?: string;
 }
 
 export interface VizManifest {
