@@ -345,9 +345,11 @@ function inlineSvg(chart: ChartEntry): string | null {
               class="inline-flex items-center gap-1.5 text-sm text-white/70 hover:text-white px-3 py-1.5 rounded-lg border border-white/20 hover:border-white/40 transition-colors"
               aria-haspopup="true"
               aria-expanded="false"
+              aria-label="Share"
+              title="Share"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-              Share
+              <span class="max-sm:hidden">Share</span>
             </button>
             <div
               id="lb-embed-menu"
@@ -1005,6 +1007,8 @@ function inlineSvg(chart: ChartEntry): string | null {
       lbNative.dataset.url = sharePage;
       lbNative.dataset.title = card.dataset.title ?? "Chart";
       if (navigator.share) lbNative.classList.remove("hidden");
+      lbEmbedBtn.dataset.url = sharePage;
+      lbEmbedBtn.dataset.title = card.dataset.title ?? "Chart";
       (document.getElementById("lb-share-copy") as HTMLButtonElement).dataset.url = sharePage;
       closeMenu();
 
@@ -1045,6 +1049,15 @@ function inlineSvg(chart: ChartEntry): string | null {
     // Embed menu toggle (closes the download menu first)
     lbEmbedBtn.addEventListener("click", (e) => {
       e.stopPropagation();
+      // On phones, one tap goes straight to the OS share sheet (iOS/Android);
+      // the dropdown (with embed code) stays for desktop.
+      const nativeFirst = !!navigator.share && window.matchMedia("(max-width: 639px)").matches;
+      if (nativeFirst) {
+        closeMenu();
+        navigator.share({ title: lbEmbedBtn.dataset.title || document.title,
+                          url: lbEmbedBtn.dataset.url || location.href }).catch(() => {});
+        return;
+      }
       const willOpen = lbEmbedMenu.classList.contains("hidden");
       closeMenu();
       if (willOpen) {
