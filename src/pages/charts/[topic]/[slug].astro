@@ -87,9 +87,19 @@ const shareUrl = encodeURIComponent(pageUrl);
     </header>
 
     <figure class="reveal rounded-2xl border border-default bg-elevated overflow-hidden max-w-4xl">
-      <div style="background-color: var(--chart-bg)">
+      <a
+        href={chartImg}
+        target="_blank"
+        rel="noopener"
+        class="group relative block cursor-zoom-in"
+        style="background-color: var(--chart-bg)"
+        aria-label={`View ${chart.title} full screen`}
+      >
         <img src={chartImg} alt={chart.title} class="w-full h-auto block" loading="eager" />
-      </div>
+        <span class="absolute top-3 right-3 rounded-lg bg-black/50 text-white p-1.5 backdrop-blur-sm opacity-70 group-hover:opacity-100 transition-opacity">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+        </span>
+      </a>
       <figcaption class="px-5 py-4 space-y-1.5">
         {chart.note && (
           <p class="text-sm leading-snug text-muted/90 italic">How to read: {chart.note}</p>
