@@ -62,6 +62,29 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Network preflight (is StatCan reachable from this runner?)
+        id: preflight
+        if: inputs.statcan_table != ''
+        run: |
+          # StatCan intermittently blocks GitHub Actions IP ranges. Probe FIRST —
+          # before the ~25 min R toolchain setup — so a blocked runner fails in
+          # ~2 min and the auto-retry gets a fresh IP cheaply.
+          for i in 1 2 3; do
+            if curl -sSf -o /dev/null --max-time 20 --connect-timeout 15 \
+                 -r 0-0 "https://www150.statcan.gc.ca/n1/tbl/csv/${{ inputs.statcan_table }}-eng.zip"; then
+              echo "✓ StatCan reachable from this runner."
+              exit 0
+            fi
+            echo "Attempt $i/3: StatCan unreachable from this runner; retrying in 15s..."
+            sleep 15
+          done
+          echo "::error::StatCan is unreachable from this GitHub runner (likely an IP block)."
+          echo "::error::Not a code/data problem. The auto-retry step will re-launch on a"
+          echo "::error::fresh runner; if it keeps failing, run the local fallback on a"
+          echo "::error::machine that can reach StatCan:"
+          echo "::error::  bash scripts/local_fallback.sh    (see scripts/LOCAL_FALLBACK.md)"
+          exit 1
+
       - name: Clone canadianeconomy
         # The (private) lab repo holds all chart code, publish.yml, the shared
         # runner, and the central package list. Needs the PAT — the default
@@ -95,27 +118,6 @@ jobs:
 
       - name: Install R packages (central list)
         run: Rscript canadianeconomy/code/install_packages.R
-
-      - name: Network preflight (is StatCan reachable from this runner?)
-        id: preflight
-        if: inputs.statcan_table != ''
-        run: |
-          # StatCan intermittently blocks GitHub Actions IP ranges. Probe first so
-          # a block fails in ~1 min with a clear message instead of an 18-min hang.
-          for i in 1 2 3; do
-            if curl -sSf -o /dev/null --max-time 20 --connect-timeout 15 \
-                 -r 0-0 "https://www150.statcan.gc.ca/n1/tbl/csv/${{ inputs.statcan_table }}-eng.zip"; then
-              echo "✓ StatCan reachable from this runner."
-              exit 0
-            fi
-            echo "Attempt $i/3: StatCan unreachable from this runner; retrying in 15s..."
-            sleep 15
-          done
-          echo "::error::StatCan is unreachable from this GitHub runner (likely an IP block)."
-          echo "::error::Not a code/data problem. Re-run the workflow (new runner = new IP),"
-          echo "::error::or run the local fallback on a machine that can reach StatCan:"
-          echo "::error::  bash scripts/local_fallback.sh    (see scripts/LOCAL_FALLBACK.md)"
-          exit 1
 
       - name: Prefetch data
         if: inputs.prefetch_script != ''
