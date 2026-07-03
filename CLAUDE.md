@@ -31,6 +31,21 @@ There are two distinct ways content is managed:
 
 Pages in `src/pages/` are mostly thin wrappers: they import from `src/data/` or query the publications collection, then render components. Core content is fully resolved at build time (no content APIs at runtime). The only runtime fetch is client-side analytics (views & downloads) querying and updating Supabase.
 
+### Chart data pipeline (this repo hosts the shared workflow)
+
+Charts are generated upstream and fetched at build time — see `canadianeconomy/CLAUDE.md`
+for the full architecture. What lives HERE:
+- **`.github/workflows/chart-pipeline.yml`** — the reusable (`workflow_call`) production
+  pipeline every private `*-data-viz` repo calls. It's hosted in this repo because it's
+  public (private repos can `uses:` it with no Actions access settings). Edit pipeline
+  behavior here once; all eight topics pick it up.
+- **`scripts/fetch-data.mjs`** (`prebuild`/`predev`) — pulls each data-viz repo's
+  `charts-manifest.json` + chart assets via the GitHub Contents API (needs `GH_PAT`;
+  raw.githubusercontent.com doesn't work with fine-grained PATs on private repos) into
+  `src/data/charts-manifest-<topic>.json` + `public/charts/<topic>/` (both gitignored).
+- **`deploy.yml`** rebuild triggers: push, `repository_dispatch[charts-updated]` (fired by
+  the pipeline after committing fresh charts), manual, and a daily 15:00 UTC backstop cron.
+
 ### Chart Analytics & Tracking (Supabase)
 
 Charts on the data pages track impressions (views) and download events using a lightweight client-side script connecting to Supabase:
