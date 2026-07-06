@@ -29,3 +29,8 @@ pnpm-debug.log*
 .quarto/
 _site/
 about_files/
+
+# build-time fetched chart artifacts — populated by scripts/fetch-data.mjs
+# (prebuild/predev). See CLAUDE.md: manifests + chart assets are gitignored.
+src/data/charts-manifest-*.json
+public/charts/
