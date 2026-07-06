@@ -18,8 +18,17 @@ command -v gh   >/dev/null || brew install gh
 gh auth status >/dev/null 2>&1 || gh auth login
 
 echo "==> Installing the C libraries the R packages compile against (one-time)"
-brew install curl openssl@3 libxml2 gdal proj geos udunits \
-             fontconfig cairo freetype harfbuzz fribidi libtiff jpeg libpng pkg-config
+# Non-fatal: most of these are usually already present, and the runner
+# registration below doesn't need them. If Homebrew's prefix isn't writable,
+# fix it once with:  sudo chown -R "$(whoami)" "$(brew --prefix)"
+if [ -w "$(brew --prefix)" ]; then
+  brew install curl openssl@3 libxml2 gdal proj geos udunits \
+               fontconfig cairo freetype harfbuzz fribidi libtiff jpeg libpng pkg-config || \
+    echo "   (some libraries failed to install — continuing; R can still compile with what's present)"
+else
+  echo "   (Homebrew prefix not writable — skipping lib install. Fix later with:"
+  echo "      sudo chown -R \"$(whoami)\" \"$(brew --prefix)\"  )"
+fi
 
 echo "==> Downloading the macOS runner"
 VER=$(gh api repos/actions/runner/releases/latest --jq .tag_name | sed 's/^v//')
