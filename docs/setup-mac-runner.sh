@@ -6,7 +6,7 @@
 #     bash setup-mac-runner.sh
 #
 # Requirements: Homebrew (https://brew.sh) and the GitHub CLI signed in as you.
-set -euo pipefail
+set -uo pipefail   # not -e: keep going per-repo and report failures instead of aborting
 
 OWNER="mokhtartabari"
 REPOS=(gdp-data-viz employment-data-viz trade-data-viz inflation-data-viz
@@ -39,17 +39,22 @@ mkdir -p "$HOME/actions-runner-pkg"
   "https://github.com/actions/runner/releases/download/v${VER}/actions-runner-osx-${ARCH}-${VER}.tar.gz"
 
 echo "==> Registering + starting a runner per repo"
+ok=0
 for repo in "${REPOS[@]}"; do
-  dir="$HOME/runners/$repo"
-  mkdir -p "$dir"; tar xzf "$PKG" -C "$dir"
-  token=$(gh api -X POST "repos/$OWNER/$repo/actions/runners/registration-token" --jq .token)
-  ( cd "$dir"
-    ./config.sh --url "https://github.com/$OWNER/$repo" --token "$token" \
-                --name "$(hostname -s)-$repo" --labels self-hosted --unattended --replace
-    sudo ./svc.sh install "$(whoami)"
-    sudo ./svc.sh start )
-  echo "   ✓ $repo — runner installed and started"
+  echo "-- $repo"
+  dir="$HOME/runners/$repo"; mkdir -p "$dir"
+  tar xzf "$PKG" -C "$dir" || { echo "   ✗ extract failed"; continue; }
+  token=$(gh api -X POST "repos/$OWNER/$repo/actions/runners/registration-token" --jq .token 2>&1) \
+    || { echo "   ✗ registration token failed: $token"; continue; }
+  ( cd "$dir" \
+    && ./config.sh --url "https://github.com/$OWNER/$repo" --token "$token" \
+         --name "$(hostname -s)-$repo" --labels self-hosted --unattended --replace \
+    && sudo ./svc.sh install "$(whoami)" \
+    && sudo ./svc.sh start ) \
+    || { echo "   ✗ config/service failed for $repo"; continue; }
+  echo "   ✓ $repo registered + started"; ok=$((ok+1))
 done
+echo "==> $ok / ${#REPOS[@]} runners registered"
 
 echo
 echo "Done. In each repo's Settings → Actions → Runners you should see a runner marked 'Idle'."
