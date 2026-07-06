@@ -47,10 +47,15 @@ on:
         required: false
         type: boolean
         default: false
+      runner:
+        description: "Runner label. Default 'ubuntu-latest' (GitHub-hosted). Set to 'self-hosted' to run on a residential-IP machine that StatCan does not block."
+        required: false
+        type: string
+        default: "ubuntu-latest"
 
 jobs:
   generate:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner }}
     timeout-minutes: 75
 
     steps:
@@ -108,6 +113,10 @@ jobs:
           key: ${{ runner.os }}-r-4.3.1-shared-${{ hashFiles('canadianeconomy/code/install_packages.R') }}
 
       - name: Install system dependencies
+        # GitHub-hosted runners start clean, so install the C libraries every run.
+        # Self-hosted runners have them installed once (see docs/SELF_HOSTED_RUNNER.md),
+        # so skip apt-get there — it also avoids needing passwordless sudo.
+        if: runner.environment == 'github-hosted'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
