@@ -1,6 +1,28 @@
 ---
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { site } from "~/data/site";
+import inflationManifest from "~/data/charts-manifest-inflation.json";
+import gdpManifest from "~/data/charts-manifest-gdp.json";
+import tradeManifest from "~/data/charts-manifest-trade.json";
+import employmentManifest from "~/data/charts-manifest-employment.json";
+import productivityManifest from "~/data/charts-manifest-productivity.json";
+import ratesManifest from "~/data/charts-manifest-rates.json";
+import housingManifest from "~/data/charts-manifest-housing.json";
+import energyManifest from "~/data/charts-manifest-energy.json";
+
+// Flat catalog of every published chart — the Studio uses it to show thumbnails
+// for the model's picks and to browse/swap attachments.
+const allManifests: any[] = [
+  inflationManifest, gdpManifest, tradeManifest, employmentManifest,
+  productivityManifest, ratesManifest, housingManifest, energyManifest,
+];
+const chartCatalog = allManifests.flatMap((m: any) =>
+  (m?.charts || []).map((c: any) => ({
+    slug: c.slug, title: c.title, topic: m.topic,
+    category: c.category || "", url: c.url, data_through: c.data_through || "",
+  }))
+);
+const catalogJson = JSON.stringify(chartCatalog).replace(/</g, "\\u003c");
 ---
 
 <BaseLayout title="Admin Dashboard" description="Site analytics, subscriber list, and user feedback.">
@@ -72,7 +94,7 @@ import { site } from "~/data/site";
 
       <!-- Navigation Tabs -->
       <nav class="flex border-b border-default overflow-x-auto no-scrollbar gap-1" aria-label="Dashboard Tabs">
-        {["Overview", "Charts", "Geography", "Devices & Referrals", "Subscribers", "Feedback Feed"].map((tab, idx) => (
+        {["Studio", "Overview", "Charts", "Geography", "Devices & Referrals", "Subscribers", "Feedback Feed"].map((tab, idx) => (
           <button
             data-tab={idx}
             class={`px-4 py-2.5 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${idx === 0 ? "border-accent-500 text-fg" : "border-transparent text-muted hover:text-fg"}`}
@@ -85,8 +107,28 @@ import { site } from "~/data/site";
       <!-- Dashboard Panels Container -->
       <div id="panels" class="relative min-h-[400px]">
         
-        <!-- 1. OVERVIEW PANEL -->
+        <!-- 0. STUDIO PANEL (default) -->
         <div class="panel space-y-6">
+          <div class="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <h2 class="font-serif text-xl font-semibold">Content Studio</h2>
+              <p class="text-sm text-muted">Auto-drafted posts from the latest data releases — edit, copy, grab a chart, publish.</p>
+            </div>
+            <label class="inline-flex items-center gap-2 text-xs text-muted cursor-pointer">
+              <input type="checkbox" id="studio-show-posted" class="rounded border-default" /> Show posted / dismissed
+            </label>
+          </div>
+          <div id="studio-drafts" class="space-y-6">
+            <p class="p-8 text-center text-muted border border-default rounded-2xl bg-elevated">Loading drafts…</p>
+          </div>
+          <details class="rounded-2xl border border-default bg-elevated">
+            <summary class="cursor-pointer px-6 py-4 font-serif font-semibold select-none">Browse all charts</summary>
+            <div id="studio-gallery" class="p-6 pt-0 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+          </details>
+        </div>
+
+        <!-- 1. OVERVIEW PANEL -->
+        <div class="panel hidden space-y-6">
           <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <!-- Metric Card 1 -->
             <div class="p-6 rounded-2xl border border-default bg-elevated space-y-2 shadow-sm">
@@ -278,10 +320,140 @@ import { site } from "~/data/site";
   </div>
 </BaseLayout>
 
+<script type="application/json" id="chart-catalog" is:inline set:html={catalogJson}></script>
+
 <script>
   const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL;
   const SB_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
   const ADMIN_PASSCODE = import.meta.env.PUBLIC_ADMIN_PASSCODE || "admin123";
+
+  // ===================== CONTENT STUDIO =====================
+  const CHART_CATALOG = (() => {
+    try { return JSON.parse(document.getElementById("chart-catalog")?.textContent || "[]"); }
+    catch { return []; }
+  })();
+  const catBySlug: Record<string, any> = Object.fromEntries(CHART_CATALOG.map((c: any) => [c.slug, c]));
+  const escH = (s: string) => (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  const chartThumb = (slug: string) => {
+    const c = catBySlug[slug];
+    if (!c) return "";
+    return `
+      <a href="${c.url}" target="_blank" rel="noopener" class="group block rounded-xl border border-default overflow-hidden bg-surface hover:shadow-md transition-shadow" title="${escH(c.title)} — open full image">
+        <img src="${c.url}" alt="${escH(c.title)}" loading="lazy" class="w-full h-28 object-cover object-top bg-white" />
+        <div class="px-2.5 py-1.5 text-[11px] font-medium truncate">${escH(c.title)}</div>
+      </a>`;
+  };
+
+  const renderStudioCard = (d: any) => {
+    const f = d.facts || {};
+    const badge = d.status === "posted"
+      ? `<span class="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">Posted</span>`
+      : d.status === "dismissed"
+      ? `<span class="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-neutral-500/10 text-muted">Dismissed</span>`
+      : `<span class="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-accent-500/10 text-accent-600">New</span>`;
+    const thumbs = (d.attach || []).map(chartThumb).join("");
+    const xText = d.x_post || "";
+    return `
+      <article class="rounded-2xl border border-default bg-elevated p-6 space-y-5 shadow-sm" data-id="${d.id}">
+        <header class="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold uppercase tracking-wider text-accent-600 dark:text-accent-400">${escH(d.topic)}</span>
+              ${badge}
+            </div>
+            <h3 class="font-serif text-lg font-semibold mt-1">${escH(d.headline || "")}</h3>
+            <p class="text-xs text-muted">data through ${escH(f.latest_date || d.release_date || "")}</p>
+          </div>
+        </header>
+        <div class="grid md:grid-cols-2 gap-5">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-semibold uppercase tracking-wider text-muted">X / Twitter</label>
+              <span class="text-[10px] text-muted"><span class="x-count">${xText.length}</span>/280</span>
+            </div>
+            <textarea class="studio-x w-full h-32 p-3 rounded-xl border border-default bg-surface text-sm leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-accent-500">${escH(xText)}</textarea>
+            <button class="btn-copy px-3 py-1.5 rounded-lg border border-default bg-surface hover:bg-neutral-50 dark:hover:bg-neutral-800 text-xs font-semibold" data-target="studio-x">Copy X post</button>
+          </div>
+          <div class="space-y-2">
+            <label class="text-xs font-semibold uppercase tracking-wider text-muted">LinkedIn</label>
+            <textarea class="studio-li w-full h-32 p-3 rounded-xl border border-default bg-surface text-sm leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-accent-500">${escH(d.linkedin_post || "")}</textarea>
+            <button class="btn-copy px-3 py-1.5 rounded-lg border border-default bg-surface hover:bg-neutral-50 dark:hover:bg-neutral-800 text-xs font-semibold" data-target="studio-li">Copy LinkedIn post</button>
+          </div>
+        </div>
+        ${thumbs ? `
+        <div class="space-y-2">
+          <p class="text-xs font-semibold uppercase tracking-wider text-muted">Suggested charts — click to open &amp; download</p>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">${thumbs}</div>
+        </div>` : ""}
+        ${d.chart_idea ? `
+        <div class="text-sm p-3 rounded-xl bg-accent-500/5 border border-accent-500/20">
+          <span class="font-semibold">💡 New chart idea:</span> ${escH(d.chart_idea)}
+        </div>` : ""}
+        <div class="flex items-center gap-2 pt-1">
+          <button class="btn-status px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold" data-status="posted">Mark posted</button>
+          <button class="btn-status px-3 py-1.5 rounded-lg border border-default text-xs font-medium text-muted hover:text-fg" data-status="dismissed">Dismiss</button>
+        </div>
+      </article>`;
+  };
+
+  const renderStudioGallery = () => {
+    const el = document.getElementById("studio-gallery");
+    if (el) el.innerHTML = CHART_CATALOG.map((c: any) => chartThumb(c.slug)).join("");
+  };
+
+  const loadStudio = async () => {
+    if (!SB_URL || !SB_KEY) return;
+    const headers = { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` };
+    const showPosted = (document.getElementById("studio-show-posted") as HTMLInputElement | null)?.checked;
+    const filter = showPosted ? "" : "&status=eq.new";
+    const wrap = document.getElementById("studio-drafts");
+    if (!wrap) return;
+    try {
+      const res = await fetch(`${SB_URL}/rest/v1/content_drafts?select=*&order=created_at.desc&limit=40${filter}`, { headers });
+      const drafts = res.ok ? await res.json() : [];
+      if (!drafts.length) {
+        wrap.innerHTML = `<p class="p-8 text-center text-muted border border-default rounded-2xl bg-elevated">No drafts yet — they appear here automatically after the next Statistics Canada release.</p>`;
+      } else {
+        wrap.innerHTML = drafts.map(renderStudioCard).join("");
+        wrap.querySelectorAll(".btn-copy").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const card = btn.closest("article")!;
+            const ta = card.querySelector<HTMLTextAreaElement>("." + (btn as HTMLElement).dataset.target)!;
+            navigator.clipboard.writeText(ta.value);
+            const t = btn.textContent; btn.textContent = "Copied!";
+            setTimeout(() => (btn.textContent = t), 1500);
+          });
+        });
+        wrap.querySelectorAll<HTMLTextAreaElement>(".studio-x").forEach((ta) => {
+          ta.addEventListener("input", () => {
+            const c = ta.closest("article")!.querySelector(".x-count");
+            if (c) c.textContent = String(ta.value.length);
+          });
+        });
+        wrap.querySelectorAll(".btn-status").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const id = (btn.closest("article") as HTMLElement).dataset.id;
+            await fetch(`${SB_URL}/rest/v1/content_drafts?id=eq.${id}`, {
+              method: "PATCH",
+              headers: { ...headers, "Content-Type": "application/json", Prefer: "return=minimal" },
+              body: JSON.stringify({ status: (btn as HTMLElement).dataset.status }),
+            });
+            loadStudio();
+          });
+        });
+      }
+      renderStudioGallery();
+    } catch (err) {
+      wrap.innerHTML = `<p class="p-8 text-center text-red-500 border border-default rounded-2xl bg-elevated">Failed to load drafts.</p>`;
+    }
+  };
+
+  const studioToggle = document.getElementById("studio-show-posted");
+  if (studioToggle && !studioToggle.dataset.bound) {
+    studioToggle.dataset.bound = "true";
+    studioToggle.addEventListener("change", loadStudio);
+  }
 
   // Simple Page Auth Gating logic
   const authCheck = () => {
@@ -385,6 +557,7 @@ import { site } from "~/data/site";
   // DB Data Load Fetching
   const loadDashboardData = async () => {
     if (!SB_URL || !SB_KEY) return;
+    loadStudio();
     const headers = { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` };
 
     try {
