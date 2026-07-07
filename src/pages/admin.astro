@@ -20,6 +20,9 @@ const chartCatalog = allManifests.flatMap((m: any) =>
   (m?.charts || []).map((c: any) => ({
     slug: c.slug, title: c.title, topic: m.topic,
     category: c.category || "", url: c.url, data_through: c.data_through || "",
+    // public chart PAGE (full-screen + download + share, and OG-tagged so a
+    // shared link renders a chart preview card) — this is what we post.
+    page: `https://mokhtartabari.github.io/charts/${m.topic}/${c.slug}/`,
   }))
 );
 const catalogJson = JSON.stringify(chartCatalog).replace(/</g, "\\u003c");
@@ -339,7 +342,7 @@ const catalogJson = JSON.stringify(chartCatalog).replace(/</g, "\\u003c");
     const c = catBySlug[slug];
     if (!c) return "";
     return `
-      <a href="${c.url}" target="_blank" rel="noopener" class="group block rounded-xl border border-default overflow-hidden bg-surface hover:shadow-md transition-shadow" title="${escH(c.title)} — open full image">
+      <a href="${c.page || c.url}" target="_blank" rel="noopener" class="group block rounded-xl border border-default overflow-hidden bg-surface hover:shadow-md transition-shadow" title="${escH(c.title)} — open on your site">
         <img src="${c.url}" alt="${escH(c.title)}" loading="lazy" class="w-full h-28 object-cover object-top bg-white" />
         <div class="px-2.5 py-1.5 text-[11px] font-medium truncate">${escH(c.title)}</div>
       </a>`;
@@ -355,7 +358,7 @@ const catalogJson = JSON.stringify(chartCatalog).replace(/</g, "\\u003c");
     const thumbs = (d.attach || []).map(chartThumb).join("");
     const xText = d.x_post || "";
     return `
-      <article class="rounded-2xl border border-default bg-elevated p-6 space-y-5 shadow-sm" data-id="${d.id}">
+      <article class="rounded-2xl border border-default bg-elevated p-6 space-y-5 shadow-sm" data-id="${d.id}" data-primary="${(d.attach && d.attach[0]) || ""}">
         <header class="flex items-start justify-between gap-3 flex-wrap">
           <div>
             <div class="flex items-center gap-2">
@@ -389,7 +392,7 @@ const catalogJson = JSON.stringify(chartCatalog).replace(/</g, "\\u003c");
         </div>
         ${thumbs ? `
         <div class="space-y-2">
-          <p class="text-xs font-semibold uppercase tracking-wider text-muted">Suggested charts — click to open &amp; download</p>
+          <p class="text-xs font-semibold uppercase tracking-wider text-muted">Charts — the post links to the first one (preview card); click to open on your site</p>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">${thumbs}</div>
         </div>` : ""}
         ${d.chart_idea ? `
@@ -436,10 +439,17 @@ const catalogJson = JSON.stringify(chartCatalog).replace(/</g, "\\u003c");
           btn.addEventListener("click", () => {
             const card = btn.closest("article")!;
             const ta = card.querySelector<HTMLTextAreaElement>("." + (btn as HTMLElement).dataset.target)!;
-            const text = encodeURIComponent(ta.value);
-            const url = (btn as HTMLElement).dataset.net === "x"
-              ? `https://twitter.com/intent/tweet?text=${text}`
-              : `https://www.linkedin.com/feed/?shareActive=true&text=${text}`;
+            const primary = (card as HTMLElement).dataset.primary || "";
+            const pageUrl = (catBySlug[primary] && catBySlug[primary].page) || "";
+            let url;
+            if ((btn as HTMLElement).dataset.net === "x") {
+              // X counts any URL as ~23 chars via the url param and renders its preview card.
+              url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(ta.value)}` +
+                    (pageUrl ? `&url=${encodeURIComponent(pageUrl)}` : "");
+            } else {
+              const body = ta.value + (pageUrl ? "\n\n" + pageUrl : "");
+              url = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(body)}`;
+            }
             window.open(url, "_blank", "noopener");
           });
         });
