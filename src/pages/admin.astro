@@ -373,12 +373,18 @@ const catalogJson = JSON.stringify(chartCatalog).replace(/</g, "\\u003c");
               <span class="text-[10px] text-muted"><span class="x-count">${xText.length}</span>/280</span>
             </div>
             <textarea class="studio-x w-full h-32 p-3 rounded-xl border border-default bg-surface text-sm leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-accent-500">${escH(xText)}</textarea>
-            <button class="btn-copy px-3 py-1.5 rounded-lg border border-default bg-surface hover:bg-neutral-50 dark:hover:bg-neutral-800 text-xs font-semibold" data-target="studio-x">Copy X post</button>
+            <div class="flex items-center gap-2">
+              <button class="btn-open px-3 py-1.5 rounded-lg bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white text-xs font-semibold" data-target="studio-x" data-net="x">Post on X ↗</button>
+              <button class="btn-copy px-3 py-1.5 rounded-lg border border-default bg-surface hover:bg-neutral-50 dark:hover:bg-neutral-800 text-xs font-semibold" data-target="studio-x">Copy</button>
+            </div>
           </div>
           <div class="space-y-2">
             <label class="text-xs font-semibold uppercase tracking-wider text-muted">LinkedIn</label>
             <textarea class="studio-li w-full h-32 p-3 rounded-xl border border-default bg-surface text-sm leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-accent-500">${escH(d.linkedin_post || "")}</textarea>
-            <button class="btn-copy px-3 py-1.5 rounded-lg border border-default bg-surface hover:bg-neutral-50 dark:hover:bg-neutral-800 text-xs font-semibold" data-target="studio-li">Copy LinkedIn post</button>
+            <div class="flex items-center gap-2">
+              <button class="btn-open px-3 py-1.5 rounded-lg bg-[#0a66c2] hover:bg-[#004182] text-white text-xs font-semibold" data-target="studio-li" data-net="li">Post on LinkedIn ↗</button>
+              <button class="btn-copy px-3 py-1.5 rounded-lg border border-default bg-surface hover:bg-neutral-50 dark:hover:bg-neutral-800 text-xs font-semibold" data-target="studio-li">Copy</button>
+            </div>
           </div>
         </div>
         ${thumbs ? `
@@ -423,6 +429,18 @@ const catalogJson = JSON.stringify(chartCatalog).replace(/</g, "\\u003c");
             navigator.clipboard.writeText(ta.value);
             const t = btn.textContent; btn.textContent = "Copied!";
             setTimeout(() => (btn.textContent = t), 1500);
+          });
+        });
+        // Open X / LinkedIn composer prefilled with the (possibly edited) draft.
+        wrap.querySelectorAll(".btn-open").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const card = btn.closest("article")!;
+            const ta = card.querySelector<HTMLTextAreaElement>("." + (btn as HTMLElement).dataset.target)!;
+            const text = encodeURIComponent(ta.value);
+            const url = (btn as HTMLElement).dataset.net === "x"
+              ? `https://twitter.com/intent/tweet?text=${text}`
+              : `https://www.linkedin.com/feed/?shareActive=true&text=${text}`;
+            window.open(url, "_blank", "noopener");
           });
         });
         wrap.querySelectorAll<HTMLTextAreaElement>(".studio-x").forEach((ta) => {
