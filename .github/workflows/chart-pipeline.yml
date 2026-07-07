@@ -99,7 +99,22 @@ jobs:
         run: |
           git clone --depth 1 "https://x-access-token:${WEBSITE_PAT}@github.com/mokhtartabari/canadianeconomy" canadianeconomy
 
+      # Self-hosted runners run as background services with NO terminal, so the
+      # sudo prompts that setup-r's macOS R/gfortran installers need fail with
+      # exit 1 in seconds. There we use the machine's pre-installed R
+      # (brew install r, once — see docs/SELF_HOSTED_RUNNER.md) and a persistent
+      # package library; setup-r runs only on GitHub-hosted runners.
+      - name: Use pre-installed R (self-hosted)
+        if: runner.environment != 'github-hosted'
+        run: |
+          for p in /opt/homebrew/bin /usr/local/bin; do [ -d "$p" ] && echo "$p" >> "$GITHUB_PATH"; done
+          PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+          command -v Rscript || { echo "::error::No R on this runner. Install once with: brew install r"; exit 1; }
+          mkdir -p "$HOME/.r-libs-runner"
+          echo "R_LIBS_USER=$HOME/.r-libs-runner" >> "$GITHUB_ENV"
+
       - name: Set up R
+        if: runner.environment == 'github-hosted'
         uses: r-lib/actions/setup-r@v2
         with:
           r-version: '4.3.1'
