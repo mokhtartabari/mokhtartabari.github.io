@@ -1,0 +1,300 @@
+---
+/**
+ * /cv — a print-optimized CV generated from the SAME site data as the rest of
+ * the website. `scripts/build-cv.mjs` loads this page in headless Chromium and
+ * prints it to public/files/cv.pdf during the build, so the PDF auto-updates
+ * whenever the underlying data changes.
+ *
+ * Reuses: about.ts (experience/education/awards), the publications collection,
+ * teaching.ts (appointments/TA/service), talks.ts (presentations).
+ * CV-only bits live in cv.ts.
+ */
+import { getCollection } from "astro:content";
+import { site } from "~/data/site";
+import { experience, education, awards } from "~/data/about";
+import { appointments, teachingAssistantships, serviceRoles } from "~/data/teaching";
+import { talks } from "~/data/talks";
+import { contact, teachingCertificates, computerSkills, service } from "~/data/cv";
+import "~/styles/global.css";
+
+// Privacy: keep the phone OFF the public web PDF (matches prior redaction).
+// Set true to build a private copy that includes it.
+const SHOW_PHONE = false;
+
+// ---- Employment: only current roles (present), from about.ts ----------------
+const current = experience.filter((e) => /present/i.test(e.period));
+
+// ---- Publications from the collection, split by status ----------------------
+const pubs = (await getCollection("publications")).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+const PUBLISHED = new Set(["published", "accepted"]);
+const published = pubs.filter((p) => PUBLISHED.has(p.data.status));
+const workingPapers = pubs.filter((p) => !PUBLISHED.has(p.data.status));
+
+const coauthors = (authors: string[]) =>
+  authors.filter((a) => !/mokhtar\s+tabari/i.test(a));
+
+const statusLabel: Record<string, string> = {
+  accepted: "Accepted",
+  "revise-and-resubmit": "Revised and Resubmitted",
+  "working-paper": "Working paper",
+  published: "",
+};
+
+// ---- Presentations grouped by year (desc), from talks.ts --------------------
+const byYear = [...talks]
+  .sort((a, b) => b.year - a.year)
+  .reduce<Record<number, string[]>>((acc, t) => {
+    (acc[t.year] ??= []).push(t.venue);
+    return acc;
+  }, {});
+const presentationYears = Object.keys(byYear)
+  .map(Number)
+  .sort((a, b) => b - a);
+
+// ---- Teaching: flatten courses across appointments --------------------------
+const allCourses = Array.from(
+  new Set(appointments.flatMap((a) => a.courses.map((c) => c.title))),
+);
+
+const lastUpdated = new Date().toLocaleDateString("en-US", {
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mokhtar Tabari — Curriculum Vitae</title>
+    <style>
+      :root {
+        --cv-ink: #15161c;    /* ink-900 — site body text */
+        --cv-muted: #4f5263;  /* ink-600 — site muted */
+        --cv-accent: #4338ca; /* accent-700 — site indigo */
+        --cv-line: #d8d9df;   /* ink-200 — site borders */
+        --cv-label: 1.55in;
+      }
+      * { box-sizing: border-box; }
+      html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      body {
+        margin: 0;
+        color: var(--cv-ink);
+        font-family: var(--font-sans);
+        font-size: 10.2pt;
+        line-height: 1.4;
+        background: #fff;
+      }
+      .page { max-width: 8.5in; margin: 0 auto; padding: 0.6in 0.75in; }
+
+      /* Header */
+      .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; border-bottom: 2px solid var(--cv-accent); padding-bottom: 12px; margin-bottom: 6px; }
+      .name { font-family: var(--font-serif); font-weight: 600; font-size: 26pt; letter-spacing: -0.01em; margin: 0; color: var(--cv-ink); }
+      .contact { text-align: right; font-size: 9pt; color: var(--cv-muted); line-height: 1.55; }
+      .contact a { color: var(--cv-accent); text-decoration: none; }
+      .contact .qr { width: 62px; height: 62px; margin-top: 6px; margin-left: auto; display: block; }
+
+      /* Section: left label + right body (mirrors the LaTeX margin style) */
+      .section { display: grid; grid-template-columns: var(--cv-label) 1fr; gap: 10px; padding: 9px 0; border-top: 1px solid var(--cv-line); break-inside: avoid; }
+      .section:first-of-type { border-top: 0; }
+      .label { font-family: var(--font-serif); font-weight: 600; font-size: 11pt; color: var(--cv-accent); line-height: 1.25; }
+      .body { }
+      .row { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; }
+      .row + .row { margin-top: 5px; }
+      .role { font-weight: 600; }
+      .org { font-style: italic; }
+      .date { color: var(--cv-muted); font-size: 9pt; white-space: nowrap; font-variant-numeric: tabular-nums; }
+      .muted { color: var(--cv-muted); }
+      .item { margin-top: 6px; }
+      .item:first-child { margin-top: 0; }
+      .courses { color: var(--cv-muted); font-size: 9.4pt; margin-top: 2px; }
+      .pubtitle { font-weight: 500; }
+      .venue { font-weight: 600; }
+      .tag { color: var(--cv-accent); font-style: italic; }
+      ul.inline { margin: 2px 0 0; padding: 0; list-style: none; }
+      .foot { text-align: right; color: var(--cv-muted); font-size: 8.5pt; font-style: italic; margin-top: 14px; }
+
+      @page { size: Letter; margin: 0; }
+      @media print { .page { padding: 0.55in 0.7in; } }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <!-- Header -->
+      <header class="head">
+        <div>
+          <h1 class="name">{site.name}</h1>
+          <div class="muted" style="font-size:10pt;margin-top:2px;">
+            Applied Economist · International Trade · Energy &amp; Environmental Economics
+          </div>
+        </div>
+        <div class="contact">
+          {SHOW_PHONE && <div>{contact.phone}</div>}
+          <div><a href={`mailto:${contact.email}`}>{contact.email}</a></div>
+          <div><a href={contact.websiteUrl}>{contact.website}</a></div>
+        </div>
+      </header>
+
+      <!-- Current Employment -->
+      <section class="section">
+        <div class="label">Current<br />Employment</div>
+        <div class="body">
+          {current.map((e) => (
+            <div class="row">
+              <div><span class="role">{e.role},</span> <span class="org">{e.org}</span></div>
+              <div class="date">{e.period}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Education -->
+      <section class="section">
+        <div class="label">Education</div>
+        <div class="body">
+          {education.map((ed) => (
+            <div class="row">
+              <div><span class="role">{ed.degree},</span> <span class="org">{ed.institution}</span></div>
+              <div class="date">{ed.year}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Publications -->
+      <section class="section">
+        <div class="label">Publications</div>
+        <div class="body">
+          {published.map((p) => {
+            const co = coauthors(p.data.authors);
+            return (
+              <div class="item">
+                <span class="pubtitle">“{p.data.title}”</span>{co.length > 0 && <span> with {co.join(", ")}</span>}<span>, </span>{p.data.status === "accepted" && <span class="tag">Accepted, </span>}{p.data.venue && <span class="venue">{p.data.venue}</span>}{p.data.status === "published" && <span>, {p.data.year}</span>}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <!-- Working Papers -->
+      {workingPapers.length > 0 && (
+        <section class="section">
+          <div class="label">Working<br />Papers</div>
+          <div class="body">
+            {workingPapers.map((p) => {
+              const co = coauthors(p.data.authors);
+              return (
+                <div class="item">
+                  <span class="pubtitle">“{p.data.title}”</span>{co.length > 0 && <span> with {co.join(", ")}</span>}{statusLabel[p.data.status] && <span>, <span class="tag">{statusLabel[p.data.status]}</span></span>}{p.data.venue && <span>, <span class="venue">{p.data.venue}</span></span>}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      <!-- Teaching Experience -->
+      <section class="section">
+        <div class="label">Teaching<br />Experience</div>
+        <div class="body">
+          <div class="item">
+            <div class="row">
+              <div class="role">Instructor &amp; Sessional Lecturer</div>
+              <div class="date">2020 – Present</div>
+            </div>
+            <div class="muted" style="font-size:9pt;">
+              {appointments.map((a) => a.institution).join(" · ")}
+            </div>
+            <div class="courses">{allCourses.join("; ")}</div>
+          </div>
+          <div class="item">
+            <div class="row">
+              <div class="role">Teaching Assistant</div>
+              <div class="date">{teachingAssistantships.period}</div>
+            </div>
+            <div class="courses">
+              The Global Trading System; International Trade (graduate); Econometrics I;
+              Empirical Energy Economics; Economics of Natural Resources; Summer Math Camp
+              (graduate); Use of Statistics in Economics; Managerial &amp; Decision Economics;
+              Principles of Macroeconomics
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Teaching Certificates -->
+      <section class="section">
+        <div class="label">Teaching<br />Certificates</div>
+        <div class="body">
+          {teachingCertificates.map((c) => (
+            <div class="row item">
+              <div><span class="role">{c.name}</span> <span class="muted">— {c.org}</span></div>
+              <div class="date">{c.year}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Scholarships & Awards -->
+      <section class="section">
+        <div class="label">Scholarships<br />&amp; Awards</div>
+        <div class="body">
+          {awards.map((a) => (
+            <div class="row">
+              <div>{a.name}{a.org && <span class="muted"> ({a.org})</span>}</div>
+              <div class="date">{a.year}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Presentations -->
+      <section class="section">
+        <div class="label">Presentations</div>
+        <div class="body">
+          {presentationYears.map((y) => (
+            <div class="row">
+              <div><span class="role">{y}:</span> {byYear[y].join(", ")}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Computer Skills -->
+      <section class="section">
+        <div class="label">Computer<br />Skills</div>
+        <div class="body">
+          <div>{computerSkills.software.join(", ")}</div>
+          <div class="courses">
+            Teaching software &amp; LMS: {computerSkills.teaching.join(", ")}
+          </div>
+        </div>
+      </section>
+
+      <!-- Service -->
+      <section class="section">
+        <div class="label">Service</div>
+        <div class="body">
+          {serviceRoles.map((s) => (
+            <div class="row">
+              <div>{s.title}{s.note && <span class="muted"> ({s.note})</span>}</div>
+              <div class="date">{s.period}</div>
+            </div>
+          ))}
+          {service.map((s) => (
+            <div class="row">
+              <div>{s.role}{s.org && <span class="muted"> ({s.org})</span>}</div>
+              <div class="date">{s.period}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div class="foot">Last updated: {lastUpdated}</div>
+    </div>
+  </body>
+</html>
