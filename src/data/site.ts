@@ -2,7 +2,7 @@ export const site = {
   name: "Mokhtar Tabari",
   title: "Mokhtar Tabari — Economist",
   description:
-    "Economist working on development economics and international trade, energy and environmental economics, and the economics of AI. Based in Vancouver, Canada.",
+    "Economist working on international trade, energy and environmental economics, and the economics of AI. Based in Vancouver, Canada.",
   url: "https://mokhtartabari.github.io",
   position: "Instructor of Economics",
   institutions: [
@@ -30,7 +30,6 @@ export const site = {
   },
   researchInterests: [
     "International Trade",
-    "Development Economics",
     "Energy & Environmental Economics",
     "Applied Microeconomics",
     "Economics of AI",
