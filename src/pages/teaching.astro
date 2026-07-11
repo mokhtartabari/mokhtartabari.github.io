@@ -9,9 +9,6 @@ import {
   teachingAssistantships,
   levelLabels,
   levelColors,
-  effectiveness,
-  studentQuotes,
-  peerObservations,
   professionalDevelopment,
 } from "~/data/teaching";
 
@@ -57,7 +54,10 @@ const pubBySlug = Object.fromEntries(publications.map((p) => [p.id, p]));
     </div>
   </section>
 
-  <!-- Teaching effectiveness -->
+  {/* "Teaching effectiveness" section hidden — kept private by choice (no public
+      sharing of student/colleague comments). The data (effectiveness, studentQuotes,
+      peerObservations) still lives in src/data/teaching.ts; remove these comment
+      markers to restore the section.
   <section class="container-wide py-12">
     <div class="reveal mb-8 max-w-3xl">
       <h2 class="font-serif text-3xl font-semibold">Teaching effectiveness</h2>
@@ -127,6 +127,7 @@ const pubBySlug = Object.fromEntries(publications.map((p) => [p.id, p]));
       </div>
     </div>
   </section>
+  */}
 
   <!-- Research on teaching -->
   <section class="container-wide py-12">
