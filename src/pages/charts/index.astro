@@ -251,26 +251,15 @@ function fmtDate(iso: string | null) {
     </div>
 
 
-    <!-- Stay involved: notify + feedback (hidden if Supabase isn't configured) -->
-    <div id="engage" class="reveal mt-6 grid md:grid-cols-2 gap-6" style="display:none">
-      <!-- Email alerts -->
-      <div class="p-6 rounded-2xl border border-default bg-elevated">
-        <h2 class="font-medium text-sm mb-1">Get notified on new data</h2>
-        <p class="text-sm text-muted leading-relaxed mb-4">
-          A short email when new economic figures are released and the charts update. No spam.
-        </p>
-        <form id="subscribe-form" class="flex flex-col sm:flex-row gap-2">
-          <input type="email" name="email" required placeholder="you@example.com"
-            class="flex-1 px-3 py-2 rounded-lg border border-default bg-surface text-sm focus:outline-none focus:ring-2 focus:ring-accent-500" />
-          <!-- honeypot: real users leave this empty -->
-          <input type="text" name="company" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true" />
-          <button type="submit"
-            class="px-4 py-2 rounded-lg text-sm font-medium border border-default bg-elevated hover:border-accent-500 text-accent-700 dark:text-accent-300 transition-colors">
-            Notify me
-          </button>
-        </form>
-        <p id="subscribe-msg" class="text-xs mt-2 text-muted" role="status"></p>
-      </div>
+    <!-- Stay involved: feedback (hidden if Supabase isn't configured) -->
+    <div id="engage" class="reveal mt-6 grid gap-6 max-w-xl" style="display:none">
+      {/*
+        "Get notified on new data" email-alerts block is hidden for now: release-day
+        email sending (Resend) isn't wired yet, so the form couldn't actually notify
+        anyone. The block + its subscribe handler remain in git history, and the
+        `subscribers` table is intact — restore this to re-enable once email is wired.
+        See CLAUDE.md → "Deferred features → Release-day email alerts (Resend)".
+      */}
 
       <!-- Feedback / request a chart -->
       <div class="p-6 rounded-2xl border border-default bg-elevated">
