@@ -39,7 +39,7 @@ export const experience = [
     role: "Assistant Professor of Economics",
     org: "University Canada West",
     location: "Vancouver, Canada",
-    period: "2020 – 2026",
+    period: "2021 – 2026",
   },
   {
     role: "Postdoctoral Fellow",
