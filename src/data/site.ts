@@ -4,7 +4,7 @@ export const site = {
   description:
     "Economist working on international trade, energy and environmental economics, and the economics of AI. Based in Vancouver, Canada.",
   url: "https://mokhtartabari.github.io",
-  position: "Instructor of Economics",
+  position: "Applied Economist",
   institutions: [
     {
       name: "Capilano University",
@@ -20,13 +20,14 @@ export const site = {
   location: "Vancouver, Canada",
   email: "mokhtartabari@capilanou.ca",
   emailPersonal: "mokhtar.tab@gmail.com",
-  cv: "/files/cv.pdf",
   socials: {
     scholar:
       "https://scholar.google.com/citations?user=Eti_yWQAAAAJ&hl=en",
     linkedin: "https://www.linkedin.com/in/mokhtar-tabari/",
     github: "https://github.com/mokhtartabari",
     bluesky: "https://bsky.app/profile/mokhtartabari.bsky.social",
+    sponsor: "https://github.com/sponsors/mokhtartabari",
+    stripe: "https://buy.stripe.com/cNieVd65a9PddYZfT85AQ00",
   },
   researchInterests: [
     "International Trade",

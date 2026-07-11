@@ -1,0 +1,1167 @@
+---
+import fs from "node:fs";
+import path from "node:path";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { vizTopics, type VizManifest, type ChartEntry } from "~/data/visualizations";
+import inflationManifest from "~/data/charts-manifest-inflation.json";
+import gdpManifest from "~/data/charts-manifest-gdp.json";
+import tradeManifest from "~/data/charts-manifest-trade.json";
+import employmentManifest from "~/data/charts-manifest-employment.json";
+import productivityManifest from "~/data/charts-manifest-productivity.json";
+import ratesManifest from "~/data/charts-manifest-rates.json";
+import housingManifest from "~/data/charts-manifest-housing.json";
+import energyManifest from "~/data/charts-manifest-energy.json";
+
+export function getStaticPaths() {
+  // Only build pages for topics that have charts; placeholder topics with an
+  // empty manifest are skipped until their pipeline produces data.
+  const counts: Record<string, number> = {
+    inflation: (inflationManifest as unknown as VizManifest).charts.length,
+    gdp: (gdpManifest as unknown as VizManifest).charts.length,
+    trade: (tradeManifest as unknown as VizManifest).charts.length,
+    employment: (employmentManifest as unknown as VizManifest).charts.length,
+    productivity: (productivityManifest as unknown as VizManifest).charts.length,
+    rates: (ratesManifest as unknown as VizManifest).charts.length,
+    housing: (housingManifest as unknown as VizManifest).charts.length,
+    energy: (energyManifest as unknown as VizManifest).charts.length,
+  };
+  return vizTopics
+    .filter((t) => (counts[t.slug] ?? 0) > 0)
+    .map((t) => ({ params: { topic: t.slug } }));
+}
+
+const { topic: topicSlug } = Astro.params;
+const topic = vizTopics.find((t) => t.slug === topicSlug)!;
+
+const manifestMap: Record<string, VizManifest> = {
+  inflation: inflationManifest as unknown as VizManifest,
+  gdp: gdpManifest as unknown as VizManifest,
+  trade: tradeManifest as unknown as VizManifest,
+  employment: employmentManifest as unknown as VizManifest,
+  productivity: productivityManifest as unknown as VizManifest,
+  rates: ratesManifest as unknown as VizManifest,
+  housing: housingManifest as unknown as VizManifest,
+  energy: energyManifest as unknown as VizManifest,
+};
+const manifest = manifestMap[topicSlug!];
+const charts = manifest.charts;
+
+const rawCategories = [...new Set(charts.map((c) => c.category).filter((c): c is string => !!c))];
+const hasCategories = rawCategories.length > 1;
+
+// Preferred reading order for category sections/filter (unknown categories appended).
+const CATEGORY_ORDER = ["Overview", "Per Capita", "Demographics", "Provincial", "Sectors", "Industries", "Cyclical"];
+const catRank = (c: string) => {
+  const i = CATEGORY_ORDER.indexOf(c);
+  return i === -1 ? CATEGORY_ORDER.length : i;
+};
+const orderedCats = [...rawCategories].sort(
+  (a, b) => catRank(a) - catRank(b) || rawCategories.indexOf(a) - rawCategories.indexOf(b),
+);
+const categories = hasCategories ? ["All", ...orderedCats] : [];
+
+// Charts grouped by category (in CATEGORY_ORDER), preserving publish.yml order within each.
+const groups = hasCategories
+  ? orderedCats.map((cat) => ({ cat, items: charts.filter((c) => (c.category ?? "") === cat) }))
+  : [{ cat: null as string | null, items: charts }];
+
+function fmtDate(iso: string | null) {
+  if (!iso) return null;
+  return new Date(iso).toLocaleDateString("en-CA", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+const updated = fmtDate(manifest.updated);
+
+function slugToTitle(slug: string) {
+  return slug
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+// Read a chart's SVG markup at build time so it can be inlined into the page DOM.
+// Inline <svg> (unlike <img src=…svg>) is part of the document, so the page's
+// Inter/Fraunces web fonts apply and it stays transparent + vector. Returns null
+// for charts without an SVG (dense maps/heatmaps), which fall back to a PNG <img>.
+// Strips the XML prolog/doctype so the <svg> drops straight into the HTML.
+function inlineSvg(chart: ChartEntry): string | null {
+  if (!chart.formats?.includes("svg")) return null;
+  const base = chart.filename.replace(/\.png$/i, "");
+  const file = path.join(process.cwd(), "public", "charts", topicSlug!, `${base}.svg`);
+  try {
+    return fs
+      .readFileSync(file, "utf-8")
+      .replace(/<\?xml[^>]*\?>/i, "")
+      .replace(/<!DOCTYPE[^>]*>/i, "")
+      .trim();
+  } catch {
+    return null;
+  }
+}
+---
+
+<BaseLayout
+  title={topic.title}
+  description={`${topic.description} High-quality charts generated from Statistics Canada data.`}
+>
+  <!-- Breadcrumb --------------------------------------------------------->
+  <div class="container-wide pt-8 pb-0">
+    <nav class="flex items-center gap-2 text-sm text-muted" aria-label="Breadcrumb">
+      <a href="/charts/" class="hover:text-accent-600 dark:hover:text-accent-400 transition-colors">
+        Charts
+      </a>
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="opacity-40">
+        <path d="M9 18l6-6-6-6"/>
+      </svg>
+      <span class="text-fg">{topic.title}</span>
+    </nav>
+  </div>
+
+  <!-- Header ------------------------------------------------------------->
+  <section class="container-wide pt-8 pb-10">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+      <header class="reveal max-w-2xl">
+        <h1 class="font-serif text-4xl sm:text-5xl font-semibold leading-[1.1] tracking-tight mb-4">
+          {topic.title}
+        </h1>
+        <p class="text-base text-muted leading-relaxed">
+          {topic.longDescription}
+        </p>
+        <div class="flex flex-wrap items-center gap-x-5 gap-y-2 mt-5 text-sm text-muted">
+          {updated && (
+            <span class="flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Updated {updated}
+            </span>
+          )}
+          {charts.length > 0 && (
+            <span>{charts.length} charts</span>
+          )}
+        </div>
+      </header>
+    </div>
+  </section>
+
+  <!-- Category filter (shown only when categories exist) ---------------->
+  {
+    hasCategories && (
+      <div class="container-wide mb-8">
+        <div
+          id="category-filter"
+          class="flex flex-wrap gap-2"
+          role="group"
+          aria-label="Filter by category"
+        >
+          {categories.map((cat, i) => (
+            <button
+              class="category-btn px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-150 border"
+              data-category={cat}
+              aria-pressed={i === 0 ? "true" : "false"}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  <!-- Chart grid --------------------------------------------------------->
+  <section class="container-wide pb-24">
+    {
+      charts.length === 0 ? (
+        /* Empty state */
+        <div class="reveal flex flex-col items-center justify-center py-28 text-center">
+          <div class="w-16 h-16 rounded-2xl border border-default bg-elevated flex items-center justify-center mb-5">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-muted" aria-hidden="true">
+              <line x1="18" y1="20" x2="18" y2="10"/>
+              <line x1="12" y1="20" x2="12" y2="4"/>
+              <line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+          </div>
+          <h2 class="font-serif text-xl font-semibold mb-2">Charts are on their way</h2>
+          <p class="text-muted text-sm max-w-sm leading-relaxed">
+            The automated workflow is being configured. Charts will appear here automatically once the first data pipeline run completes.
+          </p>
+        </div>
+      ) : (
+        <div
+          id="chart-grid"
+          class="grid sm:grid-cols-2 gap-6"
+        >
+          {groups.map((group) => (
+            <>
+              {group.cat && (
+                <h2
+                  class="category-heading sm:col-span-2 font-serif text-lg font-semibold tracking-tight mt-4 first:mt-0 pb-1.5 border-b border-default"
+                  data-category={group.cat}
+                >
+                  {group.cat}
+                </h2>
+              )}
+              {group.items.map((chart, i) => {
+                const title = chart.title ?? slugToTitle(chart.slug);
+                const caption = chart.description || title;
+                const full = chart.span === "full";
+                const recentlyUpdated =
+                  !!chart.updated &&
+                  Date.now() - Date.parse(chart.updated) < 7 * 24 * 60 * 60 * 1000;
+                const svg = inlineSvg(chart);
+                return (
+                <figure
+                  class:list={[
+                    "reveal chart-card group relative rounded-2xl border border-default bg-elevated overflow-hidden cursor-zoom-in hover:border-accent-200 dark:hover:border-accent-800 hover:shadow-xl transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500",
+                    full && "sm:col-span-2",
+                  ]}
+                  data-category={chart.category ?? ""}
+                  data-slug={chart.slug}
+                  data-title={title}
+                  data-caption={caption}
+                  data-base={chart.filename.replace(/\.png$/i, "")}
+                  data-formats={(chart.formats ?? ["png"]).join(",")}
+                  data-dir={topic.chartsDir}
+                  data-embed={`/embed/${topicSlug}/${chart.slug}/`}
+                  data-csv={chart.csv ? "true" : undefined}
+                  role="button"
+                  tabindex="0"
+                  aria-label={`Open chart: ${title}`}
+                  style={`animation-delay:${(i % 6) * 60}ms`}
+                >
+                  <div class="overflow-hidden relative" style="background-color: var(--chart-bg)">
+                    {svg ? (
+                      <div class="chart-svg w-full" role="img" aria-label={title} set:html={svg} />
+                    ) : (
+                      <img
+                        src={`${topic.chartsDir}${chart.filename}`}
+                        alt={title}
+                        class="w-full h-auto block"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    )}
+                    {recentlyUpdated && (
+                      <span class="absolute bottom-3 right-3 z-10 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500 text-white shadow-sm">
+                        Updated
+                      </span>
+                    )}
+                    {chart.insight && (
+                      <span class="absolute bottom-3 left-3 z-10 inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-gold-500 text-white shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <path d="M12 2l2.4 7.2h7.6l-6.2 4.5 2.4 7.3L12 16.6l-6.2 4.4 2.4-7.3L2 9.2h7.6L12 2z" />
+                        </svg>
+                        Original analysis
+                      </span>
+                    )}
+                  </div>
+                  <figcaption class="px-4 py-3 flex items-start justify-between gap-3">
+                    <div class="flex flex-col gap-1 min-w-0">
+                      <span class="text-sm leading-snug text-muted">
+                        {caption}
+                      </span>
+                      {chart.note && (
+                        <span class="text-[12px] leading-snug text-muted/90 italic">
+                          How to read: {chart.note}
+                        </span>
+                      )}
+                      {chart.data_through && (
+                        <span class="text-[11px] text-muted/70">
+                          Data through {chart.data_through}
+                        </span>
+                      )}
+                      <div class="chart-stats flex flex-wrap gap-x-3 gap-y-1 mt-1 opacity-0 transition-opacity duration-300 empty:hidden" data-slug={chart.slug}></div>
+                    </div>
+                    {chart.category && (
+                      <span class="flex-shrink-0 text-[11px] font-medium px-2 py-0.5 rounded-full bg-accent-50 dark:bg-accent-900/30 text-accent-700 dark:text-accent-300">
+                        {chart.category}
+                      </span>
+                    )}
+                  </figcaption>
+                  {/* Expand hint (top-right) */}
+                  <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div class="bg-black/50 text-white rounded-lg p-1.5 backdrop-blur-sm">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                    </div>
+                  </div>
+                </figure>
+                );
+              })}
+            </>
+          ))}
+        </div>
+      )
+    }
+  </section>
+
+  <!-- Lightbox ---------------------------------------------------------->
+  <div
+    id="lightbox"
+    class="fixed inset-0 z-50 hidden items-center justify-center p-4 md:p-8"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Chart lightbox"
+  >
+    <!-- Backdrop -->
+    <div id="lb-backdrop" class="absolute inset-0 bg-black/85 backdrop-blur-sm"></div>
+
+    <!-- Panel -->
+    <div id="lb-panel" class="relative z-10 w-full max-w-5xl flex flex-col gap-3 max-h-[95vh]">
+      <!-- Top bar (z-30 so its Download/Embed dropdowns sit above the chart) -->
+      <div class="relative z-30 flex items-center justify-between px-1">
+        <span id="lb-counter" class="text-white/60 text-sm tabular-nums"></span>
+        <div class="flex items-center gap-2">
+          <!-- Download menu (formats populated per-chart by JS) -->
+          <div class="static sm:relative" id="lb-download-wrap">
+            <button
+              id="lb-download-btn"
+              class="inline-flex items-center gap-1 text-sm text-white/70 hover:text-white px-2.5 py-1.5 rounded-lg border border-white/20 hover:border-white/40 transition-colors"
+              aria-haspopup="true"
+              aria-expanded="false"
+              aria-label="Download"
+              title="Download"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div
+              id="lb-download-menu"
+              class="hidden absolute left-2 right-2 top-12 sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-60 max-h-[70vh] overflow-y-auto rounded-xl border border-white/15 bg-neutral-900/95 backdrop-blur-sm shadow-2xl p-1.5 z-20"
+              role="menu"
+            >
+              <div id="lb-download-links"></div>
+              <p class="px-2.5 pt-2 pb-1 text-[11px] leading-snug text-white/45 border-t border-white/10 mt-1">
+                <span class="font-medium text-white/60">SVG</span> for slides &amp; web ·
+                <span class="font-medium text-white/60">PDF</span> for LaTeX &amp; print ·
+                <span class="font-medium text-white/60">PNG</span> for Word &amp; email.
+                Free to use with attribution — CC BY 4.0.
+              </p>
+            </div>
+          </div>
+          <!-- Share menu (social intents + copy link + embed code) -->
+          <div class="static sm:relative" id="lb-embed-wrap">
+            <button
+              id="lb-embed-btn"
+              class="inline-flex items-center gap-1.5 text-sm text-white/70 hover:text-white px-3 py-1.5 rounded-lg border border-white/20 hover:border-white/40 transition-colors"
+              aria-haspopup="true"
+              aria-expanded="false"
+              aria-label="Share"
+              title="Share"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              <span class="max-sm:hidden">Share</span>
+            </button>
+            <div
+              id="lb-embed-menu"
+              class="hidden absolute left-2 right-2 top-12 sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-80 max-h-[70vh] overflow-y-auto rounded-xl border border-white/15 bg-neutral-900/95 backdrop-blur-sm shadow-2xl p-1.5 z-20"
+              role="menu"
+            >
+              <div class="flex flex-wrap items-center justify-center gap-1.5 px-1 py-1.5">
+                <a id="lb-share-x" role="menuitem" href="#" target="_blank" rel="noopener noreferrer"
+                   aria-label="Share on X" title="Share on X"
+                   class="p-2.5 rounded-lg text-white/75 hover:text-white hover:bg-white/10 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>
+                </a>
+                <a id="lb-share-bluesky" role="menuitem" href="#" target="_blank" rel="noopener noreferrer"
+                   aria-label="Share on Bluesky" title="Share on Bluesky"
+                   class="p-2.5 rounded-lg text-white/75 hover:text-white hover:bg-white/10 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.815 2.736 3.713 3.66 6.383 3.364.136-.02.275-.039.415-.056-.138.022-.276.04-.415.056-3.912.58-7.387 2.005-2.83 7.078 5.013 5.19 6.87-1.113 7.823-4.308.953 3.195 2.05 9.271 7.733 4.308 4.267-4.308 1.172-6.498-2.74-7.078a8.741 8.741 0 0 1-.415-.056c.14.017.279.036.415.056 2.67.297 5.568-.628 6.383-3.364.246-.828.624-5.79.624-6.478 0-.69-.139-1.861-.902-2.206-.659-.298-1.664-.62-4.3 1.24C16.046 4.748 13.087 8.687 12 10.8Z"/></svg>
+                </a>
+                <a id="lb-share-linkedin" role="menuitem" href="#" target="_blank" rel="noopener noreferrer"
+                   aria-label="Share on LinkedIn" title="Share on LinkedIn"
+                   class="p-2.5 rounded-lg text-white/75 hover:text-white hover:bg-white/10 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z"/></svg>
+                </a>
+                <a id="lb-share-facebook" role="menuitem" href="#" target="_blank" rel="noopener noreferrer"
+                   aria-label="Share on Facebook" title="Share on Facebook"
+                   class="p-2.5 rounded-lg text-white/75 hover:text-white hover:bg-white/10 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                </a>
+                <a id="lb-share-whatsapp" role="menuitem" href="#" target="_blank" rel="noopener noreferrer"
+                   aria-label="Share on WhatsApp" title="Share on WhatsApp"
+                   class="p-2.5 rounded-lg text-white/75 hover:text-white hover:bg-white/10 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                </a>
+                <a id="lb-share-reddit" role="menuitem" href="#" target="_blank" rel="noopener noreferrer"
+                   aria-label="Share on Reddit" title="Share on Reddit"
+                   class="p-2.5 rounded-lg text-white/75 hover:text-white hover:bg-white/10 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 01-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 01.042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 014.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 01.14-.197.35.35 0 01.238-.042l2.906.617a1.214 1.214 0 011.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 00-.231.094.33.33 0 000 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 00.029-.463.33.33 0 00-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 00-.232-.095z"/></svg>
+                </a>
+                <a id="lb-share-email" role="menuitem" href="#"
+                   aria-label="Share by email" title="Share by email"
+                   class="p-2.5 rounded-lg text-white/75 hover:text-white hover:bg-white/10 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                </a>
+                <button id="lb-share-native" role="menuitem"
+                   aria-label="More sharing options" title="More sharing options"
+                   class="hidden p-2.5 rounded-lg text-white/75 hover:text-white hover:bg-white/10 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                </button>
+                <button id="lb-share-copy" role="menuitem"
+                   aria-label="Copy link" title="Copy link to this chart's page"
+                   class="p-2.5 rounded-lg text-white/75 hover:text-white hover:bg-white/10 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                </button>
+              </div>
+              <div class="px-2.5 pt-2 pb-1.5 mt-1 border-t border-white/10">
+                <p class="text-[11px] text-white/60 mb-2">Embed on any website:</p>
+                <textarea
+                  id="lb-embed-code"
+                  readonly
+                  rows="3"
+                  class="w-full text-[11px] font-mono text-white/85 bg-black/40 border border-white/15 rounded-lg p-2 resize-none focus:outline-none focus:ring-1 focus:ring-accent-400"
+                ></textarea>
+                <button
+                  id="lb-embed-copy"
+                  class="mt-1.5 w-full text-xs text-white/80 hover:text-white px-3 py-1.5 rounded-lg border border-white/20 hover:border-white/40 transition-colors"
+                >
+                  Copy embed code
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- Fit / full-size toggle -->
+          <button
+            id="lb-zoom"
+            class="p-1.5 rounded-lg text-white/70 hover:text-white border border-white/20 hover:border-white/40 transition-colors"
+            aria-label="Toggle full size"
+            title="Full size"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+          </button>
+          <button
+            id="lb-close"
+            class="p-1.5 rounded-lg text-white/70 hover:text-white border border-white/20 hover:border-white/40 transition-colors"
+            aria-label="Close lightbox"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Image (z-0 keeps the chart below the top bar's dropdowns) -->
+      <div id="lb-imgwrap" class="relative z-0 flex items-center justify-center">
+        <button
+          id="lb-prev"
+          class="absolute left-0 z-10 -translate-x-2 md:-translate-x-12 p-2 rounded-xl text-white/70 hover:text-white border border-white/20 hover:border-white/40 bg-black/40 hover:bg-black/60 transition-all"
+          aria-label="Previous chart"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+
+        <!-- Inner scroll box so a zoomed image pans WITHOUT moving the arrows -->
+        <div id="lb-scroll" class="flex items-center justify-center max-w-full">
+          <!-- Holds the chart's inline <svg> (cloned from the card) or a PNG <img>
+               for dense charts. Sized via .is-fit / .is-full in global.css. -->
+          <div
+            id="lb-img"
+            class="is-fit rounded-xl shadow-2xl p-3 cursor-zoom-in"
+            style="background-color: var(--chart-bg)"
+          ></div>
+        </div>
+
+        <button
+          id="lb-next"
+          class="absolute right-0 z-10 translate-x-2 md:translate-x-12 p-2 rounded-xl text-white/70 hover:text-white border border-white/20 hover:border-white/40 bg-black/40 hover:bg-black/60 transition-all"
+          aria-label="Next chart"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+
+      <!-- Caption -->
+      <p id="lb-caption" class="text-center text-white/80 text-sm px-8"></p>
+
+      <!-- Reactions ("Was this useful?") & Feedback Form -->
+      <div id="lb-reactions" class="flex flex-col items-center justify-center gap-3.5 text-sm text-white/55" style="display:none">
+        <div class="flex items-center gap-2">
+          <span id="lb-react-prompt" class="text-xs text-white/60">Was this chart useful?</span>
+          <button id="lb-react-up" class="px-2.5 py-0.5 rounded-lg border border-white/15 hover:border-white/30 hover:bg-white/5 hover:text-white text-xs transition-colors" aria-label="Yes, useful">👍</button>
+          <button id="lb-react-down" class="px-2.5 py-0.5 rounded-lg border border-white/15 hover:border-white/30 hover:bg-white/5 hover:text-white text-xs transition-colors" aria-label="Not useful">👎</button>
+          <span id="lb-react-thanks" class="hidden text-emerald-400 text-xs font-medium">Thanks for the feedback!</span>
+        </div>
+
+        <div class="w-full max-w-lg border-t border-white/10 pt-3.5">
+          <form id="lb-feedback-form" class="w-full flex flex-col gap-2">
+            <div class="flex flex-col sm:flex-row gap-2 w-full">
+              <textarea
+                id="lb-feedback-textarea"
+                required
+                rows="1"
+                maxlength="2000"
+                placeholder="Spotted an issue or have a suggestion? Type here..."
+                class="flex-grow border border-white/15 hover:border-white/25 focus:border-white/40 focus:outline-none focus:ring-0 rounded-xl bg-white/5 text-white text-xs px-3.5 py-2 resize-none placeholder-white/30 min-h-[36px]"
+              ></textarea>
+              <div class="flex gap-2 sm:flex-shrink-0">
+                <input
+                  id="lb-feedback-email"
+                  type="email"
+                  placeholder="email (optional)"
+                  class="flex-grow sm:w-36 border border-white/15 hover:border-white/25 focus:border-white/40 focus:outline-none focus:ring-0 rounded-xl bg-white/5 text-white text-xs px-3 py-2 placeholder-white/30"
+                />
+                <button
+                  type="submit"
+                  class="px-4 py-2 text-xs font-semibold rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white transition-colors"
+                >
+                  Send
+                </button>
+              </div>
+            </div>
+            <p id="lb-feedback-status" class="text-[10px] text-white/50 text-center empty:hidden" role="status"></p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  /* Category filter buttons */
+  .category-btn {
+    background-color: var(--bg-elevated);
+    border-color: var(--border);
+    color: var(--fg-muted);
+  }
+  .category-btn:hover,
+  .category-btn[aria-pressed="true"] {
+    background-color: var(--color-accent-600);
+    border-color: var(--color-accent-600);
+    color: white;
+  }
+  .dark .category-btn:hover,
+  .dark .category-btn[aria-pressed="true"] {
+    background-color: var(--color-accent-500);
+    border-color: var(--color-accent-500);
+  }
+  .chart-card[data-hidden],
+  .category-heading[data-hidden] {
+    display: none;
+  }
+</style>
+
+<script>
+  import { logChartEvent } from "~/utils/analytics";
+
+  // ── Supabase Analytics Setup ─────────────────────────────────────────
+  const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+
+  const localStats = new Map<string, { slug: string; views: number; downloads: number }>();
+
+  const updateCardBadges = (card: HTMLElement, stat: { views: number; downloads: number }) => {
+    const showViews = stat.views > 50;
+    const showDownloads = stat.downloads > 50;
+    const isPopular = card.dataset.popular === "1";
+    const container = card.querySelector<HTMLElement>(".chart-stats");
+    if (!container) return;
+
+    if (isPopular || showViews || showDownloads) {
+      let html = "";
+      if (isPopular) {
+        html += `
+          <span class="inline-flex items-center gap-1 font-medium text-amber-600 dark:text-amber-400">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <span>Popular</span>
+          </span>
+        `;
+      }
+      if (showViews) {
+        html += `
+          <span class="inline-flex items-center gap-1 text-ink-500 dark:text-ink-400">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-70"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>${stat.views.toLocaleString()} views</span>
+          </span>
+        `;
+      }
+      if (showDownloads) {
+        html += `
+          <span class="inline-flex items-center gap-1 text-ink-500 dark:text-ink-400">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-70"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>${stat.downloads.toLocaleString()} downloads</span>
+          </span>
+        `;
+      }
+      container.innerHTML = html;
+      container.classList.remove("opacity-0");
+    } else {
+      container.innerHTML = "";
+      container.classList.add("opacity-0");
+    }
+  };
+
+  // Flag the most-viewed charts on the page as "Popular" (top 3, modest floor).
+  const markPopular = (cards: HTMLElement[]) => {
+    cards
+      .map((c) => ({ c, v: localStats.get(c.dataset.slug ?? "")?.views ?? 0 }))
+      .filter((x) => x.v >= 20)
+      .sort((a, b) => b.v - a.v)
+      .slice(0, 3)
+      .forEach(({ c }) => { c.dataset.popular = "1"; });
+  };
+
+  const recordMetric = async (card: HTMLElement, metric: "views" | "downloads") => {
+    if (localStorage.getItem("exclude_analytics") === "true") {
+      return;
+    }
+    const slug = card.dataset.slug;
+    if (!slug || !supabaseUrl || !supabaseAnonKey) return;
+
+    logChartEvent(supabaseUrl, supabaseAnonKey, slug, metric);
+
+    const stat = localStats.get(slug) || { slug, views: 0, downloads: 0 };
+    if (metric === "views") stat.views++;
+    else if (metric === "downloads") stat.downloads++;
+    localStats.set(slug, stat);
+    updateCardBadges(card, stat);
+
+    try {
+      await fetch(`${supabaseUrl}/rest/v1/rpc/increment_chart_metric`, {
+        method: "POST",
+        headers: {
+          "apikey": supabaseAnonKey,
+          "Authorization": `Bearer ${supabaseAnonKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ chart_slug: slug, metric_name: metric }),
+      });
+    } catch (err) {
+      console.warn(`Failed to record ${metric} for ${slug}:`, err);
+      if (metric === "views") stat.views--;
+      else if (metric === "downloads") stat.downloads--;
+      localStats.set(slug, stat);
+      updateCardBadges(card, stat);
+    }
+  };
+
+  let activeObserver: IntersectionObserver | null = null;
+  const timers = new Map<HTMLElement, number>();
+
+  const analyticsSetup = async () => {
+    if (!supabaseUrl || !supabaseAnonKey) return;
+
+    const cards = Array.from(document.querySelectorAll<HTMLElement>(".chart-card"));
+    if (!cards.length) return;
+
+    const slugs = cards.map((c) => c.dataset.slug).filter(Boolean);
+    if (!slugs.length) return;
+
+    if (activeObserver) {
+      activeObserver.disconnect();
+      activeObserver = null;
+    }
+    for (const timerId of timers.values()) {
+      clearTimeout(timerId);
+    }
+    timers.clear();
+
+    // 1. Fetch stats
+    try {
+      const res = await fetch(
+        `${supabaseUrl}/rest/v1/chart_stats?slug=in.(${slugs.join(",")})`,
+        {
+          headers: {
+            apikey: supabaseAnonKey,
+            Authorization: `Bearer ${supabaseAnonKey}`,
+          },
+        }
+      );
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+      const data = (await res.json()) as Array<{
+        slug: string;
+        views: number;
+        downloads: number;
+      }>;
+
+      data.forEach((d) => localStats.set(d.slug, d));
+
+      markPopular(cards);
+
+      cards.forEach((card) => {
+        const slug = card.dataset.slug;
+        if (!slug) return;
+        const stat = localStats.get(slug);
+        if (stat || card.dataset.popular === "1") {
+          updateCardBadges(card, stat ?? { views: 0, downloads: 0 });
+        }
+      });
+    } catch (err) {
+      console.warn("Failed to fetch chart stats:", err);
+    }
+
+    // 2. Setup IntersectionObserver for views
+    let viewedSlugs = new Set<string>();
+    try {
+      const saved = sessionStorage.getItem("viewed_charts");
+      if (saved) viewedSlugs = new Set(JSON.parse(saved));
+    } catch (e) {}
+
+    activeObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const card = entry.target as HTMLElement;
+          const slug = card.dataset.slug;
+          if (!slug || viewedSlugs.has(slug)) return;
+
+          if (entry.isIntersecting) {
+            if (!timers.has(card)) {
+              const timerId = window.setTimeout(() => {
+                recordMetric(card, "views");
+                viewedSlugs.add(slug);
+                try {
+                  sessionStorage.setItem(
+                    "viewed_charts",
+                    JSON.stringify(Array.from(viewedSlugs))
+                  );
+                } catch (e) {}
+                timers.delete(card);
+              }, 1500);
+              timers.set(card, timerId);
+            }
+          } else {
+            if (timers.has(card)) {
+              clearTimeout(timers.get(card));
+              timers.delete(card);
+            }
+          }
+        });
+      },
+      { threshold: 0.3 }
+    );
+
+    cards.forEach((card) => activeObserver!.observe(card));
+  };
+
+  // ── Category filter ──────────────────────────────────────────────────
+  const filterSetup = () => {
+    const btns = document.querySelectorAll<HTMLButtonElement>(".category-btn");
+    const cards = document.querySelectorAll<HTMLElement>(".chart-card");
+    const headings = document.querySelectorAll<HTMLElement>(".category-heading");
+    if (!btns.length) return;
+
+    btns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const cat = btn.dataset.category ?? "All";
+        btns.forEach((b) => b.setAttribute("aria-pressed", "false"));
+        btn.setAttribute("aria-pressed", "true");
+
+        cards.forEach((card) => {
+          if (cat === "All" || card.dataset.category === cat) {
+            card.removeAttribute("data-hidden");
+          } else {
+            card.setAttribute("data-hidden", "");
+          }
+        });
+        // Section headings only make sense in the "All" view.
+        headings.forEach((h) => {
+          if (cat === "All") h.removeAttribute("data-hidden");
+          else h.setAttribute("data-hidden", "");
+        });
+      });
+    });
+  };
+
+  // ── Lightbox ─────────────────────────────────────────────────────────
+  const lightboxSetup = () => {
+    const cards = Array.from(
+      document.querySelectorAll<HTMLElement>(".chart-card"),
+    );
+    const lb = document.getElementById("lightbox")!;
+    // Guard against double-binding: this runs once inline AND again on
+    // astro:page-load, which would attach every handler twice. With the toggle
+    // handlers doubled, a click fires applyZoom() twice and cancels itself out.
+    if (!lb || !cards.length || lb.dataset.lbBound === "1") return;
+    lb.dataset.lbBound = "1";
+    const lbImg = document.getElementById("lb-img") as HTMLElement;
+    const lbCaption = document.getElementById("lb-caption")!;
+    const lbCounter = document.getElementById("lb-counter")!;
+    const lbDownloadBtn = document.getElementById("lb-download-btn")!;
+    const lbDownloadMenu = document.getElementById("lb-download-menu")!;
+    const lbDownloadLinks = document.getElementById("lb-download-links")!;
+    const lbEmbedBtn = document.getElementById("lb-embed-btn")!;
+    const lbEmbedMenu = document.getElementById("lb-embed-menu")!;
+    const lbEmbedCode = document.getElementById("lb-embed-code") as HTMLTextAreaElement;
+    const lbEmbedCopy = document.getElementById("lb-embed-copy")!;
+    const lbClose = document.getElementById("lb-close")!;
+    const lbPrev = document.getElementById("lb-prev")!;
+    const lbNext = document.getElementById("lb-next")!;
+    const lbBackdrop = document.getElementById("lb-backdrop")!;
+    const lbZoom = document.getElementById("lb-zoom")!;
+    const lbScroll = document.getElementById("lb-scroll")!;
+
+    const lbFeedbackForm = document.getElementById("lb-feedback-form") as HTMLFormElement;
+    const lbFeedbackTextarea = document.getElementById("lb-feedback-textarea") as HTMLTextAreaElement;
+    const lbFeedbackEmail = document.getElementById("lb-feedback-email") as HTMLInputElement;
+    const lbFeedbackStatus = document.getElementById("lb-feedback-status")!;
+
+    // ── Fit / full-size toggle ──────────────────────────────────────────
+    // The lightbox shows the chart's inline SVG (cloned from the card, so the
+    // page's web fonts apply) or a PNG <img> for dense charts. Sizing is driven by
+    // .is-fit / .is-full on #lb-img (see global.css).
+    // Fit = whole chart on screen. Full = 2.5× the panel width, panned in the box.
+    const LB_BASE = "rounded-xl shadow-2xl p-3 cursor-zoom-in";
+    const SCROLL_FIT = "w-full flex items-center justify-center min-w-0";
+    const SCROLL_FULL = "w-full min-w-0 overflow-auto max-h-[85vh]"; // block so oversized content pans fully both axes
+    let zoomed = false;
+
+    const applyZoom = (z: boolean) => {
+      zoomed = z;
+      lbScroll.className = z ? SCROLL_FULL : SCROLL_FIT;   // only the inner box scrolls; prev/next stay put
+      lbImg.className = `${LB_BASE} ${z ? "is-full" : "is-fit"}`;
+      lbZoom.setAttribute("title", z ? "Fit to screen" : "Full size");
+    };
+    lbZoom.addEventListener("click", (e) => { e.stopPropagation(); applyZoom(!zoomed); });
+    lbImg.addEventListener("click", (e) => { e.stopPropagation(); applyZoom(!zoomed); });
+
+    // ── Reactions ("Was this useful?") ───────────────────────────────────
+    const lbReactions = document.getElementById("lb-reactions")!;
+    const lbReactPrompt = document.getElementById("lb-react-prompt")!;
+    const lbReactUp = document.getElementById("lb-react-up")!;
+    const lbReactDown = document.getElementById("lb-react-down")!;
+    const lbReactThanks = document.getElementById("lb-react-thanks")!;
+    const reactionsEnabled = !!supabaseUrl && !!supabaseAnonKey;
+    if (reactionsEnabled) lbReactions.style.display = "";
+    const reactedKey = "reacted_charts";
+    const getReacted = (): Set<string> => {
+      try { return new Set(JSON.parse(sessionStorage.getItem(reactedKey) || "[]")); }
+      catch { return new Set(); }
+    };
+    const renderReactState = (slug: string) => {
+      const reacted = getReacted().has(slug);
+      lbReactPrompt.classList.toggle("hidden", reacted);
+      lbReactUp.classList.toggle("hidden", reacted);
+      lbReactDown.classList.toggle("hidden", reacted);
+      lbReactThanks.classList.toggle("hidden", !reacted);
+    };
+    let openSlug = "";
+    const react = async (reaction: "helpful" | "not_helpful") => {
+      const slug = openSlug;
+      if (!slug || !reactionsEnabled) return;
+      const reacted = getReacted();
+      if (reacted.has(slug)) return;
+      reacted.add(slug);
+      try { sessionStorage.setItem(reactedKey, JSON.stringify([...reacted])); } catch (e) {}
+      renderReactState(slug);
+      try {
+        await fetch(`${supabaseUrl}/rest/v1/rpc/increment_reaction`, {
+          method: "POST",
+          headers: {
+            apikey: supabaseAnonKey,
+            Authorization: `Bearer ${supabaseAnonKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ chart_slug: slug, reaction }),
+        });
+      } catch (err) { console.warn("reaction failed:", err); }
+    };
+    lbReactUp.addEventListener("click", (e) => { e.stopPropagation(); react("helpful"); });
+    lbReactDown.addEventListener("click", (e) => { e.stopPropagation(); react("not_helpful"); });
+
+    // ── Chart Feedback Form Setup ────────────────────────────────────────
+    lbFeedbackForm.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+
+    lbFeedbackForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const message = lbFeedbackTextarea.value.trim();
+      const email = lbFeedbackEmail.value.trim() || null;
+      if (!message || !openSlug) return;
+
+      lbFeedbackStatus.textContent = "Sending...";
+      lbFeedbackStatus.className = "text-[10px] text-white/60 text-center";
+
+      try {
+        const res = await fetch(`${supabaseUrl}/rest/v1/feedback`, {
+          method: "POST",
+          headers: {
+            apikey: supabaseAnonKey,
+            Authorization: `Bearer ${supabaseAnonKey}`,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal",
+          },
+          body: JSON.stringify({
+            message: `[Chart: ${openSlug}] ${message}`,
+            email: email,
+          }),
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        lbFeedbackStatus.textContent = "Thank you! Your feedback has been sent.";
+        lbFeedbackStatus.className = "text-[10px] text-emerald-400 text-center font-medium";
+        lbFeedbackTextarea.value = "";
+        
+        setTimeout(() => {
+          lbFeedbackStatus.textContent = "";
+        }, 3500);
+
+      } catch (err) {
+        console.warn("Feedback submission failed:", err);
+        lbFeedbackStatus.textContent = "Something went wrong. Please try again later.";
+        lbFeedbackStatus.className = "text-[10px] text-rose-400 text-center font-medium";
+      }
+    });
+
+    if (!lb || !cards.length) return;
+
+    // Visible cards only (respects category filter)
+    const visibleCards = () =>
+      cards.filter((c) => !c.hasAttribute("data-hidden"));
+
+    let current = 0;
+
+    const FORMAT_LABELS: Record<string, string> = {
+      svg: "vector · slides & web",
+      pdf: "vector · LaTeX & print",
+      png: "image · Word & email",
+    };
+
+    const closeMenu = () => {
+      lbDownloadMenu.classList.add("hidden");
+      lbDownloadBtn.setAttribute("aria-expanded", "false");
+      lbEmbedMenu.classList.add("hidden");
+      lbEmbedBtn.setAttribute("aria-expanded", "false");
+    };
+
+    const open = (idx: number) => {
+      const pool = visibleCards();
+      if (!pool.length) return;
+      current = ((idx % pool.length) + pool.length) % pool.length;
+      const card = pool[current];
+      const cardSvg = card.querySelector<SVGSVGElement>(".chart-svg > svg");
+      const cardImg = card.querySelector("img");
+      const caption = card.dataset.caption ?? "";
+      lbCaption.textContent = caption;
+      lbCounter.textContent = `${current + 1} / ${pool.length}`;
+      openSlug = card.dataset.slug ?? "";
+      if (reactionsEnabled) renderReactState(openSlug);
+
+      // Build per-format download links for this chart.
+      const base = card.dataset.base ?? "";
+      const dir = card.dataset.dir ?? "";
+
+      // Populate the viewer: clone the card's inline SVG (so the page's web fonts
+      // apply), or a PNG <img> for dense charts. Reset to Fit on open.
+      if (cardSvg) {
+        lbImg.replaceChildren(cardSvg.cloneNode(true));
+      } else if (cardImg) {
+        const im = document.createElement("img");
+        im.src = cardImg.src;
+        im.alt = cardImg.alt;
+        lbImg.replaceChildren(im);
+      }
+      lbZoom.classList.remove("hidden");
+      lbPrev.classList.remove("hidden");
+      lbNext.classList.remove("hidden");
+      applyZoom(false);                        // reset to Fit
+      const formats = (card.dataset.formats ?? "png").split(",").filter(Boolean);
+      // Stable, useful order regardless of manifest order.
+      const ordered = ["svg", "pdf", "png"].filter((f) => formats.includes(f));
+      let linksHtml = ordered
+        .map(
+          (f) =>
+            `<a role="menuitem" href="${dir}${base}.${f}" download class="flex items-center justify-between gap-3 px-2.5 py-2 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors">` +
+            `<span class="font-medium uppercase">${f}</span>` +
+            `<span class="text-[11px] text-white/45">${FORMAT_LABELS[f] ?? ""}</span>` +
+            `</a>`,
+        )
+        .join("");
+      // Underlying data, when available.
+      if (card.dataset.csv === "true") {
+        linksHtml +=
+          `<a role="menuitem" href="${dir}${base}.csv" download class="flex items-center justify-between gap-3 px-2.5 py-2 mt-1 pt-2 border-t border-white/10 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors">` +
+          `<span class="font-medium uppercase">CSV</span>` +
+          `<span class="text-[11px] text-white/45">data · spreadsheet</span>` +
+          `</a>`;
+      }
+      lbDownloadLinks.innerHTML = linksHtml;
+
+      // Build the embed snippet for this chart.
+      const embedPath = card.dataset.embed ?? "";
+      const safeTitle = (card.dataset.title ?? "Chart").replace(/"/g, "&quot;");
+      lbEmbedCode.value = embedPath
+        ? `<iframe src="${location.origin}${embedPath}" width="100%" height="460" style="border:0" loading="lazy" title="${safeTitle}"></iframe>`
+        : "";
+
+      // Share targets: the chart's own page (unfurls into the chart image).
+      const sharePage = `${location.origin}${card.dataset.dir ?? ""}${card.dataset.slug ?? ""}/`;
+      const shareText = encodeURIComponent(card.dataset.title ?? "Chart");
+      const shareUrl = encodeURIComponent(sharePage);
+      (document.getElementById("lb-share-x") as HTMLAnchorElement).href =
+        `https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`;
+      (document.getElementById("lb-share-bluesky") as HTMLAnchorElement).href =
+        `https://bsky.app/intent/compose?text=${shareText}%20${shareUrl}`;
+      (document.getElementById("lb-share-linkedin") as HTMLAnchorElement).href =
+        `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`;
+      (document.getElementById("lb-share-facebook") as HTMLAnchorElement).href =
+        `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`;
+      (document.getElementById("lb-share-whatsapp") as HTMLAnchorElement).href =
+        `https://wa.me/?text=${shareText}%20${shareUrl}`;
+      (document.getElementById("lb-share-reddit") as HTMLAnchorElement).href =
+        `https://www.reddit.com/submit?url=${shareUrl}&title=${shareText}`;
+      (document.getElementById("lb-share-email") as HTMLAnchorElement).href =
+        `mailto:?subject=${shareText}&body=${shareUrl}`;
+      const lbNative = document.getElementById("lb-share-native") as HTMLButtonElement;
+      lbNative.dataset.url = sharePage;
+      lbNative.dataset.title = card.dataset.title ?? "Chart";
+      if (navigator.share) lbNative.classList.remove("hidden");
+      lbEmbedBtn.dataset.url = sharePage;
+      lbEmbedBtn.dataset.title = card.dataset.title ?? "Chart";
+      (document.getElementById("lb-share-copy") as HTMLButtonElement).dataset.url = sharePage;
+      closeMenu();
+
+      // Reset chart feedback form state
+      lbFeedbackTextarea.value = "";
+      lbFeedbackEmail.value = "";
+      lbFeedbackStatus.textContent = "";
+
+      lb.classList.remove("hidden");
+      lb.classList.add("flex");
+      document.body.style.overflow = "hidden";
+      lbClose.focus();
+    };
+
+    const close = () => {
+      closeMenu();
+      
+      // Reset chart feedback form state
+      lbFeedbackTextarea.value = "";
+      lbFeedbackEmail.value = "";
+      lbFeedbackStatus.textContent = "";
+
+      lb.classList.add("hidden");
+      lb.classList.remove("flex");
+      document.body.style.overflow = "";
+    };
+
+    // Download menu toggle (closes the embed menu first)
+    lbDownloadBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const willOpen = lbDownloadMenu.classList.contains("hidden");
+      closeMenu();
+      if (willOpen) {
+        lbDownloadMenu.classList.remove("hidden");
+        lbDownloadBtn.setAttribute("aria-expanded", "true");
+      }
+    });
+    // Embed menu toggle (closes the download menu first)
+    lbEmbedBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      // On phones, one tap goes straight to the OS share sheet (iOS/Android);
+      // the dropdown (with embed code) stays for desktop.
+      const nativeFirst = !!navigator.share && window.matchMedia("(max-width: 639px)").matches;
+      if (nativeFirst) {
+        closeMenu();
+        navigator.share({ title: lbEmbedBtn.dataset.title || document.title,
+                          url: lbEmbedBtn.dataset.url || location.href }).catch(() => {});
+        return;
+      }
+      const willOpen = lbEmbedMenu.classList.contains("hidden");
+      closeMenu();
+      if (willOpen) {
+        lbEmbedMenu.classList.remove("hidden");
+        lbEmbedBtn.setAttribute("aria-expanded", "true");
+      }
+    });
+    // Native OS share sheet (mobile) — hidden where unsupported.
+    const lbShareNative = document.getElementById("lb-share-native") as HTMLButtonElement;
+    lbShareNative.addEventListener("click", (e) => {
+      e.stopPropagation();
+      navigator.share({ title: lbShareNative.dataset.title || document.title,
+                        url: lbShareNative.dataset.url || location.href }).catch(() => {});
+    });
+    // Copy-link item in the share menu.
+    const lbShareCopy = document.getElementById("lb-share-copy") as HTMLButtonElement;
+    lbShareCopy.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      const url = lbShareCopy.dataset.url || location.href;
+      try { await navigator.clipboard.writeText(url); } catch { /* no clipboard */ }
+      const old = lbShareCopy.innerHTML;
+      lbShareCopy.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(() => { lbShareCopy.innerHTML = old; }, 1500);
+    });
+    lbEmbedCopy.addEventListener("click", async () => {
+      const done = () => {
+        lbEmbedCopy.textContent = "Copied!";
+        setTimeout(() => { lbEmbedCopy.textContent = "Copy embed code"; }, 1800);
+      };
+      try {
+        await navigator.clipboard.writeText(lbEmbedCode.value);
+        done();
+      } catch {
+        lbEmbedCode.select();
+        document.execCommand("copy");
+        done();
+      }
+    });
+    // Close either menu when clicking outside both.
+    document.addEventListener("click", (e) => {
+      const open = !lbDownloadMenu.classList.contains("hidden") ||
+                   !lbEmbedMenu.classList.contains("hidden");
+      if (!open) return;
+      const t = e.target as Node;
+      const dWrap = document.getElementById("lb-download-wrap");
+      const eWrap = document.getElementById("lb-embed-wrap");
+      if ((!dWrap || !dWrap.contains(t)) && (!eWrap || !eWrap.contains(t))) closeMenu();
+    });
+
+    // Handle download tracking
+    lbDownloadLinks.addEventListener("click", (e) => {
+      const link = (e.target as HTMLElement).closest("a[download]");
+      if (link) {
+        const pool = visibleCards();
+        const activeCard = pool[current];
+        if (activeCard) {
+          recordMetric(activeCard, "downloads");
+        }
+      }
+    });
+
+    cards.forEach((card) => {
+      const openCard = () => {
+        const pool = visibleCards();
+        const poolIdx = pool.indexOf(card);
+        open(poolIdx >= 0 ? poolIdx : 0);
+      };
+      card.addEventListener("click", openCard);
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openCard();
+        }
+      });
+    });
+
+    lbClose.addEventListener("click", close);
+    lbBackdrop.addEventListener("click", close);
+    lbPrev.addEventListener("click", () => open(current - 1));
+    lbNext.addEventListener("click", () => open(current + 1));
+
+    document.addEventListener("keydown", (e) => {
+      if (lb.classList.contains("hidden")) return;
+      if (e.key === "Escape") close();
+      if (e.key === "ArrowLeft") open(current - 1);
+      if (e.key === "ArrowRight") open(current + 1);
+    });
+
+    // Touch swipe → prev/next. Disabled while zoomed so a pan gesture pans the
+    // image (native scroll) instead of jumping to the next/previous chart.
+    let touchStartX = 0;
+    lb.addEventListener("touchstart", (e) => {
+      touchStartX = e.touches[0].clientX;
+    });
+    lb.addEventListener("touchend", (e) => {
+      if (zoomed) return;
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 50) open(dx < 0 ? current + 1 : current - 1);
+    });
+  };
+
+  document.addEventListener("astro:page-load", () => {
+    filterSetup();
+    lightboxSetup();
+    analyticsSetup();
+  });
+</script>

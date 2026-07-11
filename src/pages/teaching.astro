@@ -3,13 +3,16 @@ import { getCollection } from "astro:content";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import {
   philosophy,
-  interests,
   innovations,
   appointments,
   serviceRoles,
   teachingAssistantships,
   levelLabels,
   levelColors,
+  effectiveness,
+  studentQuotes,
+  peerObservations,
+  professionalDevelopment,
 } from "~/data/teaching";
 
 const publications = await getCollection("publications");
@@ -33,7 +36,7 @@ const pubBySlug = Object.fromEntries(publications.map((p) => [p.id, p]));
         Teaching & Pedagogy
       </h1>
       <p class="mt-5 text-lg text-muted leading-relaxed">
-        Course history, teaching interests, and research on pedagogy.
+        Course history, teaching effectiveness, and research on pedagogy.
       </p>
     </header>
   </section>
@@ -54,21 +57,75 @@ const pubBySlug = Object.fromEntries(publications.map((p) => [p.id, p]));
     </div>
   </section>
 
-  <!-- Teaching interests -->
+  <!-- Teaching effectiveness -->
   <section class="container-wide py-12">
-    <div class="reveal mb-8">
-      <h2 class="font-serif text-3xl font-semibold">Teaching interests</h2>
+    <div class="reveal mb-8 max-w-3xl">
+      <h2 class="font-serif text-3xl font-semibold">Teaching effectiveness</h2>
+      <p class="mt-2 text-muted">
+        Evidence from student evaluations, peer observations, and a national
+        teaching award.
+      </p>
     </div>
-    <ul class="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-3" role="list">
-      {
-        interests.map((interest) => (
-          <li class="flex items-start gap-3 rounded-xl border border-default bg-elevated p-4">
-            <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-accent-500 flex-shrink-0" />
-            <span class="text-sm font-medium">{interest}</span>
-          </li>
-        ))
-      }
-    </ul>
+
+    <div class="reveal grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+      <div class="rounded-2xl border border-default bg-elevated p-6">
+        <p class="font-serif text-3xl font-semibold text-accent-600 dark:text-accent-400">
+          {Math.round(effectiveness.evalBefore)} → {Math.round(effectiveness.evalPeak)}%
+        </p>
+        <p class="mt-2 text-sm text-muted leading-relaxed">
+          Average student evaluation in {effectiveness.evalCourse} rose from
+          {" "}{effectiveness.evalBefore}% to a peak of {effectiveness.evalPeak}%
+          across multiple sections after a flipped-classroom redesign with peer
+          assessment.
+        </p>
+      </div>
+      <div class="rounded-2xl border border-default bg-elevated p-6">
+        <p class="font-serif text-3xl font-semibold text-accent-600 dark:text-accent-400">
+          2023
+        </p>
+        <p class="mt-2 text-sm text-muted leading-relaxed">
+          ACBSP Teaching Excellence Award — recognising teaching, professional
+          development, and institutional commitment across ~30 member
+          institutions.
+        </p>
+      </div>
+      <div class="rounded-2xl border border-default bg-elevated p-6">
+        <p class="font-serif text-3xl font-semibold text-accent-600 dark:text-accent-400">
+          {effectiveness.videoViews}
+        </p>
+        <p class="mt-2 text-sm text-muted leading-relaxed">
+          Student views on an open library of interactive (H5P) lecture videos
+          supporting self-paced learning.
+        </p>
+      </div>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-8">
+      <div class="reveal space-y-4">
+        <h3 class="font-serif text-lg font-semibold">From students</h3>
+        {
+          studentQuotes.map((q) => (
+            <blockquote class="rounded-2xl border border-default bg-elevated p-5">
+              <p class="text-[15px] leading-relaxed italic">“{q.quote}”</p>
+              <footer class="mt-3 text-xs text-muted not-italic">— {q.source}</footer>
+            </blockquote>
+          ))
+        }
+      </div>
+      <div class="reveal space-y-4">
+        <h3 class="font-serif text-lg font-semibold">From peer observers</h3>
+        {
+          peerObservations.map((q) => (
+            <blockquote class="rounded-2xl border border-default bg-elevated p-5">
+              <p class="text-[15px] leading-relaxed italic">“{q.quote}”</p>
+              <footer class="mt-3 text-xs text-muted not-italic">
+                — {q.name}, {q.role}
+              </footer>
+            </blockquote>
+          ))
+        }
+      </div>
+    </div>
   </section>
 
   <!-- Research on teaching -->
@@ -212,6 +269,30 @@ const pubBySlug = Object.fromEntries(publications.map((p) => [p.id, p]));
               <span class="text-sm text-muted whitespace-nowrap">
                 {s.period}
               </span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- Professional development -->
+  <section class="container-wide py-12">
+    <div class="reveal rounded-2xl border border-default bg-elevated p-6 sm:p-8">
+      <h2 class="font-serif text-xl font-semibold mb-4">
+        Professional development in teaching
+      </h2>
+      <ul class="space-y-3" role="list">
+        {
+          professionalDevelopment.map((d) => (
+            <li class="flex flex-wrap items-baseline justify-between gap-3 border-b border-default pb-3 last:border-0 last:pb-0">
+              <div>
+                <span class="font-medium">{d.title}</span>
+                <span class="text-muted text-sm"> · {d.org}</span>
+              </div>
+              {d.year && (
+                <span class="text-sm text-muted whitespace-nowrap">{d.year}</span>
+              )}
             </li>
           ))
         }

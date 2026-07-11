@@ -1,0 +1,394 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { vizTopics, type VizManifest } from "~/data/visualizations";
+import inflationManifest from "~/data/charts-manifest-inflation.json";
+import gdpManifest from "~/data/charts-manifest-gdp.json";
+import tradeManifest from "~/data/charts-manifest-trade.json";
+import employmentManifest from "~/data/charts-manifest-employment.json";
+import productivityManifest from "~/data/charts-manifest-productivity.json";
+import ratesManifest from "~/data/charts-manifest-rates.json";
+import housingManifest from "~/data/charts-manifest-housing.json";
+import energyManifest from "~/data/charts-manifest-energy.json";
+
+const manifests: Record<string, VizManifest> = {
+  inflation: inflationManifest as unknown as VizManifest,
+  gdp: gdpManifest as unknown as VizManifest,
+  trade: tradeManifest as unknown as VizManifest,
+  employment: employmentManifest as unknown as VizManifest,
+  productivity: productivityManifest as unknown as VizManifest,
+  rates: ratesManifest as unknown as VizManifest,
+  housing: housingManifest as unknown as VizManifest,
+  energy: energyManifest as unknown as VizManifest,
+};
+
+// Only surface topics that actually have charts. Placeholder topics whose
+// data pipeline hasn't produced anything yet stay hidden until their manifest
+// fills in (auto-reverses — no manual step needed).
+const visibleTopics = vizTopics.filter(
+  (t) => (manifests[t.slug]?.charts.length ?? 0) > 0,
+);
+
+const totalCharts = Object.values(manifests).reduce(
+  (n, m) => n + m.charts.length,
+  0,
+);
+
+function fmtDate(iso: string | null) {
+  if (!iso) return null;
+  return new Date(iso).toLocaleDateString("en-CA", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+---
+
+<BaseLayout
+  title="Charts"
+  description="High-quality, auto-updated charts on Canadian inflation, GDP, and macroeconomic trends — generated from official sources including Statistics Canada and FRED."
+>
+  <!-- Hero ---------------------------------------------------------------->
+  <section class="container-wide pt-16 pb-12">
+    <header class="reveal max-w-3xl">
+      <p
+        class="text-xs font-medium tracking-widest uppercase text-accent-700 dark:text-accent-300 mb-3"
+      >
+        Charts
+      </p>
+      <h1
+        class="font-serif text-4xl sm:text-5xl font-semibold leading-[1.1] tracking-tight"
+      >
+        Canadian economy in charts
+      </h1>
+      <p class="mt-4 text-lg text-muted max-w-2xl leading-relaxed">
+        Publication-quality visualizations built from official sources including
+        Statistics Canada and FRED — automatically refreshed whenever new data is released.
+      </p>
+    </header>
+
+    <div class="reveal mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+      <span class="flex items-center gap-1.5 text-muted">
+        <span
+          class="w-2 h-2 rounded-full bg-emerald-500"
+          style="animation: pulse 2s cubic-bezier(0.4,0,0.6,1) infinite"
+        ></span>
+        Live data · auto-updated
+      </span>
+      {
+        totalCharts > 0 && (
+          <span class="text-muted">
+            {totalCharts} charts across {visibleTopics.length} topics
+          </span>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- Topic cards --------------------------------------------------------->
+  <section class="container-wide pb-16">
+    <div class="grid md:grid-cols-2 gap-6">
+      {
+        visibleTopics.map((topic, i) => {
+          const manifest = manifests[topic.slug];
+          const chartCount = manifest.charts.length;
+          const updated = fmtDate(manifest.updated);
+          const preview = manifest.charts.slice(0, 3);
+
+          return (
+            <a
+              href={`/charts/${topic.slug}/`}
+              class="reveal group topic-card relative flex flex-col rounded-2xl border border-default bg-elevated hover:border-accent-500/30 dark:hover:border-accent-500/30 hover:shadow-[0_25px_60px_-15px_rgba(99,102,241,0.12)] dark:hover:shadow-[0_25px_60px_-15px_rgba(99,102,241,0.22)] transition-all duration-300 overflow-hidden"
+              style={`animation-delay:${i * 80}ms`}
+            >
+              {/* Preview strip */}
+              <div class="relative h-44 bg-[color-mix(in_srgb,var(--bg)_60%,transparent)] border-b border-default overflow-hidden grid-noise">
+                {/* Glow wash on hover */}
+                <div class="absolute inset-0 bg-gradient-to-br from-accent-500/5 to-transparent dark:from-accent-500/10 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                {preview.length > 0 ? (
+                  <div class="absolute inset-2 flex gap-2.5">
+                    {preview.map((chart, j) => (
+                      <div
+                        class={`flex-1 rounded-lg overflow-hidden shadow-md border border-neutral-200/50 dark:border-neutral-800/50 bg-white preview-card-image preview-card-image-${j}`}
+                        style={`transform: rotate(${(j - 1) * 3}deg) translateY(${Math.abs(j - 1) * 6}px) translateX(${(j - 1) * 4}px); transition-delay: ${j * 40}ms;`}
+                      >
+                        <img
+                          src={`${topic.chartsDir}${chart.filename}`}
+                          alt={chart.title}
+                          class="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div class="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="40"
+                      height="40"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.25"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="text-muted opacity-40"
+                      aria-hidden="true"
+                    >
+                      <line x1="18" y1="20" x2="18" y2="10" />
+                      <line x1="12" y1="20" x2="12" y2="4" />
+                      <line x1="6" y1="20" x2="6" y2="14" />
+                    </svg>
+                    <p class="text-xs text-muted opacity-60">Syncing charts…</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Card body */}
+              <div class="flex flex-col flex-1 p-6">
+                <div class="flex items-start justify-between gap-4 mb-3">
+                  <h2 class="font-serif text-xl font-semibold group-hover:text-accent-600 dark:group-hover:text-accent-400 transition-colors">
+                    {topic.title}
+                  </h2>
+                  {chartCount > 0 && (
+                    <span class="flex-shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full bg-accent-500/10 text-accent-700 dark:text-accent-300 border border-accent-500/20 shadow-sm">
+                      {chartCount} charts
+                    </span>
+                  )}
+                </div>
+
+                <p class="text-sm text-muted leading-relaxed mb-5 flex-1">
+                  {topic.description}
+                </p>
+
+                <div class="flex items-center justify-between text-xs text-muted border-t border-default pt-4">
+                  <span>
+                    {updated ? `Updated ${updated}` : "Awaiting first sync"}
+                  </span>
+                  <span class="flex items-center gap-1.5 text-accent-600 dark:text-accent-400 font-medium transition-colors">
+                    View charts
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="transform transition-transform duration-300 group-hover:translate-x-1"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </a>
+          );
+        })
+      }
+    </div>
+
+    <!-- Methodology note -->
+    <div
+      class="reveal mt-8 flex gap-4 p-6 rounded-2xl border border-default bg-elevated"
+    >
+      <div class="flex-shrink-0 mt-0.5">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="text-accent-500"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div>
+        <h2 class="font-medium text-sm mb-1">About this data</h2>
+        <p class="text-sm text-muted leading-relaxed">
+          All charts are generated programmatically from official and authoritative sources
+        such as{" "}
+        <a
+          href="https://www.statcan.gc.ca/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-accent-600 dark:text-accent-400 hover:underline"
+        >
+          Statistics Canada
+        </a>,{" "}
+        <a
+          href="https://fred.stlouisfed.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-accent-600 dark:text-accent-400 hover:underline"
+        >
+          FRED
+        </a>, and{" "}
+        <a
+          href="https://ec.europa.eu/eurostat"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-accent-600 dark:text-accent-400 hover:underline"
+        >
+          Eurostat
+        </a>{" "}
+        using R and custom ggplot2 styling. Charts are automatically regenerated and
+        deployed whenever new data is published.
+        </p>
+      </div>
+    </div>
+
+
+    <!-- Stay involved: notify + feedback (hidden if Supabase isn't configured) -->
+    <div id="engage" class="reveal mt-6 grid md:grid-cols-2 gap-6" style="display:none">
+      <!-- Email alerts -->
+      <div class="p-6 rounded-2xl border border-default bg-elevated">
+        <h2 class="font-medium text-sm mb-1">Get notified on new data</h2>
+        <p class="text-sm text-muted leading-relaxed mb-4">
+          A short email when new economic figures are released and the charts update. No spam.
+        </p>
+        <form id="subscribe-form" class="flex flex-col sm:flex-row gap-2">
+          <input type="email" name="email" required placeholder="you@example.com"
+            class="flex-1 px-3 py-2 rounded-lg border border-default bg-surface text-sm focus:outline-none focus:ring-2 focus:ring-accent-500" />
+          <!-- honeypot: real users leave this empty -->
+          <input type="text" name="company" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true" />
+          <button type="submit"
+            class="px-4 py-2 rounded-lg text-sm font-medium border border-default bg-elevated hover:border-accent-500 text-accent-700 dark:text-accent-300 transition-colors">
+            Notify me
+          </button>
+        </form>
+        <p id="subscribe-msg" class="text-xs mt-2 text-muted" role="status"></p>
+      </div>
+
+      <!-- Feedback / request a chart -->
+      <div class="p-6 rounded-2xl border border-default bg-elevated">
+        <h2 class="font-medium text-sm mb-1">Request a chart or send feedback</h2>
+        <p class="text-sm text-muted leading-relaxed mb-4">
+          Want a series that isn't here, or spotted something off? Let me know.
+        </p>
+        <form id="feedback-form" class="flex flex-col gap-2">
+          <textarea name="message" required rows="2" maxlength="2000" placeholder="Your request or feedback…"
+            class="px-3 py-2 rounded-lg border border-default bg-surface text-sm resize-y focus:outline-none focus:ring-2 focus:ring-accent-500"></textarea>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input type="email" name="email" placeholder="email (optional)"
+              class="flex-1 px-3 py-2 rounded-lg border border-default bg-surface text-sm focus:outline-none focus:ring-2 focus:ring-accent-500" />
+            <input type="text" name="company" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true" />
+            <button type="submit"
+              class="px-4 py-2 rounded-lg text-sm font-medium border border-default bg-elevated hover:border-accent-500 text-accent-700 dark:text-accent-300 transition-colors">
+              Send
+            </button>
+          </div>
+        </form>
+        <p id="feedback-msg" class="text-xs mt-2 text-muted" role="status"></p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  // Engagement forms — only active when Supabase is configured.
+  const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL;
+  const SB_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+
+  const engageSetup = () => {
+    const engage = document.getElementById("engage");
+    if (!engage || !SB_URL || !SB_KEY) return;
+    engage.style.display = "";
+
+    const headers = {
+      apikey: SB_KEY,
+      Authorization: `Bearer ${SB_KEY}`,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    };
+
+    const subForm = document.getElementById("subscribe-form") as HTMLFormElement | null;
+    const subMsg = document.getElementById("subscribe-msg");
+    if (subForm && subMsg && !subForm.dataset.bound) {
+      subForm.dataset.bound = "1";
+      subForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const data = new FormData(subForm);
+        if (data.get("company")) return; // honeypot tripped
+        const email = String(data.get("email") || "").trim();
+        if (!email) return;
+        subMsg.textContent = "Adding you…";
+        try {
+          const res = await fetch(`${SB_URL}/rest/v1/subscribers`, {
+            method: "POST", headers, body: JSON.stringify({ email }),
+          });
+          if (res.ok) { subForm.reset(); subMsg.textContent = "Thanks! You'll hear from me when new data lands."; }
+          else if (res.status === 409) { subForm.reset(); subMsg.textContent = "You're already on the list — thanks!"; }
+          else throw new Error(`HTTP ${res.status}`);
+        } catch (err) {
+          subMsg.textContent = "Something went wrong — please try again later.";
+          console.warn("subscribe failed:", err);
+        }
+      });
+    }
+
+    const fbForm = document.getElementById("feedback-form") as HTMLFormElement | null;
+    const fbMsg = document.getElementById("feedback-msg");
+    if (fbForm && fbMsg && !fbForm.dataset.bound) {
+      fbForm.dataset.bound = "1";
+      fbForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const data = new FormData(fbForm);
+        if (data.get("company")) return; // honeypot tripped
+        const message = String(data.get("message") || "").trim();
+        const email = String(data.get("email") || "").trim() || null;
+        if (!message) return;
+        fbMsg.textContent = "Sending…";
+        try {
+          const res = await fetch(`${SB_URL}/rest/v1/feedback`, {
+            method: "POST", headers, body: JSON.stringify({ message, email }),
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          fbForm.reset();
+          fbMsg.textContent = "Thank you — I read every message.";
+        } catch (err) {
+          fbMsg.textContent = "Something went wrong — please try again later.";
+          console.warn("feedback failed:", err);
+        }
+      });
+    }
+  };
+
+  document.addEventListener("astro:page-load", engageSetup);
+</script>
+
+<style>
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .preview-card-image {
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
+  }
+  
+  .topic-card:hover .preview-card-image-0 {
+    transform: rotate(-6deg) translateY(-2px) translateX(-18px) scale(1.04) !important;
+  }
+  
+  .topic-card:hover .preview-card-image-1 {
+    transform: rotate(0deg) translateY(-8px) translateX(0) scale(1.06) !important;
+    z-index: 10;
+  }
+  
+  .topic-card:hover .preview-card-image-2 {
+    transform: rotate(6deg) translateY(-2px) translateX(18px) scale(1.04) !important;
+  }
+</style>

@@ -13,15 +13,80 @@ export type TeachingAppointment = {
 };
 
 export const philosophy = [
-  "My teaching is grounded in three commitments. First, meeting students where they are: I teach learners from a wide range of academic, cultural, and professional backgrounds — from first-year undergraduates encountering supply and demand for the first time to working-professional MBAs — and I design my courses so that economic theory becomes accessible without losing rigor.",
-  "Second, evidence-based pedagogy. I treat my own teaching as an empirical question. I have designed and tested classroom approaches that combine flipped instruction, peer assessment, generative AI for active learning, and live case studies, and I have published this work in peer-reviewed venues.",
-  "Third, connecting theory to the world. I want students to leave a course with the analytical habits to make sense of the economy they will graduate into — using contemporary policy debates, real data, and case material drawn from the firms and markets they will encounter.",
+  "His teaching is grounded in three commitments. First, meeting students where they are: he teaches learners from a wide range of academic, cultural, and professional backgrounds — from first-year undergraduates encountering supply and demand for the first time to working-professional MBAs — and designs his courses so that economic theory becomes accessible without losing rigor.",
+  "Second, evidence-based pedagogy. He treats teaching as an empirical question. He has designed and tested classroom approaches that combine flipped instruction, peer assessment, generative AI for active learning, and live case studies, and has published this work in peer-reviewed venues.",
+  "Third, connecting theory to the world. He wants students to leave a course with the analytical habits to make sense of the economy they will graduate into — using contemporary policy debates, real data, and case material drawn from the firms and markets they will encounter.",
 ];
 
 export const interests = [
   "Undergraduate economics — principles, intermediate, and field courses",
   "International trade (upper-division and graduate)",
   "Panel data econometrics and quantitative methods",
+];
+
+// Institution-neutral teaching evidence (evaluations, peer observations, PD).
+export const effectiveness = {
+  evalCourse: "MBAF 504: Business Economics",
+  evalBefore: 87.4,
+  evalPeak: 94.2,
+  videoViews: "3,000+",
+};
+
+export const studentQuotes = [
+  {
+    quote:
+      "This has been a very interactive and effective class. The instructor made sure we learned, wrote, and practiced.",
+    source: "MBA student, Spring 2022",
+  },
+  {
+    quote:
+      "I am very impressed with the teaching method through video and in-class activities. It helped me grasp and learn economics fundamentals easily.",
+    source: "MBA student, Fall 2021",
+  },
+];
+
+export const peerObservations = [
+  {
+    quote:
+      "Creative, inclusive, and clearly communicated … an exemplary colleague whose practices align with the vision of the department and university in fostering academic excellence and innovation.",
+    name: "Eduardo Azmitia",
+    role: "Capilano University",
+  },
+  {
+    quote:
+      "An excellent instructor who treats his students with respect and tries to instil motivation in them to learn more. His class covered the learning outcomes of the course uniquely and ingeniously.",
+    name: "Chieko Tanimura",
+    role: "Economics Department Convenor, Capilano University",
+  },
+  {
+    quote:
+      "Articulate, enthusiastic, confident, prepared … easy to follow and explains complex ideas very clearly. Dr. Tabari is a gifted teacher who cares a lot about his students learning the course material.",
+    name: "Peter Tsigaris",
+    role: "Thompson Rivers University",
+  },
+];
+
+export const professionalDevelopment = [
+  {
+    title: "LEADing in Learning: Teaching with AI (Certificate)",
+    org: "Capilano University",
+    year: "2024",
+  },
+  {
+    title: "Centre for Excellence in Learning and Teaching workshops",
+    org: "Thompson Rivers University",
+    year: "",
+  },
+  {
+    title: "Teaching Online Series",
+    org: "UBC Sauder School of Business",
+    year: "",
+  },
+  {
+    title: "Instructional Skills Workshop (ISW)",
+    org: "Taylor Institute, University of Calgary",
+    year: "2018",
+  },
 ];
 
 export const innovations = [

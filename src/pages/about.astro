@@ -52,20 +52,29 @@ import { site } from "~/data/site";
           <p class="text-sm text-muted mb-2">{site.location}</p>
           <a
             href={`mailto:${site.email}`}
-            class="text-sm text-accent-600 dark:text-accent-400 hover:underline break-all"
+            class="text-sm text-accent-600 dark:text-accent-400 hover:underline break-all block mb-4"
           >
             {site.email}
           </a>
-          <div class="mt-4 pt-4 border-t border-default">
-            <a
-              href={site.cv}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-1.5 text-sm font-medium text-accent-600 dark:text-accent-400 hover:underline"
-            >
-              Download CV ↓
-            </a>
-          </div>
+        </div>
+        <div class="reveal rounded-2xl border border-default bg-elevated p-6">
+          <h2 class="font-serif text-lg font-semibold mb-3">Curriculum vitae</h2>
+          <p class="text-xs text-muted leading-relaxed mb-4">
+            Full record of publications, teaching, education, and awards.
+          </p>
+          <a
+            href="/files/cv.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-accent-600 hover:bg-accent-700 text-white font-medium text-sm transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-accent-500/25"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Download CV (PDF)
+          </a>
         </div>
       </aside>
     </div>

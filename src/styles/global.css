@@ -53,6 +53,18 @@
     format("woff2");
 }
 
+/* Alias so inline chart SVGs resolve their title font. The R/svglite charts emit
+   font-family: "Fraunces SemiBold" (the OS font name used at render time); map it
+   to the same Fraunces variable font so the inline SVG title matches the site. */
+@font-face {
+  font-family: "Fraunces SemiBold";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/fraunces/v37/6NUh8FyLNQOQZAnv9bYEvDiIdE9Ea92uemAk_WBq8U_9v0c2WjPLNVMjuxihRRyZHA.woff2")
+    format("woff2");
+}
+
 @layer base {
   :root {
     color-scheme: light;
@@ -61,6 +73,11 @@
     --fg: var(--color-ink-900);
     --fg-muted: var(--color-ink-600);
     --border: var(--color-ink-200);
+    /* Surface behind charts. Charts are inlined as transparent SVGs with dark
+       ink, so this panel shows through and MUST stay light in both themes. Soft
+       warm off-white ("paper") so charts feel printed rather than sitting on a
+       stark white block. Single knob to re-theme all charts site-wide. */
+    --chart-bg: #f9f4ea;
   }
 
   .dark {
@@ -70,6 +87,44 @@
     --fg: var(--color-ink-50);
     --fg-muted: var(--color-ink-300);
     --border: var(--color-ink-800);
+    /* Dark mode: charts have dark ink, so they must sit on a light "paper" panel
+       (can't follow --bg-elevated, which is dark). Warm paper tone instead of
+       stark white — gentler glow against the dark page, still fully readable. */
+    --chart-bg: #ece7dc;
+  }
+
+  /* Inline chart SVGs scale to their container (svglite emits intrinsic pt
+     width/height + a viewBox; width:100% overrides to make them responsive). */
+  .chart-svg svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  /* Lightbox: Fit = whole chart within the viewport. */
+  #lb-img.is-fit svg {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 75vh;
+  }
+  #lb-img.is-fit img {
+    max-width: 100%;
+    max-height: 75vh;
+  }
+  /* Full size: the paper panel grows to wrap the enlarged chart (so the cream
+     background covers all of it, not just the first viewport), and the chart is
+     sized off the viewport — not a % of the panel, which would be circular with
+     width:max-content. #lb-scroll pans it; it's left/top-aligned, so the title
+     sits at the scroll origin (no clipped left edge). */
+  #lb-img.is-full {
+    width: max-content;
+    max-width: none;
+  }
+  #lb-img.is-full svg,
+  #lb-img.is-full img {
+    width: 175vw;
+    max-width: none;
+    height: auto;
   }
 
   html {
@@ -169,23 +224,9 @@
   }
 }
 
-/* Reveal-on-scroll animation */
+/* Reveal-on-scroll is disabled to ensure a smooth, instant native scrolling experience. */
 .reveal {
-  opacity: 0;
-  transform: translateY(12px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-.reveal.is-visible {
   opacity: 1;
-  transform: translateY(0);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .reveal {
-    opacity: 1;
-    transform: none;
-  }
 }
 
 /* Prose styling for blog posts */

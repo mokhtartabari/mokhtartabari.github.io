@@ -9,6 +9,14 @@ export type Talk = {
 export const talks: Talk[] = [
   {
     title:
+      "AI-Integrated Course Design: Virtual Interviews and Podcasts in Economics",
+    venue: "Capilano University Teaching & Learning Symposium",
+    location: "North Vancouver, Canada",
+    date: "2024",
+    year: 2024,
+  },
+  {
+    title:
       "Enhancing Student Engagement: The Synergy of Peer Assessment and Flipped Classroom Design",
     venue: "BCCAT Annual Economics Meeting",
     location: "British Columbia, Canada",

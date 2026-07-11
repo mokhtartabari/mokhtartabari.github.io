@@ -2,12 +2,14 @@
 import ThemeToggle from "~/components/ThemeToggle.astro";
 import { site } from "~/data/site";
 
-const nav = [
+const nav: { label: string; href: string; external?: boolean }[] = [
   { label: "About", href: "/about/" },
   { label: "Research", href: "/publications/" },
+  { label: "Charts", href: "/charts/" },
   { label: "Teaching", href: "/teaching/" },
   { label: "Talks", href: "/talks/" },
   { label: "Contact", href: "/contact/" },
+  { label: "CV", href: "/files/cv.pdf", external: true },
 ];
 
 const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
@@ -29,11 +31,14 @@ const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
         nav.map((item) => {
           const itemPath = item.href.replace(/\/$/, "") || "/";
           const isActive =
-            itemPath === pathname ||
-            (itemPath !== "/" && pathname.startsWith(itemPath));
+            !item.external &&
+            (itemPath === pathname ||
+              (itemPath !== "/" && pathname.startsWith(itemPath)));
           return (
             <a
               href={item.href}
+              target={item.external ? "_blank" : undefined}
+              rel={item.external ? "noopener noreferrer" : undefined}
               class:list={[
                 "relative px-3 py-2 text-sm font-medium rounded-md transition-colors",
                 isActive
@@ -90,11 +95,14 @@ const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
         nav.map((item) => {
           const itemPath = item.href.replace(/\/$/, "") || "/";
           const isActive =
-            itemPath === pathname ||
-            (itemPath !== "/" && pathname.startsWith(itemPath));
+            !item.external &&
+            (itemPath === pathname ||
+              (itemPath !== "/" && pathname.startsWith(itemPath)));
           return (
             <a
               href={item.href}
+              target={item.external ? "_blank" : undefined}
+              rel={item.external ? "noopener noreferrer" : undefined}
               class:list={[
                 "px-3 py-2 rounded-md text-sm font-medium transition-colors",
                 isActive

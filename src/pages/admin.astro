@@ -1,0 +1,891 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { site } from "~/data/site";
+import inflationManifest from "~/data/charts-manifest-inflation.json";
+import gdpManifest from "~/data/charts-manifest-gdp.json";
+import tradeManifest from "~/data/charts-manifest-trade.json";
+import employmentManifest from "~/data/charts-manifest-employment.json";
+import productivityManifest from "~/data/charts-manifest-productivity.json";
+import ratesManifest from "~/data/charts-manifest-rates.json";
+import housingManifest from "~/data/charts-manifest-housing.json";
+import energyManifest from "~/data/charts-manifest-energy.json";
+
+// Flat catalog of every published chart — the Studio uses it to show thumbnails
+// for the model's picks and to browse/swap attachments.
+const allManifests: any[] = [
+  inflationManifest, gdpManifest, tradeManifest, employmentManifest,
+  productivityManifest, ratesManifest, housingManifest, energyManifest,
+];
+const chartCatalog = allManifests.flatMap((m: any) =>
+  (m?.charts || []).map((c: any) => ({
+    slug: c.slug, title: c.title, topic: m.topic,
+    category: c.category || "", url: c.url, data_through: c.data_through || "",
+    // public chart PAGE (full-screen + download + share, and OG-tagged so a
+    // shared link renders a chart preview card) — this is what we post.
+    page: `https://mokhtartabari.github.io/charts/${m.topic}/${c.slug}/`,
+  }))
+);
+const catalogJson = JSON.stringify(chartCatalog).replace(/</g, "\\u003c");
+---
+
+<BaseLayout title="Admin Dashboard" description="Site analytics, subscriber list, and user feedback.">
+  <div class="container-wide py-12 min-h-[80vh] flex flex-col">
+    <!-- Passcode Gate Screen -->
+    <div id="admin-login" class="flex-1 flex items-center justify-center py-12">
+      <div class="w-full max-w-md p-8 rounded-2xl border border-default bg-elevated shadow-xl text-center space-y-6">
+        <div class="inline-flex p-3 rounded-xl bg-accent-500/10 text-accent-600 dark:text-accent-400">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <div class="space-y-2">
+          <h1 class="font-serif text-2xl font-semibold">Admin Access</h1>
+          <p class="text-sm text-muted">Enter passcode to view site analytics and user data.</p>
+        </div>
+        <form id="login-form" class="space-y-4">
+          <input
+            type="password"
+            id="passcode"
+            required
+            placeholder="••••••••"
+            class="w-full px-4 py-2.5 rounded-xl border border-default bg-surface text-center font-mono text-lg focus:outline-none focus:ring-2 focus:ring-accent-500"
+          />
+          <button
+            type="submit"
+            class="w-full py-2.5 rounded-xl bg-accent-600 hover:bg-accent-700 text-white font-medium text-sm transition-all hover:shadow-lg hover:shadow-accent-500/25"
+          >
+            Access Dashboard
+          </button>
+          <p id="login-error" class="text-xs text-red-500 hidden" role="status">Incorrect passcode. Please try again.</p>
+        </form>
+      </div>
+    </div>
+
+    <!-- Authenticated Dashboard -->
+    <div id="admin-dashboard" class="hidden flex-grow flex flex-col space-y-8">
+      <!-- Header -->
+      <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-default pb-6">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-accent-600 dark:text-accent-400 mb-1">
+            Console
+          </p>
+          <h1 class="font-serif text-3xl font-semibold">Dashboard & Analytics</h1>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- Self-Exclusion Toggle -->
+          <div class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-default bg-elevated text-xs font-medium">
+            <span class="text-muted">Self-Exclusion (Current Browser):</span>
+            <button
+              id="btn-exclude-toggle"
+              class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-neutral-200 dark:bg-neutral-800 transition-colors duration-200 ease-in-out focus:outline-none"
+              role="switch"
+              aria-checked="false"
+            >
+              <span class="pointer-events-none inline-block h-4 w-4 translate-x-0 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+            </button>
+          </div>
+          <!-- Logout -->
+          <button
+            id="btn-logout"
+            class="px-3 py-1.5 rounded-xl border border-default bg-elevated hover:bg-neutral-50 dark:hover:bg-neutral-800 text-xs font-medium transition-colors"
+          >
+            Log Out
+          </button>
+        </div>
+      </header>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex border-b border-default overflow-x-auto no-scrollbar gap-1" aria-label="Dashboard Tabs">
+        {["Studio", "Overview", "Charts", "Geography", "Devices & Referrals", "Subscribers", "Feedback Feed"].map((tab, idx) => (
+          <button
+            data-tab={idx}
+            class={`px-4 py-2.5 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${idx === 0 ? "border-accent-500 text-fg" : "border-transparent text-muted hover:text-fg"}`}
+          >
+            {tab}
+          </button>
+        ))}
+      </nav>
+
+      <!-- Dashboard Panels Container -->
+      <div id="panels" class="relative min-h-[400px]">
+        
+        <!-- 0. STUDIO PANEL (default) -->
+        <div class="panel space-y-6">
+          <div class="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <h2 class="font-serif text-xl font-semibold">Content Studio</h2>
+              <p class="text-sm text-muted">Auto-drafted posts from the latest data releases — edit, copy, grab a chart, publish.</p>
+            </div>
+            <label class="inline-flex items-center gap-2 text-xs text-muted cursor-pointer">
+              <input type="checkbox" id="studio-show-posted" class="rounded border-default" /> Show posted / dismissed
+            </label>
+          </div>
+          <div id="studio-drafts" class="space-y-6">
+            <p class="p-8 text-center text-muted border border-default rounded-2xl bg-elevated">Loading drafts…</p>
+          </div>
+          <details class="rounded-2xl border border-default bg-elevated">
+            <summary class="cursor-pointer px-6 py-4 font-serif font-semibold select-none">Browse all charts</summary>
+            <div id="studio-gallery" class="p-6 pt-0 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+          </details>
+        </div>
+
+        <!-- 1. OVERVIEW PANEL -->
+        <div class="panel hidden space-y-6">
+          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Metric Card 1 -->
+            <div class="p-6 rounded-2xl border border-default bg-elevated space-y-2 shadow-sm">
+              <span class="text-xs font-medium text-muted uppercase tracking-wider">Total Views</span>
+              <p id="stat-views" class="font-serif text-3xl font-semibold">0</p>
+            </div>
+            <!-- Metric Card 2 -->
+            <div class="p-6 rounded-2xl border border-default bg-elevated space-y-2 shadow-sm">
+              <span class="text-xs font-medium text-muted uppercase tracking-wider">Total Downloads</span>
+              <p id="stat-downloads" class="font-serif text-3xl font-semibold">0</p>
+            </div>
+            <!-- Metric Card 3 -->
+            <div class="p-6 rounded-2xl border border-default bg-elevated space-y-2 shadow-sm">
+              <span class="text-xs font-medium text-muted uppercase tracking-wider">Conversion Rate</span>
+              <p id="stat-conversion" class="font-serif text-3xl font-semibold">0.0%</p>
+            </div>
+            <!-- Metric Card 4 -->
+            <div class="p-6 rounded-2xl border border-default bg-elevated space-y-2 shadow-sm">
+              <span class="text-xs font-medium text-muted uppercase tracking-wider">Active Subscribers</span>
+              <p id="stat-subscribers" class="font-serif text-3xl font-semibold">0</p>
+            </div>
+          </div>
+
+          <div class="grid lg:grid-cols-12 gap-6">
+            <!-- Traffic chart log -->
+            <div class="lg:col-span-8 p-6 rounded-2xl border border-default bg-elevated space-y-4">
+              <h2 class="font-serif text-lg font-semibold">Activity Feed</h2>
+              <div class="h-64 flex flex-col justify-between" id="activity-chart">
+                <!-- Simple bar representation -->
+                <div class="flex-1 flex items-end justify-between gap-2 border-b border-default pb-2 h-48" id="activity-chart-bars">
+                  <span class="text-muted text-xs w-full text-center py-16">Loading metrics...</span>
+                </div>
+                <div class="flex justify-between text-[10px] text-muted pt-2" id="activity-chart-labels"></div>
+              </div>
+            </div>
+
+            <!-- Pipeline Runs Log -->
+            <div class="lg:col-span-4 p-6 rounded-2xl border border-default bg-elevated space-y-4 flex flex-col">
+              <div class="flex items-center justify-between">
+                <h2 class="font-serif text-lg font-semibold">Pipeline Runs</h2>
+                <span class="inline-flex items-center gap-1.5 font-medium text-emerald-500 text-xs">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Active
+                </span>
+              </div>
+              <div id="pipeline-logs-list" class="space-y-3.5 max-h-[260px] overflow-y-auto pr-1 no-scrollbar flex-grow">
+                <div class="text-center py-12 text-muted text-xs">Loading pipeline logs...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. CHARTS PANEL -->
+        <div class="panel hidden space-y-4">
+          <div class="p-6 rounded-2xl border border-default bg-elevated overflow-x-auto">
+            <h2 class="font-serif text-lg font-semibold mb-4">Chart Utility Metrics</h2>
+            <table class="w-full text-sm text-left border-collapse">
+              <thead>
+                <tr class="border-b border-default text-muted">
+                  <th class="pb-3 font-medium">Chart Slug</th>
+                  <th class="pb-3 font-medium text-right">Views</th>
+                  <th class="pb-3 font-medium text-right">Downloads</th>
+                  <th class="pb-3 font-medium text-right">Interaction Rate</th>
+                </tr>
+              </thead>
+              <tbody id="tbl-charts" class="divide-y divide-default">
+                <tr>
+                  <td colspan="4" class="py-8 text-center text-muted">Loading chart catalog...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 3. GEOGRAPHY PANEL -->
+        <div class="panel hidden grid md:grid-cols-2 gap-6">
+          <div class="p-6 rounded-2xl border border-default bg-elevated space-y-4">
+            <h2 class="font-serif text-lg font-semibold">Top Countries</h2>
+            <table class="w-full text-sm text-left border-collapse">
+              <thead>
+                <tr class="border-b border-default text-muted">
+                  <th class="pb-2 font-medium">Country</th>
+                  <th class="pb-2 font-medium text-right w-24">Hits</th>
+                </tr>
+              </thead>
+              <tbody id="tbl-geo-countries" class="divide-y divide-default">
+                <tr>
+                  <td colspan="2" class="py-8 text-center text-muted">Awaiting sync...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="p-6 rounded-2xl border border-default bg-elevated space-y-4">
+            <h2 class="font-serif text-lg font-semibold">Top Cities</h2>
+            <table class="w-full text-sm text-left border-collapse">
+              <thead>
+                <tr class="border-b border-default text-muted">
+                  <th class="pb-2 font-medium">City</th>
+                  <th class="pb-2 font-medium text-right w-24">Hits</th>
+                </tr>
+              </thead>
+              <tbody id="tbl-geo-cities" class="divide-y divide-default">
+                <tr>
+                  <td colspan="2" class="py-8 text-center text-muted">Awaiting sync...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 4. DEVICES & REFERRALS PANEL -->
+        <div class="panel hidden grid md:grid-cols-2 gap-6">
+          <!-- Device Breakdown -->
+          <div class="p-6 rounded-2xl border border-default bg-elevated space-y-6">
+            <h2 class="font-serif text-lg font-semibold">Device & Browser</h2>
+            
+            <div class="space-y-4">
+              <h3 class="text-xs uppercase font-semibold tracking-wider text-muted">Devices</h3>
+              <div class="space-y-2" id="div-devices"></div>
+            </div>
+
+            <div class="space-y-4 border-t border-default pt-4">
+              <h3 class="text-xs uppercase font-semibold tracking-wider text-muted">Browsers</h3>
+              <div class="space-y-2" id="div-browsers"></div>
+            </div>
+          </div>
+
+          <!-- Referral Sources -->
+          <div class="p-6 rounded-2xl border border-default bg-elevated space-y-4">
+            <h2 class="font-serif text-lg font-semibold">Referral Traffic</h2>
+            <table class="w-full text-sm text-left border-collapse">
+              <thead>
+                <tr class="border-b border-default text-muted">
+                  <th class="pb-2 font-medium">Domain</th>
+                  <th class="pb-2 font-medium text-right w-24">Visits</th>
+                </tr>
+              </thead>
+              <tbody id="tbl-referrals" class="divide-y divide-default">
+                <tr>
+                  <td colspan="2" class="py-8 text-center text-muted">Awaiting sync...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 5. SUBSCRIBERS PANEL -->
+        <div class="panel hidden space-y-4">
+          <div class="p-6 rounded-2xl border border-default bg-elevated space-y-4">
+            <div class="flex items-center justify-between gap-4 flex-wrap">
+              <h2 class="font-serif text-lg font-semibold">Alert Subscribers</h2>
+              <button
+                id="btn-sub-copy"
+                class="px-3 py-1.5 rounded-xl border border-default bg-surface hover:bg-neutral-50 dark:hover:bg-neutral-800 text-xs font-semibold transition-colors"
+              >
+                Copy all emails
+              </button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-default text-muted">
+                    <th class="pb-2 font-medium">Email</th>
+                    <th class="pb-2 font-medium">Date Subscribed</th>
+                    <th class="pb-2 font-medium text-right w-24">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="tbl-subscribers" class="divide-y divide-default">
+                  <tr>
+                    <td colspan="3" class="py-8 text-center text-muted">Loading subscriber catalog...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. FEEDBACK PANEL -->
+        <div class="panel hidden space-y-4">
+          <h2 class="font-serif text-xl font-semibold">Feedback Inbox</h2>
+          <div id="div-feedback" class="space-y-4">
+            <p class="p-8 text-center text-muted border border-default rounded-2xl bg-elevated">Loading messages...</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script type="application/json" id="chart-catalog" is:inline set:html={catalogJson}></script>
+
+<script>
+  const SB_URL = import.meta.env.PUBLIC_SUPABASE_URL;
+  const SB_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+  const ADMIN_PASSCODE = import.meta.env.PUBLIC_ADMIN_PASSCODE || "admin123";
+
+  // ===================== CONTENT STUDIO =====================
+  const CHART_CATALOG = (() => {
+    try { return JSON.parse(document.getElementById("chart-catalog")?.textContent || "[]"); }
+    catch { return []; }
+  })();
+  const catBySlug: Record<string, any> = Object.fromEntries(CHART_CATALOG.map((c: any) => [c.slug, c]));
+  const escH = (s: string) => (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  const chartThumb = (slug: string) => {
+    const c = catBySlug[slug];
+    if (!c) return "";
+    return `
+      <a href="${c.page || c.url}" target="_blank" rel="noopener" class="group block rounded-xl border border-default overflow-hidden bg-surface hover:shadow-md transition-shadow" title="${escH(c.title)} — open on your site">
+        <img src="${c.url}" alt="${escH(c.title)}" loading="lazy" class="w-full h-28 object-cover object-top bg-white" />
+        <div class="px-2.5 py-1.5 text-[11px] font-medium truncate">${escH(c.title)}</div>
+      </a>`;
+  };
+
+  const renderStudioCard = (d: any) => {
+    const f = d.facts || {};
+    const badge = d.status === "posted"
+      ? `<span class="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">Posted</span>`
+      : d.status === "dismissed"
+      ? `<span class="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-neutral-500/10 text-muted">Dismissed</span>`
+      : `<span class="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-accent-500/10 text-accent-600">New</span>`;
+    const thumbs = (d.attach || []).map(chartThumb).join("");
+    const xText = d.x_post || "";
+    return `
+      <article class="rounded-2xl border border-default bg-elevated p-6 space-y-5 shadow-sm" data-id="${d.id}" data-primary="${(d.attach && d.attach[0]) || ""}">
+        <header class="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold uppercase tracking-wider text-accent-600 dark:text-accent-400">${escH(d.topic)}</span>
+              ${badge}
+            </div>
+            <h3 class="font-serif text-lg font-semibold mt-1">${escH(d.headline || "")}</h3>
+            <p class="text-xs text-muted">data through ${escH(f.latest_date || d.release_date || "")}</p>
+          </div>
+        </header>
+        <div class="grid md:grid-cols-2 gap-5">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-semibold uppercase tracking-wider text-muted">X / Twitter</label>
+              <span class="text-[10px] text-muted"><span class="x-count">${xText.length}</span>/280</span>
+            </div>
+            <textarea class="studio-x w-full h-32 p-3 rounded-xl border border-default bg-surface text-sm leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-accent-500">${escH(xText)}</textarea>
+            <div class="flex items-center gap-2">
+              <button class="btn-open px-3 py-1.5 rounded-lg bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white text-xs font-semibold" data-target="studio-x" data-net="x">Post on X ↗</button>
+              <button class="btn-copy px-3 py-1.5 rounded-lg border border-default bg-surface hover:bg-neutral-50 dark:hover:bg-neutral-800 text-xs font-semibold" data-target="studio-x">Copy</button>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <label class="text-xs font-semibold uppercase tracking-wider text-muted">LinkedIn</label>
+            <textarea class="studio-li w-full h-32 p-3 rounded-xl border border-default bg-surface text-sm leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-accent-500">${escH(d.linkedin_post || "")}</textarea>
+            <div class="flex items-center gap-2">
+              <button class="btn-open px-3 py-1.5 rounded-lg bg-[#0a66c2] hover:bg-[#004182] text-white text-xs font-semibold" data-target="studio-li" data-net="li">Post on LinkedIn ↗</button>
+              <button class="btn-copy px-3 py-1.5 rounded-lg border border-default bg-surface hover:bg-neutral-50 dark:hover:bg-neutral-800 text-xs font-semibold" data-target="studio-li">Copy</button>
+            </div>
+          </div>
+        </div>
+        ${thumbs ? `
+        <div class="space-y-2">
+          <p class="text-xs font-semibold uppercase tracking-wider text-muted">Charts — the post links to the first one (preview card); click to open on your site</p>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">${thumbs}</div>
+        </div>` : ""}
+        ${d.chart_idea ? `
+        <div class="text-sm p-3 rounded-xl bg-accent-500/5 border border-accent-500/20">
+          <span class="font-semibold">💡 New chart idea:</span> ${escH(d.chart_idea)}
+        </div>` : ""}
+        <div class="flex items-center gap-2 pt-1">
+          <button class="btn-status px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold" data-status="posted">Mark posted</button>
+          <button class="btn-status px-3 py-1.5 rounded-lg border border-default text-xs font-medium text-muted hover:text-fg" data-status="dismissed">Dismiss</button>
+        </div>
+      </article>`;
+  };
+
+  const renderStudioGallery = () => {
+    const el = document.getElementById("studio-gallery");
+    if (el) el.innerHTML = CHART_CATALOG.map((c: any) => chartThumb(c.slug)).join("");
+  };
+
+  const loadStudio = async () => {
+    if (!SB_URL || !SB_KEY) return;
+    const headers = { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` };
+    const showPosted = (document.getElementById("studio-show-posted") as HTMLInputElement | null)?.checked;
+    const filter = showPosted ? "" : "&status=eq.new";
+    const wrap = document.getElementById("studio-drafts");
+    if (!wrap) return;
+    try {
+      const res = await fetch(`${SB_URL}/rest/v1/content_drafts?select=*&order=created_at.desc&limit=40${filter}`, { headers });
+      const drafts = res.ok ? await res.json() : [];
+      if (!drafts.length) {
+        wrap.innerHTML = `<p class="p-8 text-center text-muted border border-default rounded-2xl bg-elevated">No drafts yet — they appear here automatically after the next Statistics Canada release.</p>`;
+      } else {
+        wrap.innerHTML = drafts.map(renderStudioCard).join("");
+        wrap.querySelectorAll(".btn-copy").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const card = btn.closest("article")!;
+            const ta = card.querySelector<HTMLTextAreaElement>("." + (btn as HTMLElement).dataset.target)!;
+            navigator.clipboard.writeText(ta.value);
+            const t = btn.textContent; btn.textContent = "Copied!";
+            setTimeout(() => (btn.textContent = t), 1500);
+          });
+        });
+        // Open X / LinkedIn composer prefilled with the (possibly edited) draft.
+        wrap.querySelectorAll(".btn-open").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const card = btn.closest("article")!;
+            const ta = card.querySelector<HTMLTextAreaElement>("." + (btn as HTMLElement).dataset.target)!;
+            const primary = (card as HTMLElement).dataset.primary || "";
+            const pageUrl = (catBySlug[primary] && catBySlug[primary].page) || "";
+            let url;
+            if ((btn as HTMLElement).dataset.net === "x") {
+              // X counts any URL as ~23 chars via the url param and renders its preview card.
+              url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(ta.value)}` +
+                    (pageUrl ? `&url=${encodeURIComponent(pageUrl)}` : "");
+            } else {
+              const body = ta.value + (pageUrl ? "\n\n" + pageUrl : "");
+              url = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(body)}`;
+            }
+            window.open(url, "_blank", "noopener");
+          });
+        });
+        wrap.querySelectorAll<HTMLTextAreaElement>(".studio-x").forEach((ta) => {
+          ta.addEventListener("input", () => {
+            const c = ta.closest("article")!.querySelector(".x-count");
+            if (c) c.textContent = String(ta.value.length);
+          });
+        });
+        wrap.querySelectorAll(".btn-status").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const id = (btn.closest("article") as HTMLElement).dataset.id;
+            await fetch(`${SB_URL}/rest/v1/content_drafts?id=eq.${id}`, {
+              method: "PATCH",
+              headers: { ...headers, "Content-Type": "application/json", Prefer: "return=minimal" },
+              body: JSON.stringify({ status: (btn as HTMLElement).dataset.status }),
+            });
+            loadStudio();
+          });
+        });
+      }
+      renderStudioGallery();
+    } catch (err) {
+      wrap.innerHTML = `<p class="p-8 text-center text-red-500 border border-default rounded-2xl bg-elevated">Failed to load drafts.</p>`;
+    }
+  };
+
+  const studioToggle = document.getElementById("studio-show-posted");
+  if (studioToggle && !studioToggle.dataset.bound) {
+    studioToggle.dataset.bound = "true";
+    studioToggle.addEventListener("change", loadStudio);
+  }
+
+  // Simple Page Auth Gating logic
+  const authCheck = () => {
+    const isAuthed = sessionStorage.getItem("admin_authorized") === "true";
+    const loginScreen = document.getElementById("admin-login")!;
+    const dashboard = document.getElementById("admin-dashboard")!;
+
+    if (isAuthed) {
+      loginScreen.classList.add("hidden");
+      dashboard.classList.remove("hidden");
+      loadDashboardData();
+    } else {
+      loginScreen.classList.remove("hidden");
+      dashboard.classList.add("hidden");
+    }
+  };
+
+  const loginForm = document.getElementById("login-form") as HTMLFormElement | null;
+  const loginError = document.getElementById("login-error");
+  if (loginForm && !loginForm.dataset.bound) {
+    loginForm.dataset.bound = "true";
+    loginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const passcodeEl = document.getElementById("passcode") as HTMLInputElement;
+      if (passcodeEl.value === ADMIN_PASSCODE) {
+        sessionStorage.setItem("admin_authorized", "true");
+        loginError?.classList.add("hidden");
+        authCheck();
+      } else {
+        loginError?.classList.remove("hidden");
+        passcodeEl.value = "";
+        passcodeEl.focus();
+      }
+    });
+  }
+
+  // Logout button
+  const logoutBtn = document.getElementById("btn-logout");
+  if (logoutBtn && !logoutBtn.dataset.bound) {
+    logoutBtn.dataset.bound = "true";
+    logoutBtn.addEventListener("click", () => {
+      sessionStorage.removeItem("admin_authorized");
+      authCheck();
+    });
+  }
+
+  // Self-Exclusion Toggle Switch
+  const setupExclusionToggle = () => {
+    const switchBtn = document.getElementById("btn-exclude-toggle");
+    if (!switchBtn || switchBtn.dataset.bound) return;
+    switchBtn.dataset.bound = "true";
+    
+    const updateSwitchState = () => {
+      const isExcluded = localStorage.getItem("exclude_analytics") === "true";
+      switchBtn.setAttribute("aria-checked", isExcluded ? "true" : "false");
+      const dot = switchBtn.querySelector("span")!;
+      if (isExcluded) {
+        switchBtn.classList.remove("bg-neutral-200", "dark:bg-neutral-800");
+        switchBtn.classList.add("bg-accent-600");
+        dot.classList.add("translate-x-4");
+      } else {
+        switchBtn.classList.add("bg-neutral-200", "dark:bg-neutral-800");
+        switchBtn.classList.remove("bg-accent-600");
+        dot.classList.remove("translate-x-4");
+      }
+    };
+
+    switchBtn.addEventListener("click", () => {
+      const isExcluded = localStorage.getItem("exclude_analytics") === "true";
+      localStorage.setItem("exclude_analytics", isExcluded ? "false" : "true");
+      updateSwitchState();
+    });
+
+    updateSwitchState();
+  };
+
+  // Switch tabs
+  const tabButtons = document.querySelectorAll<HTMLButtonElement>("nav[aria-label='Dashboard Tabs'] button");
+  const panels = document.querySelectorAll<HTMLDivElement>("#panels .panel");
+
+  tabButtons.forEach((btn) => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = "true";
+    btn.addEventListener("click", () => {
+      const targetIdx = parseInt(btn.dataset.tab || "0");
+      tabButtons.forEach((b, idx) => {
+        if (idx === targetIdx) {
+          b.classList.remove("border-transparent", "text-muted", "hover:text-fg");
+          b.classList.add("border-accent-500", "text-fg");
+        } else {
+          b.classList.add("border-transparent", "text-muted", "hover:text-fg");
+          b.classList.remove("border-accent-500", "text-fg");
+        }
+      });
+      panels.forEach((p, idx) => {
+        p.classList.toggle("hidden", idx !== targetIdx);
+      });
+    });
+  });
+
+  // DB Data Load Fetching
+  const loadDashboardData = async () => {
+    if (!SB_URL || !SB_KEY) return;
+    loadStudio();
+    const headers = { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` };
+
+    try {
+      // 1. Fetch Subscribers count & table
+      const subRes = await fetch(`${SB_URL}/rest/v1/subscribers?select=*&order=created_at.desc`, { headers });
+      const subscribers = subRes.ok ? await subRes.json() : [];
+      document.getElementById("stat-subscribers")!.textContent = subscribers.length;
+      
+      const tblSub = document.getElementById("tbl-subscribers")!;
+      if (subscribers.length === 0) {
+        tblSub.innerHTML = `<tr><td colspan="3" class="py-8 text-center text-muted">No subscribers yet.</td></tr>`;
+      } else {
+        tblSub.innerHTML = subscribers.map((sub: any) => `
+          <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-900/40">
+            <td class="py-3 font-medium">${sub.email}</td>
+            <td class="py-3 text-muted">${new Date(sub.created_at).toLocaleDateString()}</td>
+            <td class="py-3 text-right">
+              <button data-id="${sub.id}" class="btn-sub-delete text-red-500 hover:underline text-xs font-semibold">
+                Delete
+              </button>
+            </td>
+          </tr>
+        `).join("");
+      }
+
+      // 2. Fetch Feedback messages
+      const fbRes = await fetch(`${SB_URL}/rest/v1/feedback?select=*&order=created_at.desc`, { headers });
+      const feedbacks = fbRes.ok ? await fbRes.json() : [];
+      
+      const divFb = document.getElementById("div-feedback")!;
+      if (feedbacks.length === 0) {
+        divFb.innerHTML = `<p class="p-8 text-center text-muted border border-default rounded-2xl bg-elevated">No messages received.</p>`;
+      } else {
+        divFb.innerHTML = feedbacks.map((fb: any) => `
+          <article class="p-6 rounded-2xl border border-default bg-elevated space-y-4 shadow-sm relative group">
+            <div class="flex justify-between items-baseline flex-wrap gap-2">
+              <span class="text-xs font-semibold text-accent-600 dark:text-accent-400">
+                ${fb.email ? fb.email : "Anonymous Visitor"}
+              </span>
+              <span class="text-xs text-muted">
+                ${new Date(fb.created_at).toLocaleString()}
+              </span>
+            </div>
+            <p class="text-sm text-fg leading-relaxed whitespace-pre-wrap">${fb.message}</p>
+            <div class="flex items-center gap-3 pt-2 border-t border-default/40">
+              ${fb.email ? `<a href="mailto:${fb.email}?subject=Feedback regarding charts website" class="text-xs font-semibold text-accent-600 dark:text-accent-400 hover:underline">Reply via Email</a>` : ""}
+              <button data-id="${fb.id}" class="btn-fb-delete text-red-500 hover:underline text-xs font-semibold ml-auto">
+                Delete Message
+              </button>
+            </div>
+          </article>
+        `).join("");
+      }
+
+      // Bind deletes
+      document.querySelectorAll(".btn-sub-delete").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const id = btn.getAttribute("data-id");
+          if (confirm("Remove subscriber?")) {
+            await fetch(`${SB_URL}/rest/v1/subscribers?id=eq.${id}`, { method: "DELETE", headers });
+            loadDashboardData();
+          }
+        });
+      });
+
+      document.querySelectorAll(".btn-fb-delete").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const id = btn.getAttribute("data-id");
+          if (confirm("Delete feedback message?")) {
+            await fetch(`${SB_URL}/rest/v1/feedback?id=eq.${id}`, { method: "DELETE", headers });
+            loadDashboardData();
+          }
+        });
+      });
+
+      // Email clipboard copy
+      document.getElementById("btn-sub-copy")!.addEventListener("click", () => {
+        const emails = subscribers.map((s: any) => s.email).join(", ");
+        navigator.clipboard.writeText(emails);
+        const copyBtn = document.getElementById("btn-sub-copy")!;
+        copyBtn.textContent = "Copied!";
+        setTimeout(() => { copyBtn.textContent = "Copy all emails"; }, 2000);
+      });
+
+      // 3. Fetch chart aggregates
+      const statsRes = await fetch(`${SB_URL}/rest/v1/chart_stats?select=*&order=views.desc`, { headers });
+      const stats = statsRes.ok ? await statsRes.json() : [];
+
+      let totalViews = 0;
+      let totalDownloads = 0;
+      stats.forEach((s: any) => {
+        totalViews += s.views;
+        totalDownloads += s.downloads;
+      });
+      document.getElementById("stat-views")!.textContent = totalViews.toLocaleString();
+      document.getElementById("stat-downloads")!.textContent = totalDownloads.toLocaleString();
+      
+      const convRate = totalViews > 0 ? ((totalDownloads / totalViews) * 100).toFixed(1) : "0.0";
+      document.getElementById("stat-conversion")!.textContent = `${convRate}%`;
+
+      const tblCharts = document.getElementById("tbl-charts")!;
+      if (stats.length === 0) {
+        tblCharts.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-muted">No chart stats records yet.</td></tr>`;
+      } else {
+        tblCharts.innerHTML = stats.map((s: any) => {
+          const utility = s.views > 0 ? ((s.downloads / s.views) * 100).toFixed(1) : "0.0";
+          return `
+            <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-900/40">
+              <td class="py-3 font-mono text-xs">${s.slug}</td>
+              <td class="py-3 text-right font-medium">${s.views.toLocaleString()}</td>
+              <td class="py-3 text-right font-medium">${s.downloads.toLocaleString()}</td>
+              <td class="py-3 text-right text-muted">${utility}%</td>
+            </tr>
+          `;
+        }).join("");
+      }
+
+      // Fetch pipeline logs
+      try {
+        const pipeRes = await fetch(`${SB_URL}/rest/v1/pipeline_logs?select=*&limit=8&order=created_at.desc`, { headers });
+        const pipelineLogs = pipeRes.ok ? await pipeRes.json() : [];
+        const divPipe = document.getElementById("pipeline-logs-list")!;
+        
+        const timeAgo = (dateStr: string) => {
+          const d = new Date(dateStr);
+          const now = new Date();
+          const diffMs = now.getTime() - d.getTime();
+          const diffSec = Math.floor(diffMs / 1000);
+          const diffMin = Math.floor(diffSec / 60);
+          const diffHr = Math.floor(diffMin / 60);
+          const diffDay = Math.floor(diffHr / 24);
+
+          if (diffSec < 60) return "Just now";
+          if (diffMin < 60) return `${diffMin}m ago`;
+          if (diffHr < 24) return `${diffHr}h ago`;
+          return `${diffDay}d ago`;
+        };
+
+        if (pipelineLogs.length === 0) {
+          divPipe.innerHTML = `<div class="text-center py-12 text-muted text-xs">No pipeline runs logged yet.</div>`;
+        } else {
+          divPipe.innerHTML = pipelineLogs.map((log: any) => {
+            const duration = log.duration_seconds != null ? `${log.duration_seconds}s` : "N/A";
+            const isSuccess = log.status === "success";
+            const statusColor = isSuccess 
+              ? "bg-emerald-500" 
+              : "bg-rose-500";
+            
+            return `
+              <div class="flex items-start justify-between gap-3 text-xs border-b border-default/40 pb-2.5 last:border-b-0 last:pb-0">
+                <div class="space-y-1 min-w-0 flex-1">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="w-1.5 h-1.5 rounded-full ${statusColor}"></span>
+                    <span class="font-mono font-semibold uppercase tracking-wider text-[10px] text-muted">${log.pipeline_name}</span>
+                    <span class="font-mono text-[10px] text-muted">(${duration})</span>
+                  </div>
+                  <p class="text-fg font-medium text-[11px] leading-tight break-words" title="${log.message}">${log.message}</p>
+                </div>
+                <span class="text-muted text-[10px] whitespace-nowrap">${timeAgo(log.created_at)}</span>
+              </div>
+            `;
+          }).join("");
+        }
+      } catch (err) {
+        console.warn("Failed to fetch pipeline logs:", err);
+        const divPipe = document.getElementById("pipeline-logs-list");
+        if (divPipe) {
+          divPipe.innerHTML = `<div class="text-center py-12 text-red-500 text-xs">Error loading logs.</div>`;
+        }
+      }
+
+      // 4. Fetch detailed log events (chart_events) to build geolocation & referrals
+      const eventsRes = await fetch(`${SB_URL}/rest/v1/chart_events?select=*&limit=1500&order=created_at.desc`, { headers });
+      const events = eventsRes.ok ? await eventsRes.json() : [];
+
+      // Process locations
+      const countries: Record<string, number> = {};
+      const cities: Record<string, number> = {};
+      const referrers: Record<string, number> = {};
+      const devices: Record<string, number> = {};
+      const browsers: Record<string, number> = {};
+      const timeline: Record<string, number> = {};
+
+      events.forEach((ev: any) => {
+        countries[ev.country || "Unknown"] = (countries[ev.country || "Unknown"] || 0) + 1;
+        cities[ev.city || "Unknown"] = (cities[ev.city || "Unknown"] || 0) + 1;
+        referrers[ev.referrer || "Direct"] = (referrers[ev.referrer || "Direct"] || 0) + 1;
+        devices[ev.device || "Desktop"] = (devices[ev.device || "Desktop"] || 0) + 1;
+        browsers[ev.browser || "Unknown"] = (browsers[ev.browser || "Unknown"] || 0) + 1;
+
+        // Date timeline
+        const dateStr = new Date(ev.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+        timeline[dateStr] = (timeline[dateStr] || 0) + 1;
+      });
+
+      // Fill tables
+      const renderTable = (elementId: string, record: Record<string, number>) => {
+        const sorted = Object.entries(record).sort((a, b) => b[1] - a[1]);
+        const el = document.getElementById(elementId)!;
+        if (sorted.length === 0) {
+          el.innerHTML = `<tr><td colspan="2" class="py-4 text-center text-muted text-xs">No records.</td></tr>`;
+        } else {
+          el.innerHTML = sorted.slice(0, 10).map(([k, v]) => `
+            <tr>
+              <td class="py-2.5 font-medium">${k}</td>
+              <td class="py-2.5 text-right font-mono text-xs w-24">${v.toLocaleString()}</td>
+            </tr>
+          `).join("");
+        }
+      };
+
+      renderTable("tbl-geo-countries", countries);
+      renderTable("tbl-geo-cities", cities);
+      renderTable("tbl-referrals", referrers);
+
+      // Render Progress Bars for Devices and Browsers
+      const renderProgressBars = (elementId: string, record: Record<string, number>) => {
+        const sorted = Object.entries(record).sort((a, b) => b[1] - a[1]);
+        const total = Object.values(record).reduce((a, b) => a + b, 0) || 1;
+        const el = document.getElementById(elementId)!;
+
+        if (sorted.length === 0) {
+          el.innerHTML = `<p class="text-sm text-muted">Awaiting records...</p>`;
+        } else {
+          el.innerHTML = sorted.slice(0, 4).map(([k, v]) => {
+            const pct = ((v / total) * 100).toFixed(0);
+            return `
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs font-medium">
+                  <span>${k}</span>
+                  <span class="text-muted">${v} (${pct}%)</span>
+                </div>
+                <div class="h-2 w-full rounded-full bg-neutral-100 dark:bg-neutral-800 overflow-hidden">
+                  <div class="h-full bg-accent-500 rounded-full" style="width: ${pct}%"></div>
+                </div>
+              </div>
+            `;
+          }).join("");
+        }
+      };
+
+      renderProgressBars("div-devices", devices);
+      renderProgressBars("div-browsers", browsers);
+
+      // Render Simple Activity Bar Chart
+      const renderActivityChart = (timeline: Record<string, number>) => {
+        const barsContainer = document.getElementById("activity-chart-bars")!;
+        const labelsContainer = document.getElementById("activity-chart-labels")!;
+        
+        // Take last 7 days of entries
+        const dates = [];
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date();
+          d.setDate(d.getDate() - i);
+          dates.push(d.toLocaleDateString(undefined, { month: "short", day: "numeric" }));
+        }
+
+        const counts = dates.map(date => timeline[date] || 0);
+        const max = Math.max(...counts) || 1;
+
+        barsContainer.innerHTML = counts.map((v, i) => {
+          const hPct = ((v / max) * 100).toFixed(0);
+          return `
+            <div class="flex-1 flex flex-col items-center group relative h-full justify-end">
+              <!-- Tooltip -->
+              <span class="absolute bottom-full mb-1 opacity-0 group-hover:opacity-100 bg-neutral-900 text-white text-[10px] px-1.5 py-0.5 rounded transition-opacity pointer-events-none">
+                ${v} hits
+              </span>
+              <div class="w-full max-w-[32px] bg-accent-500/80 hover:bg-accent-500 rounded-t-sm transition-all" style="height: ${v === 0 ? 4 : hPct}%"></div>
+            </div>
+          `;
+        }).join("");
+
+        labelsContainer.innerHTML = dates.map(d => `<span class="flex-1 text-center font-mono text-[9px]">${d}</span>`).join("");
+      };
+
+      renderActivityChart(timeline);
+
+    } catch (err) {
+      console.warn("Dashboard data retrieval failed:", err);
+    }
+  };
+
+  // Run Auth check on page load & Astro swaps
+  authCheck();
+  setupExclusionToggle();
+
+  document.addEventListener("astro:page-load", () => {
+    authCheck();
+    setupExclusionToggle();
+  });
+</script>
+
+<style>
+  /* Scrollbar hide helper */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>
