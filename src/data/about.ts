@@ -33,7 +33,7 @@ export const experience = [
     role: "Sessional Instructor",
     org: "UBC Sauder School of Business",
     location: "Vancouver, Canada",
-    period: "2020, 2023 – Present",
+    period: "2020, 2023 – 2024",
   },
   {
     role: "Assistant Professor of Economics",

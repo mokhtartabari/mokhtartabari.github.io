@@ -8,7 +8,7 @@ venue: "Journal of Economics and Finance Education"
 venueShort: "JEFE"
 status: "accepted"
 featured: false
-order: 2
+order: 3
 tags: ["Economics Education", "Pedagogy"]
 abstract: "Grounded in student-centered teaching practices, we investigate the synergy of peer assessments and flipped classroom design in an economics course specifically developed for incoming MBA students. This innovative approach was implemented for two consecutive terms. Survey results show that students have a positive view of this integrated approach. It enhances their engagement and improves their knowledge and skills by providing constructive feedback. Additionally, this combination helps students improve their assessment skills."
 links:

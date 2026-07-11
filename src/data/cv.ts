@@ -38,11 +38,10 @@ export const computerSkills = {
 };
 
 // Service / reviewing beyond the Course-Lead role already in teaching.ts (serviceRoles).
-export const service = [
+export const service: { role: string; org?: string; period: string }[] = [
   { role: "ACBSP Teaching Excellence Award Reviewer", period: "2024" },
   {
     role: "Research and Scholarly Activity Committee Member",
-    org: "University Canada West",
     period: "2021 – 2025",
   },
   {

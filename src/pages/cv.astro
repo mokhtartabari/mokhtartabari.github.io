@@ -12,7 +12,7 @@
 import { getCollection } from "astro:content";
 import { site } from "~/data/site";
 import { experience, education, awards } from "~/data/about";
-import { appointments, teachingAssistantships, serviceRoles } from "~/data/teaching";
+import { appointments, serviceRoles } from "~/data/teaching";
 import { talks } from "~/data/talks";
 import { contact, teachingCertificates, computerSkills, service } from "~/data/cv";
 import "~/styles/global.css";
@@ -21,8 +21,14 @@ import "~/styles/global.css";
 // Set true to build a private copy that includes it.
 const SHOW_PHONE = false;
 
-// ---- Employment: only current roles (present), from about.ts ----------------
+// ---- Employment, from about.ts ----------------------------------------------
+// Current = roles that are ongoing (Capilano). Previous appointments = the
+// substantive past positions (Assistant Professor, Postdoctoral Fellow) — these
+// fill the post-PhD years; sessional teaching lives in the Teaching section.
 const current = experience.filter((e) => /present/i.test(e.period));
+const priorAppointments = experience.filter(
+  (e) => !/present/i.test(e.period) && /(Professor|Postdoctoral)/i.test(e.role),
+);
 
 // ---- Publications from the collection, split by status ----------------------
 const pubs = (await getCollection("publications")).sort(
@@ -129,7 +135,7 @@ const lastUpdated = new Date().toLocaleDateString("en-US", {
         <div>
           <h1 class="name">{site.name}</h1>
           <div class="muted" style="font-size:10pt;margin-top:2px;">
-            Applied Economist · International Trade · Energy &amp; Environmental Economics
+            Applied Economist
           </div>
         </div>
         <div class="contact">
@@ -151,6 +157,21 @@ const lastUpdated = new Date().toLocaleDateString("en-US", {
           ))}
         </div>
       </section>
+
+      <!-- Previous Appointments -->
+      {priorAppointments.length > 0 && (
+        <section class="section">
+          <div class="label">Previous<br />Appointments</div>
+          <div class="body">
+            {priorAppointments.map((e) => (
+              <div class="row">
+                <div><span class="role">{e.role},</span> <span class="org">{e.org}</span></div>
+                <div class="date">{e.period}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <!-- Education -->
       <section class="section">
@@ -206,22 +227,10 @@ const lastUpdated = new Date().toLocaleDateString("en-US", {
               <div class="role">Instructor &amp; Sessional Lecturer</div>
               <div class="date">2020 – Present</div>
             </div>
-            <div class="muted" style="font-size:9pt;">
-              {appointments.map((a) => a.institution).join(" · ")}
+            <div class="muted" style="font-size:9.4pt;margin-top:2px;">
+              Courses taught across undergraduate and MBA levels:
             </div>
             <div class="courses">{allCourses.join("; ")}</div>
-          </div>
-          <div class="item">
-            <div class="row">
-              <div class="role">Teaching Assistant</div>
-              <div class="date">{teachingAssistantships.period}</div>
-            </div>
-            <div class="courses">
-              The Global Trading System; International Trade (graduate); Econometrics I;
-              Empirical Energy Economics; Economics of Natural Resources; Summer Math Camp
-              (graduate); Use of Statistics in Economics; Managerial &amp; Decision Economics;
-              Principles of Macroeconomics
-            </div>
           </div>
         </div>
       </section>

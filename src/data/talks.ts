@@ -9,6 +9,14 @@ export type Talk = {
 export const talks: Talk[] = [
   {
     title:
+      "Enhancing Student Engagement: The Synergy of Peer Assessment and Flipped Classroom Design",
+    venue: "BCCAT Annual Economics Meeting",
+    location: "British Columbia, Canada",
+    date: "2024",
+    year: 2024,
+  },
+  {
+    title:
       "Decomposing the Within-Firm Productivity Gains from Trade: Evidence From India",
     venue: "Canadian Economics Association Annual Conference",
     location: "Toronto, Canada",
@@ -20,14 +28,6 @@ export const talks: Talk[] = [
       "Decomposing the Within-Firm Productivity Gains from Trade: Evidence From India",
     venue: "Midwest International Economics Meetings",
     location: "Minneapolis, USA",
-    date: "October 2022",
-    year: 2022,
-  },
-  {
-    title:
-      "Decomposing the Within-Firm Productivity Gains from Trade: Evidence From India",
-    venue: "Guelph Economics Seminar",
-    location: "Guelph, Canada",
     date: "October 2022",
     year: 2022,
   },
