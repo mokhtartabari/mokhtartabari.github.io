@@ -9,6 +9,7 @@
     "start": "astro dev",
     "prebuild": "node scripts/fetch-data.mjs",
     "build": "astro build",
+    "build:cv": "node scripts/build-cv.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -21,5 +22,8 @@
     "astro": "^5.1.1",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.2"
+  },
+  "devDependencies": {
+    "playwright": "^1.61.1"
   }
 }

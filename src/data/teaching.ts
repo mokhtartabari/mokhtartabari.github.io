@@ -20,7 +20,7 @@ export const philosophy = [
 
 export const interests = [
   "Undergraduate economics — principles, intermediate, and field courses",
-  "Development economics and international trade (upper-division and graduate)",
+  "International trade (upper-division and graduate)",
   "Panel data econometrics and quantitative methods",
 ];
 

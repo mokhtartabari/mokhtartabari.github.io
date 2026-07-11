@@ -30,6 +30,7 @@ pnpm-debug.log*
 _site/
 about_files/
 
-# Dynamically fetched data charts and manifests
-public/charts/
+# build-time fetched chart artifacts — populated by scripts/fetch-data.mjs
+# (prebuild/predev). See CLAUDE.md: manifests + chart assets are gitignored.
 src/data/charts-manifest-*.json
+public/charts/

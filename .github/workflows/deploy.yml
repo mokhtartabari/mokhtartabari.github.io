@@ -49,6 +49,11 @@ jobs:
           PUBLIC_ADMIN_PASSCODE: ${{ secrets.PUBLIC_ADMIN_PASSCODE || vars.PUBLIC_ADMIN_PASSCODE }}
         run: npm run build
 
+      - name: Render CV PDF (auto-generated from site data)
+        run: |
+          npx playwright install --with-deps chromium
+          npm run build:cv
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
